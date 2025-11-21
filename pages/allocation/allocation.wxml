@@ -2,81 +2,85 @@
 <view class="container">
   <view class="card">
     <view class="section-title">第二步：定制财富比例</view>
-    <view class="subtitle">根据"四分法"模型，我们推荐了以下方案。您可拖动调整。</view>
+    <view class="subtitle">根据"25-15-50-10法则"，我们推荐了以下方案。您可拖动调整。</view>
 
-    <!-- 生活开支 -->
+    <!-- 增长投资 Growth 25% -->
     <view class="slider-item">
       <view class="slider-header">
-        <text class="slider-label">生活开支</text>
-        <text class="slider-value">{{allocation.living}}%</text>
+        <text class="slider-label">增长投资</text>
+        <text class="slider-value">{{allocation.growth}}%</text>
       </view>
+      <view class="slider-desc">让钱为你工作</view>
       <slider
         class="slider"
         min="0"
         max="100"
-        value="{{allocation.living}}"
-        activeColor="#3B82F6"
-        backgroundColor="#E5E7EB"
-        block-size="24"
-        bindchange="onLivingChange"
-        bindchanging="onLivingChanging"
-      />
-    </view>
-
-    <!-- 投资增长 -->
-    <view class="slider-item">
-      <view class="slider-header">
-        <text class="slider-label">投资增长</text>
-        <text class="slider-value">{{allocation.investment}}%</text>
-      </view>
-      <slider
-        class="slider"
-        min="0"
-        max="100"
-        value="{{allocation.investment}}"
+        value="{{allocation.growth}}"
         activeColor="#10B981"
         backgroundColor="#E5E7EB"
         block-size="24"
-        bindchange="onInvestmentChange"
-        bindchanging="onInvestmentChanging"
+        bindchange="onGrowthChange"
+        bindchanging="onGrowthChanging"
       />
     </view>
 
-    <!-- 稳定基金 -->
+    <!-- 稳定基金 Stability 15% -->
     <view class="slider-item">
       <view class="slider-header">
         <text class="slider-label">稳定基金</text>
-        <text class="slider-value">{{allocation.stable}}%</text>
+        <text class="slider-value">{{allocation.stability}}%</text>
       </view>
+      <view class="slider-desc">应急储备金</view>
       <slider
         class="slider"
         min="0"
         max="100"
-        value="{{allocation.stable}}"
-        activeColor="#93C5FD"
+        value="{{allocation.stability}}"
+        activeColor="#3B82F6"
         backgroundColor="#E5E7EB"
         block-size="24"
-        bindchange="onStableChange"
-        bindchanging="onStableChanging"
+        bindchange="onStabilityChange"
+        bindchanging="onStabilityChanging"
       />
     </view>
 
-    <!-- 快乐基金 -->
+    <!-- 基本开支 Essentials 50% -->
     <view class="slider-item">
       <view class="slider-header">
-        <text class="slider-label">快乐基金</text>
-        <text class="slider-value">{{allocation.fun}}%</text>
+        <text class="slider-label">基本开支</text>
+        <text class="slider-value">{{allocation.essentials}}%</text>
       </view>
+      <view class="slider-desc">生活必需品</view>
       <slider
         class="slider"
         min="0"
         max="100"
-        value="{{allocation.fun}}"
+        value="{{allocation.essentials}}"
+        activeColor="#F59E0B"
+        backgroundColor="#E5E7EB"
+        block-size="24"
+        bindchange="onEssentialsChange"
+        bindchanging="onEssentialsChanging"
+      />
+    </view>
+
+    <!-- 奖励消费 Rewards 10% -->
+    <view class="slider-item">
+      <view class="slider-header">
+        <text class="slider-label">奖励消费</text>
+        <text class="slider-value">{{allocation.rewards}}%</text>
+      </view>
+      <view class="slider-desc">无罪恶感享受</view>
+      <slider
+        class="slider"
+        min="0"
+        max="100"
+        value="{{allocation.rewards}}"
         activeColor="#F9A8D4"
         backgroundColor="#E5E7EB"
         block-size="24"
-        bindchange="onFunChange"
-        bindchanging="onFunChanging"
+        bindchange="onRewardsChange"
+        bindchanging="onRewardsChanging"
       />
     </view>
 

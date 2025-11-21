@@ -6,109 +6,109 @@ Page({
   },
 
   onLoad(options) {
-    const type = options.type || 'living';
+    const type = options.type || 'growth';
     this.setData({ type });
     this.loadCategoryData(type);
   },
 
   loadCategoryData(type) {
     const categories = {
-      living: {
-        title: '精明消费，优化你的50%',
-        subtitle: '让每一分钱都花在刀刃上',
-        icon: '🏠',
-        bgColor: 'linear-gradient(135deg, #FFD93D 0%, #FFA500 100%)',
-        intro: '这部分资金用于保障您的日常生活。我们的目标不是削减快乐，而是聪明地优化大额开支，并用规则战胜冲动消费。',
-        steps: [
-          {
-            title: '厘清你的"必需品"',
-            description: '提供一个简单的两栏清单工具，让用户列出自己的"需求 (Needs)"和"欲望 (Wants)"，帮助看清消费核心。',
-            type: 'list'
-          },
-          {
-            title: '缩减两大关键开支',
-            description: '住房和交通是最大的开销，思考一下：',
-            type: 'questions',
-            questions: [
-              { icon: '🏠', text: '住房："有没有可能通过重新谈判来降低租金？"' },
-              { icon: '🚗', text: '交通："一辆可靠的二手车，是否比新车更适合你？"' }
-            ]
-          },
-          {
-            title: '用规则代替意志力',
-            description: '当你想冲动消费时，使用这个决策树：\n\n这是冲动消费吗？\n→ 是：等待24-48小时\n→ 否：列入预算后购买'
-          }
-        ]
-      },
-      investment: {
-        title: '着眼未来，让你的25%为你工作',
+      growth: {
+        title: '增长投资，让你的25%为你工作',
         subtitle: '财富增长的核心引擎',
         icon: '📈',
-        bgColor: 'linear-gradient(135deg, #6BCB77 0%, #4CAF50 100%)',
-        intro: '这是你财富增长的核心引擎。通过持续投资，让复利的力量帮你走向财务自由。',
+        bgColor: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+        intro: '这是你财富增长的核心引擎。通过持续投资，让复利的力量帮你走向财务自由。越早开始，复利的威力越大。',
         steps: [
           {
-            title: '选择你的增长型资产',
-            description: '这是一个风险与回报的阶梯图，风险越高，潜在回报也越高。',
+            title: 'Step 1: 选择你的增长型资产',
+            description: '不同资产有不同的风险和回报。从低风险的指数基金开始，逐步探索其他选项。',
             type: 'risk-ladder'
           },
           {
-            title: '建立节税账户',
-            description: '利用好税收优惠的账户能显著加速你的财富增长（如401k, IRA等）。'
+            title: 'Step 2: 设置税收优惠账户',
+            description: '利用税收优惠账户能显著加速财富增长：\n• 中国：企业年金、个人养老金\n• 美国：Roth IRA、401k\n• 英国：ISA账户\n\n这些账户能让你的投资增长免税或延税。'
           },
           {
-            title: '开始投资',
-            description: '从银行转账到投资APP，再投入指数基金。',
+            title: 'Step 3: 开始投资',
+            description: '设置自动转账，每月工资到账时立即投资25%。推荐三基金组合：\n• 国内股票指数基金\n• 国际股票指数基金\n• 债券基金\n\n不要试图择时，定期投资最重要。',
             type: 'flow'
           }
         ]
       },
-      stable: {
-        title: '构筑基石，你的15%安全网',
-        subtitle: '为未来的不确定性做准备',
+      stability: {
+        title: '稳定基金，你的15%安全网',
+        subtitle: '让你在危机中保持冷静',
         icon: '🛡️',
-        bgColor: 'linear-gradient(135deg, #4D96FF 0%, #2196F3 100%)',
-        intro: '这是你的安全网，用于应对突发状况和保护家人。稳定基金让你在面对意外时不会惊慌失措。',
+        bgColor: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
+        intro: '这是你的安全网。当意外发生时，它让你不必动用投资或欠债。目标是存够5个月的基本开支。',
         steps: [
           {
-            title: '建立应急基金',
-            description: '目标是积累3-6个月的生活开支。这笔钱应该放在高流动性、低风险的账户中（如货币市场基金或高收益储蓄账户）。'
+            title: 'Step 1: 计算你的稳定基金',
+            description: '列出每月核心开支（房租、食品、水电、交通）然后乘以5。\n\n例如：月开支¥3000 × 5 = ¥15000稳定基金\n\n这个数字看似很大，但通过每月存15%，你会比想象中更快达成。'
           },
           {
-            title: '购买保险',
-            description: '评估你需要的保险类型：\n• 健康保险\n• 人寿保险\n• 财产保险\n• 收入保障保险'
+            title: 'Step 2: 正确存储',
+            description: '稳定基金必须满足三个条件：\n\n✓ 易于获取（24小时内可取）\n✓ 零风险（不投资股市）\n✓ 持续增值（高收益储蓄账户4-5%年利率）\n\n不要把应急资金投入股市！'
           },
           {
-            title: '定期审查',
-            description: '每年至少审查一次你的安全网是否充足。随着收入增长和家庭变化，你的需求也会改变。'
+            title: 'Step 3: 快速积累策略',
+            description: '① 工资扫描法：工资到账立即自动转账15%\n② 替换承诺：使用了就立即补回\n③ 四舍五入储蓄：消费¥3.6向上取整为¥4，差额存入\n\n一旦达到目标，可将这15%转投增长投资。'
           }
         ]
       },
-      fun: {
-        title: '投资快乐，你的10%自由金',
-        subtitle: '享受当下，奖励自己',
-        icon: '🎉',
-        bgColor: 'linear-gradient(135deg, #FFB6C1 0%, #FF69B4 100%)',
-        intro: '生活不只是为了未来，也要享受当下。这10%是你的"零罪恶感"消费基金，用来做任何让你开心的事。',
+      essentials: {
+        title: '基本开支，优化你的50%',
+        subtitle: '让每一分钱都花在刀刃上',
+        icon: '🏠',
+        bgColor: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+        intro: '这50%用于生活必需品：房租、食品、水电、交通、保险和基本衣物。不是削减快乐，而是聪明消费。',
         steps: [
           {
-            title: '无需解释的自由',
-            description: '这笔钱可以用于任何让你快乐的事情：\n• 和朋友聚餐\n• 购买心仪已久的物品\n• 旅行和体验\n• 培养爱好'
+            title: 'Step 1: 明确真正的必需品',
+            description: '必需品：房租/房贷、食品、水电、交通、保险、基本衣物\n\n非必需品：外卖、未使用的订阅、健身房（如果不去）、品牌溢价\n\n很多人把60-70%花在"必需品"上，是因为把欲望当成了需求。',
+            type: 'list'
           },
           {
-            title: '设定快乐目标',
-            description: '想想什么能真正让你快乐？列出你的"快乐清单"，然后用这笔钱去实现它们。'
+            title: 'Step 2: 缩减两大关键开支',
+            description: '住房和交通是最大的两项开支，优化它们影响最大：',
+            type: 'questions',
+            questions: [
+              { icon: '🏠', text: '住房：重新谈判租金、合租、回家住（暂时）' },
+              { icon: '🚗', text: '交通：买可靠的二手车、公共交通、步行/骑车' }
+            ]
           },
           {
-            title: '平衡当下与未来',
-            description: '记住：投资快乐不是浪费，而是投资于你的幸福和生活质量。快乐的你会更有动力去追求财务目标。'
+            title: 'Step 3: 用规则代替意志力',
+            description: '购买决策树：\n\n① 这是冲动消费吗？→ 是：7天法则（等7天再买）\n② 买品牌还是价值？→ 选价值（$60靴子穿100次=$0.6/次）\n③ 会改善生活吗？→ 不会就别买\n\n规则比意志力更可靠。'
+          }
+        ]
+      },
+      rewards: {
+        title: '奖励消费，你的10%自由金',
+        subtitle: '无罪恶感享受生活',
+        icon: '🎉',
+        bgColor: 'linear-gradient(135deg, #F9A8D4 0%, #F472B6 100%)',
+        intro: '生活不只是存钱和投资。这10%是你的"零罪恶感"基金，用来享受当下、保持动力。92%的人会在高强度存钱后过度消费，所以预留奖励金很重要。',
+        steps: [
+          {
+            title: 'Step 1: 无罪恶感消费类别',
+            description: '将奖励金用在真正有价值的地方：\n\n✓ 度假旅行 - 买回忆，不会贬值\n✓ 培养爱好 - 保持热情和创造力\n✓ 社交聚会 - 维护重要的人际关系\n✓ 送礼物 - 加强与亲友的情感联系\n\n这些都是对生活质量的投资。'
+          },
+          {
+            title: 'Step 2: 预加载"快乐罐"',
+            description: '开设独立银行账户，命名为"快乐罐"(Joy Jar)。\n\n• 每月自动转入收入的10%\n• 只能用这个账户的钱奖励自己\n• 用完就等下个月，不能从其他账户补\n\n限制反而让你更珍惜和明智地使用。'
+          },
+          {
+            title: 'Step 3: 优先体验而非物质',
+            description: '研究表明，体验带来的快乐持续时间远超物质。\n\n✓ 和朋友的晚餐\n✓ 音乐会和演出\n✓ 周末短途旅行\n✓ 学习新技能的课程\n\n存钱是为了更好的生活，不是为了死前账户里有很多钱。'
           }
         ]
       }
     };
 
     this.setData({
-      categoryData: categories[type] || categories.living
+      categoryData: categories[type] || categories.growth
     });
   },
 

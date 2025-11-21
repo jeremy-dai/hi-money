@@ -5,16 +5,16 @@ Page({
   data: {
     currentMonth: '',
     allocation: {
-      living: 50,
-      investment: 25,
-      stable: 15,
-      fun: 10
+      growth: 25,
+      stability: 15,
+      essentials: 50,
+      rewards: 10
     },
     amounts: {
-      living: '0.00',
-      investment: '0.00',
-      stable: '0.00',
-      fun: '0.00'
+      growth: '0.00',
+      stability: '0.00',
+      essentials: '0.00',
+      rewards: '0.00'
     }
   },
 
@@ -43,10 +43,10 @@ Page({
 
     // 计算各类别金额
     const amounts = {
-      living: ((income * allocation.living) / 100).toFixed(2),
-      investment: ((income * allocation.investment) / 100).toFixed(2),
-      stable: ((income * allocation.stable) / 100).toFixed(2),
-      fun: ((income * allocation.fun) / 100).toFixed(2)
+      growth: ((income * allocation.growth) / 100).toFixed(2),
+      stability: ((income * allocation.stability) / 100).toFixed(2),
+      essentials: ((income * allocation.essentials) / 100).toFixed(2),
+      rewards: ((income * allocation.rewards) / 100).toFixed(2)
     };
 
     this.setData({
@@ -65,12 +65,12 @@ Page({
     const centerY = 150;
     const radius = 100;
 
-    // 数据和颜色
+    // 数据和颜色 - 按照25-15-50-10顺序
     const data = [
-      { value: allocation.living, color: '#FFD93D' },
-      { value: allocation.investment, color: '#6BCB77' },
-      { value: allocation.stable, color: '#4D96FF' },
-      { value: allocation.fun, color: '#FFB6C1' }
+      { value: allocation.growth, color: '#10B981' },       // 增长投资 - 绿色
+      { value: allocation.stability, color: '#3B82F6' },    // 稳定基金 - 蓝色
+      { value: allocation.essentials, color: '#F59E0B' },   // 基本开支 - 橙色
+      { value: allocation.rewards, color: '#F9A8D4' }       // 奖励消费 - 粉色
     ];
 
     // 绘制饼图

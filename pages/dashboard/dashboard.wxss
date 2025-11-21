@@ -54,20 +54,20 @@
   position: relative;
 }
 
-.card-living {
-  background: linear-gradient(135deg, #FFF9E6 0%, #FFFFFF 100%);
+.card-growth {
+  background: linear-gradient(135deg, #D1FAE5 0%, #FFFFFF 100%);
 }
 
-.card-investment {
-  background: linear-gradient(135deg, #E6F9F0 0%, #FFFFFF 100%);
+.card-stability {
+  background: linear-gradient(135deg, #DBEAFE 0%, #FFFFFF 100%);
 }
 
-.card-stable {
-  background: linear-gradient(135deg, #E6F3FF 0%, #FFFFFF 100%);
+.card-essentials {
+  background: linear-gradient(135deg, #FEF3C7 0%, #FFFFFF 100%);
 }
 
-.card-fun {
-  background: linear-gradient(135deg, #FFE6F0 0%, #FFFFFF 100%);
+.card-rewards {
+  background: linear-gradient(135deg, #FCE7F3 0%, #FFFFFF 100%);
 }
 
 .card-header {
@@ -80,6 +80,7 @@
 .card-title {
   font-size: 28rpx;
   color: #666;
+  font-weight: 500;
 }
 
 .card-icon {
@@ -96,27 +97,13 @@
   font-size: 40rpx;
   font-weight: bold;
   color: #333;
-  margin-bottom: 20rpx;
+  margin-bottom: 12rpx;
 }
 
-.card-action {
-  padding: 12rpx 20rpx;
-  background: #F3F4F6;
-  border-radius: 12rpx;
-  text-align: center;
-}
-
-.card-action.confirmed {
-  background: #E6F9F0;
-}
-
-.action-text {
+.card-subtitle {
   font-size: 22rpx;
-  color: #666;
-}
-
-.card-action.confirmed .action-text {
-  color: #10B981;
+  color: #999;
+  text-align: center;
 }
 
 .chart-section {
@@ -124,6 +111,14 @@
   border-radius: 24rpx;
   padding: 40rpx;
   box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+}
+
+.section-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 30rpx;
+  text-align: center;
 }
 
 .chart-subtitle {

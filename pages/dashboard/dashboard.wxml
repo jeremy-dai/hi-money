@@ -11,58 +11,50 @@
     <view class="success-msg">本月规划已完成！做得非常棒！</view>
   </view>
 
-  <!-- 财富卡片 -->
+  <!-- 财富卡片 - 按照25-15-50-10顺序 -->
   <view class="wealth-cards">
-    <!-- 精明消费 -->
-    <view class="wealth-card card-living" bindtap="showDetail" data-type="living">
+    <!-- 增长投资 Growth 25% -->
+    <view class="wealth-card card-growth" bindtap="showDetail" data-type="growth">
       <view class="card-header">
-        <text class="card-title">精明消费</text>
-        <text class="card-icon">🏠</text>
-      </view>
-      <view class="card-percentage">{{allocation.living}}%</view>
-      <view class="card-amount">¥{{amounts.living}}</view>
-      <view class="card-action">
-        <text class="action-text">自动抽取</text>
-      </view>
-    </view>
-
-    <!-- 着眼未来 -->
-    <view class="wealth-card card-investment" bindtap="showDetail" data-type="investment">
-      <view class="card-header">
-        <text class="card-title">着眼未来</text>
+        <text class="card-title">增长投资</text>
         <text class="card-icon">📈</text>
       </view>
-      <view class="card-percentage">{{allocation.investment}}%</view>
-      <view class="card-amount">¥{{amounts.investment}}</view>
-      <view class="card-action confirmed">
-        <text class="action-text">✓ 已确认</text>
-      </view>
+      <view class="card-percentage">{{allocation.growth}}%</view>
+      <view class="card-amount">¥{{amounts.growth}}</view>
+      <view class="card-subtitle">让钱为你工作</view>
     </view>
 
-    <!-- 构筑基石 -->
-    <view class="wealth-card card-stable" bindtap="showDetail" data-type="stable">
+    <!-- 稳定基金 Stability 15% -->
+    <view class="wealth-card card-stability" bindtap="showDetail" data-type="stability">
       <view class="card-header">
-        <text class="card-title">构筑基石</text>
+        <text class="card-title">稳定基金</text>
         <text class="card-icon">🛡️</text>
       </view>
-      <view class="card-percentage">{{allocation.stable}}%</view>
-      <view class="card-amount">¥{{amounts.stable}}</view>
-      <view class="card-action confirmed">
-        <text class="action-text">✓ 已确认</text>
-      </view>
+      <view class="card-percentage">{{allocation.stability}}%</view>
+      <view class="card-amount">¥{{amounts.stability}}</view>
+      <view class="card-subtitle">应急储备金</view>
     </view>
 
-    <!-- 投资快乐 -->
-    <view class="wealth-card card-fun" bindtap="showDetail" data-type="fun">
+    <!-- 基本开支 Essentials 50% -->
+    <view class="wealth-card card-essentials" bindtap="showDetail" data-type="essentials">
       <view class="card-header">
-        <text class="card-title">投资快乐</text>
+        <text class="card-title">基本开支</text>
+        <text class="card-icon">🏠</text>
+      </view>
+      <view class="card-percentage">{{allocation.essentials}}%</view>
+      <view class="card-amount">¥{{amounts.essentials}}</view>
+      <view class="card-subtitle">生活必需品</view>
+    </view>
+
+    <!-- 奖励消费 Rewards 10% -->
+    <view class="wealth-card card-rewards" bindtap="showDetail" data-type="rewards">
+      <view class="card-header">
+        <text class="card-title">奖励消费</text>
         <text class="card-icon">🎉</text>
       </view>
-      <view class="card-percentage">{{allocation.fun}}%</view>
-      <view class="card-amount">¥{{amounts.fun}}</view>
-      <view class="card-action confirmed">
-        <text class="action-text">✓ 已确认</text>
-      </view>
+      <view class="card-percentage">{{allocation.rewards}}%</view>
+      <view class="card-amount">¥{{amounts.rewards}}</view>
+      <view class="card-subtitle">无罪恶感享受</view>
     </view>
   </view>
 
@@ -74,20 +66,20 @@
     <!-- 图例 -->
     <view class="chart-legend">
       <view class="legend-item">
-        <view class="legend-color" style="background: #FFD93D;"></view>
-        <text class="legend-text">生活开支</text>
+        <view class="legend-color" style="background: #10B981;"></view>
+        <text class="legend-text">增长投资</text>
       </view>
       <view class="legend-item">
-        <view class="legend-color" style="background: #6BCB77;"></view>
-        <text class="legend-text">投资增长</text>
-      </view>
-      <view class="legend-item">
-        <view class="legend-color" style="background: #4D96FF;"></view>
+        <view class="legend-color" style="background: #3B82F6;"></view>
         <text class="legend-text">稳定基金</text>
       </view>
       <view class="legend-item">
-        <view class="legend-color" style="background: #FFB6C1;"></view>
-        <text class="legend-text">快乐基金</text>
+        <view class="legend-color" style="background: #F59E0B;"></view>
+        <text class="legend-text">基本开支</text>
+      </view>
+      <view class="legend-item">
+        <view class="legend-color" style="background: #F9A8D4;"></view>
+        <text class="legend-text">奖励消费</text>
       </view>
     </view>
 

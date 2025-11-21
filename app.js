@@ -3,10 +3,10 @@ App({
   globalData: {
     monthlyIncome: 0,
     allocation: {
-      living: 50,      // 生活开支
-      investment: 25,  // 投资增长
-      stable: 15,      // 稳定基金
-      fun: 10          // 快乐基金
+      growth: 25,      // 增长投资 (Growth)
+      stability: 15,   // 稳定基金 (Stability)
+      essentials: 50,  // 基本开支 (Essentials)
+      rewards: 10      // 奖励消费 (Rewards)
     },
     hasCompletedSetup: false
   },

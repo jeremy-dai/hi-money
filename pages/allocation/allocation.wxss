@@ -26,6 +26,12 @@
   font-weight: 600;
 }
 
+.slider-desc {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 12rpx;
+}
+
 .slider {
   width: 100%;
 }

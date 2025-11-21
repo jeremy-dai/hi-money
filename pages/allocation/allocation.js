@@ -4,10 +4,10 @@ const app = getApp();
 Page({
   data: {
     allocation: {
-      living: 50,
-      investment: 25,
-      stable: 15,
-      fun: 10
+      growth: 25,       // 增长投资
+      stability: 15,    // 稳定基金
+      essentials: 50,   // 基本开支
+      rewards: 10       // 奖励消费
     },
     total: 100,
     currentlyChanging: '' // 跟踪当前正在更改的滑块
@@ -25,8 +25,8 @@ Page({
   },
 
   calculateTotal() {
-    const { living, investment, stable, fun } = this.data.allocation;
-    const total = living + investment + stable + fun;
+    const { growth, stability, essentials, rewards } = this.data.allocation;
+    const total = growth + stability + essentials + rewards;
     this.setData({ total });
   },
 
@@ -40,7 +40,7 @@ Page({
     allocation[changedField] = newValue;
 
     // 获取其他字段
-    const otherFields = ['living', 'investment', 'stable', 'fun'].filter(f => f !== changedField);
+    const otherFields = ['growth', 'stability', 'essentials', 'rewards'].filter(f => f !== changedField);
 
     // 计算其他字段的总和
     let othersTotal = otherFields.reduce((sum, field) => sum + allocation[field], 0);
@@ -72,39 +72,39 @@ Page({
     this.calculateTotal();
   },
 
-  onLivingChanging(e) {
-    this.setData({ currentlyChanging: 'living' });
+  onGrowthChanging(e) {
+    this.setData({ currentlyChanging: 'growth' });
   },
 
-  onLivingChange(e) {
-    this.autoAdjust('living', e.detail.value);
+  onGrowthChange(e) {
+    this.autoAdjust('growth', e.detail.value);
     this.setData({ currentlyChanging: '' });
   },
 
-  onInvestmentChanging(e) {
-    this.setData({ currentlyChanging: 'investment' });
+  onStabilityChanging(e) {
+    this.setData({ currentlyChanging: 'stability' });
   },
 
-  onInvestmentChange(e) {
-    this.autoAdjust('investment', e.detail.value);
+  onStabilityChange(e) {
+    this.autoAdjust('stability', e.detail.value);
     this.setData({ currentlyChanging: '' });
   },
 
-  onStableChanging(e) {
-    this.setData({ currentlyChanging: 'stable' });
+  onEssentialsChanging(e) {
+    this.setData({ currentlyChanging: 'essentials' });
   },
 
-  onStableChange(e) {
-    this.autoAdjust('stable', e.detail.value);
+  onEssentialsChange(e) {
+    this.autoAdjust('essentials', e.detail.value);
     this.setData({ currentlyChanging: '' });
   },
 
-  onFunChanging(e) {
-    this.setData({ currentlyChanging: 'fun' });
+  onRewardsChanging(e) {
+    this.setData({ currentlyChanging: 'rewards' });
   },
 
-  onFunChange(e) {
-    this.autoAdjust('fun', e.detail.value);
+  onRewardsChange(e) {
+    this.autoAdjust('rewards', e.detail.value);
     this.setData({ currentlyChanging: '' });
   },
 
