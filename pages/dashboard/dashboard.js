@@ -38,21 +38,28 @@ Page({
     const currentMonth = monthNames[date.getMonth()];
 
     // 加载数据
-    const income = app.globalData.monthlyIncome;
     const allocation = app.globalData.allocation;
 
-    // 计算各类别金额
+    // 获取各类别实际金额（从账户计算）
     const amounts = {
-      growth: ((income * allocation.growth) / 100).toFixed(2),
-      stability: ((income * allocation.stability) / 100).toFixed(2),
-      essentials: ((income * allocation.essentials) / 100).toFixed(2),
-      rewards: ((income * allocation.rewards) / 100).toFixed(2)
+      growth: app.getCategoryTotal('growth').toFixed(2),
+      stability: app.getCategoryTotal('stability').toFixed(2),
+      essentials: app.getCategoryTotal('essentials').toFixed(2),
+      rewards: app.getCategoryTotal('rewards').toFixed(2)
     };
+
+    // 获取目标和总资产
+    const goalName = app.globalData.goal.name || '未设置目标';
+    const goalAmount = app.globalData.goal.totalAmount || 0;
+    const totalAssets = app.getTotalAssets();
 
     this.setData({
       currentMonth,
       allocation,
-      amounts
+      amounts,
+      goalName,
+      goalAmount,
+      totalAssets
     });
   },
 
@@ -110,6 +117,34 @@ Page({
   goToSettings() {
     wx.navigateTo({
       url: '/pages/allocation/allocation'
+    });
+  },
+
+  // 新增：跳转到目标设定
+  goToGoal() {
+    wx.navigateTo({
+      url: '/pages/goal/goal'
+    });
+  },
+
+  // 新增：跳转到账户管理
+  goToAccounts() {
+    wx.navigateTo({
+      url: '/pages/accounts/accounts'
+    });
+  },
+
+  // 新增：跳转到智能分配
+  goToAllocateIncome() {
+    wx.navigateTo({
+      url: '/pages/allocate-income/allocate-income'
+    });
+  },
+
+  // 新增：跳转到数据分析
+  goToAnalytics() {
+    wx.navigateTo({
+      url: '/pages/analytics/analytics'
     });
   },
 

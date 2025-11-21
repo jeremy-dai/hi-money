@@ -11,6 +11,28 @@
     <view class="success-msg">本月规划已完成！做得非常棒！</view>
   </view>
 
+  <!-- 新增：目标进度卡片 -->
+  <view class="goal-progress-card" wx:if="{{goalAmount > 0}}">
+    <view class="goal-header">
+      <text class="goal-icon">🎯</text>
+      <text class="goal-name">{{goalName}}</text>
+    </view>
+    <view class="goal-amounts">
+      <view class="goal-current">
+        <text class="label">当前资产</text>
+        <text class="value">¥{{totalAssets.toFixed(2)}}</text>
+      </view>
+      <view class="goal-target">
+        <text class="label">目标</text>
+        <text class="value">¥{{goalAmount.toFixed(2)}}</text>
+      </view>
+    </view>
+    <view class="goal-progress-bar">
+      <view class="goal-progress-fill" style="width: {{(totalAssets / goalAmount * 100).toFixed(1)}}%"></view>
+    </view>
+    <view class="goal-progress-text">完成 {{(totalAssets / goalAmount * 100).toFixed(1)}}%</view>
+  </view>
+
   <!-- 财富卡片 - 按照25-15-50-10顺序 -->
   <view class="wealth-cards">
     <!-- 增长投资 Growth 25% -->
@@ -91,6 +113,29 @@
         class="pie-chart"
         disable-scroll="true"
       ></canvas>
+    </view>
+  </view>
+
+  <!-- 新增：快捷操作区 -->
+  <view class="quick-actions">
+    <view class="section-title">快捷操作</view>
+    <view class="action-grid">
+      <view class="action-item" bindtap="goToGoal">
+        <view class="action-icon">🎯</view>
+        <text class="action-text">设定目标</text>
+      </view>
+      <view class="action-item" bindtap="goToAccounts">
+        <view class="action-icon">💰</view>
+        <text class="action-text">管理账户</text>
+      </view>
+      <view class="action-item" bindtap="goToAllocateIncome">
+        <view class="action-icon">📊</view>
+        <text class="action-text">分配收入</text>
+      </view>
+      <view class="action-item" bindtap="goToAnalytics">
+        <view class="action-icon">📈</view>
+        <text class="action-text">数据分析</text>
+      </view>
     </view>
   </view>
 </view>

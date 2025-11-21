@@ -1,0 +1,97 @@
+<!--pages/analytics/analytics.wxml-->
+<view class="container">
+  <view class="header">
+    <view class="title">数据分析</view>
+    <view class="subtitle">追踪进度，洞察财务趋势</view>
+  </view>
+
+  <!-- 目标进度卡片 -->
+  <view class="goal-card">
+    <view class="goal-header">
+      <text class="goal-icon">🎯</text>
+      <view class="goal-info">
+        <text class="goal-name">{{goalName}}</text>
+        <text class="goal-target">目标: ¥{{goalAmount.toFixed(2)}}</text>
+      </view>
+    </view>
+
+    <view class="progress-section">
+      <view class="progress-amount">
+        <text class="current">¥{{totalAssets.toFixed(2)}}</text>
+        <text class="remaining">还差 ¥{{(goalAmount - totalAssets).toFixed(2)}}</text>
+      </view>
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{progressPercentage}}%"></view>
+      </view>
+      <view class="progress-text">完成 {{progressPercentage}}%</view>
+    </view>
+
+    <!-- 预测 -->
+    <view class="prediction-section" wx:if="{{prediction.monthsNeeded > 0 && prediction.monthsNeeded < 999}}">
+      <view class="prediction-item">
+        <text class="prediction-label">月均增长</text>
+        <text class="prediction-value">¥{{prediction.monthlyGrowthRate}}</text>
+      </view>
+      <view class="prediction-item">
+        <text class="prediction-label">预计还需</text>
+        <text class="prediction-value">{{prediction.monthsNeeded}}个月</text>
+      </view>
+      <view class="prediction-item">
+        <text class="prediction-label">预计达成</text>
+        <text class="prediction-value">{{prediction.estimatedDate}}</text>
+      </view>
+    </view>
+
+    <view class="tip" wx:if="{{prediction.monthsNeeded >= 999}}">
+      <text class="tip-icon">💡</text>
+      <text class="tip-text">{{prediction.estimatedDate}}</text>
+    </view>
+  </view>
+
+  <!-- 资产占比饼图 -->
+  <view class="chart-card">
+    <view class="chart-title">资产分布</view>
+    <canvas canvas-id="pieChart" class="pie-chart"></canvas>
+
+    <view class="legend">
+      <view class="legend-item">
+        <view class="legend-color" style="background-color: {{categories.growth.color}}"></view>
+        <view class="legend-info">
+          <text class="legend-name">{{categories.growth.name}}</text>
+          <text class="legend-value">¥{{categories.growth.amount.toFixed(2)}} ({{categories.growth.percentage}}%)</text>
+        </view>
+      </view>
+
+      <view class="legend-item">
+        <view class="legend-color" style="background-color: {{categories.stability.color}}"></view>
+        <view class="legend-info">
+          <text class="legend-name">{{categories.stability.name}}</text>
+          <text class="legend-value">¥{{categories.stability.amount.toFixed(2)}} ({{categories.stability.percentage}}%)</text>
+        </view>
+      </view>
+
+      <view class="legend-item">
+        <view class="legend-color" style="background-color: {{categories.essentials.color}}"></view>
+        <view class="legend-info">
+          <text class="legend-name">{{categories.essentials.name}}</text>
+          <text class="legend-value">¥{{categories.essentials.amount.toFixed(2)}} ({{categories.essentials.percentage}}%)</text>
+        </view>
+      </view>
+
+      <view class="legend-item">
+        <view class="legend-color" style="background-color: {{categories.rewards.color}}"></view>
+        <view class="legend-info">
+          <text class="legend-name">{{categories.rewards.name}}</text>
+          <text class="legend-value">¥{{categories.rewards.amount.toFixed(2)}} ({{categories.rewards.percentage}}%)</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 资产趋势图 -->
+  <view class="chart-card">
+    <view class="chart-title">资产增长趋势</view>
+    <canvas canvas-id="trendChart" class="trend-chart"></canvas>
+    <view class="chart-note">根据历史记录绘制</view>
+  </view>
+</view>
