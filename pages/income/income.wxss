@@ -1,0 +1,33 @@
+/* pages/income/income.wxss */
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  background: #F8F8F8;
+  border-radius: 16rpx;
+  padding: 28rpx 32rpx;
+  margin: 40rpx 0;
+}
+
+.currency {
+  font-size: 40rpx;
+  color: #333;
+  font-weight: 500;
+  margin-right: 16rpx;
+}
+
+.income-input {
+  flex: 1;
+  font-size: 40rpx;
+  color: #333;
+}
+
+.btn-disabled {
+  opacity: 0.5;
+}

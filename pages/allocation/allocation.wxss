@@ -1,0 +1,61 @@
+/* pages/allocation/allocation.wxss */
+.container {
+  padding-bottom: 60rpx;
+}
+
+.slider-item {
+  margin-bottom: 50rpx;
+}
+
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.slider-label {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.slider-value {
+  font-size: 32rpx;
+  color: #666;
+  font-weight: 600;
+}
+
+.slider {
+  width: 100%;
+}
+
+.total-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40rpx 0;
+  margin: 20rpx 0;
+  border-top: 2rpx solid #E5E7EB;
+}
+
+.total-label {
+  font-size: 36rpx;
+  color: #333;
+  font-weight: bold;
+  margin-right: 16rpx;
+}
+
+.total-value {
+  font-size: 36rpx;
+  color: #10B981;
+  font-weight: bold;
+}
+
+.total-error {
+  color: #EF4444;
+}
+
+.btn-disabled {
+  opacity: 0.5;
+}

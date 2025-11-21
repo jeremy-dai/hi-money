@@ -1,0 +1,104 @@
+<!-- pages/dashboard/dashboard.wxml -->
+<view class="container">
+  <!-- 设置按钮 -->
+  <view class="settings-btn" bindtap="goToSettings">
+    <text class="icon">⚙️</text>
+  </view>
+
+  <!-- 标题 -->
+  <view class="header">
+    <view class="main-title">{{currentMonth}}月财务规划</view>
+    <view class="success-msg">本月规划已完成！做得非常棒！</view>
+  </view>
+
+  <!-- 财富卡片 -->
+  <view class="wealth-cards">
+    <!-- 精明消费 -->
+    <view class="wealth-card card-living" bindtap="showDetail" data-type="living">
+      <view class="card-header">
+        <text class="card-title">精明消费</text>
+        <text class="card-icon">🏠</text>
+      </view>
+      <view class="card-percentage">{{allocation.living}}%</view>
+      <view class="card-amount">¥{{amounts.living}}</view>
+      <view class="card-action">
+        <text class="action-text">自动抽取</text>
+      </view>
+    </view>
+
+    <!-- 着眼未来 -->
+    <view class="wealth-card card-investment" bindtap="showDetail" data-type="investment">
+      <view class="card-header">
+        <text class="card-title">着眼未来</text>
+        <text class="card-icon">📈</text>
+      </view>
+      <view class="card-percentage">{{allocation.investment}}%</view>
+      <view class="card-amount">¥{{amounts.investment}}</view>
+      <view class="card-action confirmed">
+        <text class="action-text">✓ 已确认</text>
+      </view>
+    </view>
+
+    <!-- 构筑基石 -->
+    <view class="wealth-card card-stable" bindtap="showDetail" data-type="stable">
+      <view class="card-header">
+        <text class="card-title">构筑基石</text>
+        <text class="card-icon">🛡️</text>
+      </view>
+      <view class="card-percentage">{{allocation.stable}}%</view>
+      <view class="card-amount">¥{{amounts.stable}}</view>
+      <view class="card-action confirmed">
+        <text class="action-text">✓ 已确认</text>
+      </view>
+    </view>
+
+    <!-- 投资快乐 -->
+    <view class="wealth-card card-fun" bindtap="showDetail" data-type="fun">
+      <view class="card-header">
+        <text class="card-title">投资快乐</text>
+        <text class="card-icon">🎉</text>
+      </view>
+      <view class="card-percentage">{{allocation.fun}}%</view>
+      <view class="card-amount">¥{{amounts.fun}}</view>
+      <view class="card-action confirmed">
+        <text class="action-text">✓ 已确认</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 年度资金分配概览 -->
+  <view class="chart-section">
+    <view class="section-title">年度资金分配概览</view>
+    <view class="chart-subtitle">这是您今年以来在四大模块中的累计投入情况。</view>
+
+    <!-- 图例 -->
+    <view class="chart-legend">
+      <view class="legend-item">
+        <view class="legend-color" style="background: #FFD93D;"></view>
+        <text class="legend-text">生活开支</text>
+      </view>
+      <view class="legend-item">
+        <view class="legend-color" style="background: #6BCB77;"></view>
+        <text class="legend-text">投资增长</text>
+      </view>
+      <view class="legend-item">
+        <view class="legend-color" style="background: #4D96FF;"></view>
+        <text class="legend-text">稳定基金</text>
+      </view>
+      <view class="legend-item">
+        <view class="legend-color" style="background: #FFB6C1;"></view>
+        <text class="legend-text">快乐基金</text>
+      </view>
+    </view>
+
+    <!-- 饼图容器 - 稍后添加canvas -->
+    <view class="chart-container">
+      <canvas
+        canvas-id="pieChart"
+        id="pieChart"
+        class="pie-chart"
+        disable-scroll="true"
+      ></canvas>
+    </view>
+  </view>
+</view>

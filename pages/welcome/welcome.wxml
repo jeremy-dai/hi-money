@@ -1,0 +1,30 @@
+<!-- pages/welcome/welcome.wxml -->
+<view class="container">
+  <view class="welcome-content">
+    <view class="main-title">开启您的财富之旅</view>
+    <view class="subtitle">忘掉繁琐记账，让我们专注于规划一个更富足、快乐的生活。</view>
+
+    <view class="illustration">
+      <text class="icon">💰</text>
+    </view>
+
+    <view class="features">
+      <view class="feature-item">
+        <text class="feature-icon">📊</text>
+        <text class="feature-text">智能财富分配</text>
+      </view>
+      <view class="feature-item">
+        <text class="feature-icon">🎯</text>
+        <text class="feature-text">个性化规划</text>
+      </view>
+      <view class="feature-item">
+        <text class="feature-icon">📈</text>
+        <text class="feature-text">财务目标追踪</text>
+      </view>
+    </view>
+
+    <view class="btn-primary" bindtap="startJourney">
+      开始财富之旅
+    </view>
+  </view>
+</view>

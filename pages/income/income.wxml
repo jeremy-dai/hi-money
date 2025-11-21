@@ -1,0 +1,23 @@
+<!-- pages/income/income.wxml -->
+<view class="container">
+  <view class="card">
+    <view class="section-title">第一步：您的月收入</view>
+    <view class="subtitle">请输入您的税后月收入，这是我们规划的起点。</view>
+
+    <view class="input-group">
+      <text class="currency">¥</text>
+      <input
+        class="income-input"
+        type="digit"
+        placeholder="例如：10000"
+        value="{{income}}"
+        bindinput="onIncomeInput"
+        focus="{{true}}"
+      />
+    </view>
+
+    <view class="btn-primary {{!canProceed ? 'btn-disabled' : ''}}" bindtap="nextStep">
+      下一步
+    </view>
+  </view>
+</view>

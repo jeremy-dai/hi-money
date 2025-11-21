@@ -1,0 +1,170 @@
+/* pages/dashboard/dashboard.wxss */
+.container {
+  padding-bottom: 60rpx;
+}
+
+.settings-btn {
+  position: absolute;
+  top: 40rpx;
+  right: 40rpx;
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.settings-btn .icon {
+  font-size: 40rpx;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.main-title {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.success-msg {
+  font-size: 28rpx;
+  color: #10B981;
+}
+
+.wealth-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+  margin-bottom: 60rpx;
+}
+
+.wealth-card {
+  background: white;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+.card-living {
+  background: linear-gradient(135deg, #FFF9E6 0%, #FFFFFF 100%);
+}
+
+.card-investment {
+  background: linear-gradient(135deg, #E6F9F0 0%, #FFFFFF 100%);
+}
+
+.card-stable {
+  background: linear-gradient(135deg, #E6F3FF 0%, #FFFFFF 100%);
+}
+
+.card-fun {
+  background: linear-gradient(135deg, #FFE6F0 0%, #FFFFFF 100%);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.card-title {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.card-icon {
+  font-size: 36rpx;
+}
+
+.card-percentage {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 8rpx;
+}
+
+.card-amount {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.card-action {
+  padding: 12rpx 20rpx;
+  background: #F3F4F6;
+  border-radius: 12rpx;
+  text-align: center;
+}
+
+.card-action.confirmed {
+  background: #E6F9F0;
+}
+
+.action-text {
+  font-size: 22rpx;
+  color: #666;
+}
+
+.card-action.confirmed .action-text {
+  color: #10B981;
+}
+
+.chart-section {
+  background: white;
+  border-radius: 24rpx;
+  padding: 40rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+}
+
+.chart-subtitle {
+  font-size: 24rpx;
+  color: #999;
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24rpx;
+  margin-bottom: 40rpx;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+}
+
+.legend-color {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 4rpx;
+  margin-right: 8rpx;
+}
+
+.legend-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pie-chart {
+  width: 300px;
+  height: 300px;
+}

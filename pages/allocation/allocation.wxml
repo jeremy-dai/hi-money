@@ -1,0 +1,93 @@
+<!-- pages/allocation/allocation.wxml -->
+<view class="container">
+  <view class="card">
+    <view class="section-title">第二步：定制财富比例</view>
+    <view class="subtitle">根据"四分法"模型，我们推荐了以下方案。您可拖动调整。</view>
+
+    <!-- 生活开支 -->
+    <view class="slider-item">
+      <view class="slider-header">
+        <text class="slider-label">生活开支</text>
+        <text class="slider-value">{{allocation.living}}%</text>
+      </view>
+      <slider
+        class="slider"
+        min="0"
+        max="100"
+        value="{{allocation.living}}"
+        activeColor="#3B82F6"
+        backgroundColor="#E5E7EB"
+        block-size="24"
+        bindchange="onLivingChange"
+        bindchanging="onLivingChanging"
+      />
+    </view>
+
+    <!-- 投资增长 -->
+    <view class="slider-item">
+      <view class="slider-header">
+        <text class="slider-label">投资增长</text>
+        <text class="slider-value">{{allocation.investment}}%</text>
+      </view>
+      <slider
+        class="slider"
+        min="0"
+        max="100"
+        value="{{allocation.investment}}"
+        activeColor="#10B981"
+        backgroundColor="#E5E7EB"
+        block-size="24"
+        bindchange="onInvestmentChange"
+        bindchanging="onInvestmentChanging"
+      />
+    </view>
+
+    <!-- 稳定基金 -->
+    <view class="slider-item">
+      <view class="slider-header">
+        <text class="slider-label">稳定基金</text>
+        <text class="slider-value">{{allocation.stable}}%</text>
+      </view>
+      <slider
+        class="slider"
+        min="0"
+        max="100"
+        value="{{allocation.stable}}"
+        activeColor="#93C5FD"
+        backgroundColor="#E5E7EB"
+        block-size="24"
+        bindchange="onStableChange"
+        bindchanging="onStableChanging"
+      />
+    </view>
+
+    <!-- 快乐基金 -->
+    <view class="slider-item">
+      <view class="slider-header">
+        <text class="slider-label">快乐基金</text>
+        <text class="slider-value">{{allocation.fun}}%</text>
+      </view>
+      <slider
+        class="slider"
+        min="0"
+        max="100"
+        value="{{allocation.fun}}"
+        activeColor="#F9A8D4"
+        backgroundColor="#E5E7EB"
+        block-size="24"
+        bindchange="onFunChange"
+        bindchanging="onFunChanging"
+      />
+    </view>
+
+    <!-- 总计 -->
+    <view class="total-section">
+      <text class="total-label">总计：</text>
+      <text class="total-value {{total !== 100 ? 'total-error' : ''}}">{{total}}%</text>
+    </view>
+
+    <view class="btn-primary {{total !== 100 ? 'btn-disabled' : ''}}" bindtap="completeSetup">
+      完成设置，进入主页
+    </view>
+  </view>
+</view>
