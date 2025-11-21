@@ -6,28 +6,44 @@
   min-height: 100vh;
 }
 
+.card {
+  animation: slideUp 0.6s ease-out;
+}
+
 .input-group {
   display: flex;
   align-items: center;
-  background: #F8F8F8;
-  border-radius: 16rpx;
-  padding: 28rpx 32rpx;
-  margin: 40rpx 0;
+  background: linear-gradient(135deg, #f6f8fb 0%, #ffffff 100%);
+  border-radius: 20rpx;
+  padding: 32rpx 40rpx;
+  margin: 48rpx 0;
+  border: 2rpx solid rgba(102, 126, 234, 0.1);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.input-group:focus-within {
+  border-color: #667eea;
+  box-shadow: 0 8rpx 32rpx rgba(102, 126, 234, 0.15);
+  transform: translateY(-2rpx);
 }
 
 .currency {
-  font-size: 40rpx;
-  color: #333;
-  font-weight: 500;
-  margin-right: 16rpx;
+  font-size: 48rpx;
+  color: #667eea;
+  font-weight: 700;
+  margin-right: 20rpx;
+  text-shadow: 0 2rpx 4rpx rgba(102, 126, 234, 0.2);
 }
 
 .income-input {
   flex: 1;
-  font-size: 40rpx;
-  color: #333;
+  font-size: 48rpx;
+  color: #1a202c;
+  font-weight: 600;
 }
 
 .btn-disabled {
   opacity: 0.5;
+  transform: none !important;
 }

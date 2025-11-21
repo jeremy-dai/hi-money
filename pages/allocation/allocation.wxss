@@ -1,67 +1,109 @@
 /* pages/allocation/allocation.wxss */
 .container {
-  padding-bottom: 60rpx;
+  padding-bottom: 80rpx;
+}
+
+.card {
+  animation: slideUp 0.6s ease-out;
+  margin-top: 20rpx;
 }
 
 .slider-item {
-  margin-bottom: 50rpx;
+  margin-bottom: 60rpx;
+  animation: fadeIn 0.5s ease-out both;
+}
+
+.slider-item:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.slider-item:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.slider-item:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.slider-item:nth-child(4) {
+  animation-delay: 0.4s;
 }
 
 .slider-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20rpx;
+  margin-bottom: 16rpx;
 }
 
 .slider-label {
   font-size: 32rpx;
-  color: #333;
-  font-weight: 500;
+  color: #1a202c;
+  font-weight: 600;
 }
 
 .slider-value {
-  font-size: 32rpx;
-  color: #666;
-  font-weight: 600;
+  font-size: 36rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
 }
 
 .slider-desc {
   font-size: 24rpx;
-  color: #999;
-  margin-bottom: 12rpx;
+  color: #94a3b8;
+  margin-bottom: 20rpx;
+  font-weight: 500;
 }
 
 .slider {
   width: 100%;
+  margin-top: 8rpx;
 }
 
 .total-section {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 40rpx 0;
-  margin: 20rpx 0;
-  border-top: 2rpx solid #E5E7EB;
+  padding: 48rpx 0;
+  margin: 32rpx 0;
+  border-top: 2rpx solid rgba(102, 126, 234, 0.1);
+  border-bottom: 2rpx solid rgba(102, 126, 234, 0.1);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
+  border-radius: 16rpx;
 }
 
 .total-label {
   font-size: 36rpx;
-  color: #333;
-  font-weight: bold;
+  color: #1a202c;
+  font-weight: 700;
   margin-right: 16rpx;
 }
 
 .total-value {
-  font-size: 36rpx;
-  color: #10B981;
-  font-weight: bold;
+  font-size: 48rpx;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  text-shadow: 0 2rpx 8rpx rgba(16, 185, 129, 0.2);
 }
 
 .total-error {
-  color: #EF4444;
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .btn-disabled {
   opacity: 0.5;
+  transform: none !important;
+}
+
+.btn-primary {
+  animation: slideUp 0.6s ease-out 0.6s both;
 }
