@@ -4,7 +4,11 @@
     "pages/income/income",
     "pages/allocation/allocation",
     "pages/dashboard/dashboard",
-    "pages/detail/detail"
+    "pages/detail/detail",
+    "pages/goal/goal",
+    "pages/accounts/accounts",
+    "pages/allocate-income/allocate-income",
+    "pages/analytics/analytics"
   ],
   "window": {
     "navigationBarTitleText": "财富管理助手",
