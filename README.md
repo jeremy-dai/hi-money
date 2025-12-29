@@ -1,163 +1,196 @@
-# Hi Money - 个人财富管理微信小程序
+# Hi Money Web - 智能财富管理系统
 
-一个基于**25-15-50-10法则**的个人财富管理微信小程序，帮助用户通过教育引导和智能规划，像1%的富人一样管理金钱。
+一个基于**25-15-50-10法则**的现代化财富管理Web应用，帮助用户像1%的富人一样管理金钱。
 
 ## 什么是25-15-50-10法则？
 
 这是一套经过验证的财富管理框架，帮助任何收入水平的人都能有效管理金钱：
 
-- **25% 增长投资 (Growth)** - 让钱为你工作
-- **15% 稳定基金 (Stability)** - 建立5个月开支的应急储备
-- **50% 基本开支 (Essentials)** - 生活必需品，不包括奢侈消费
-- **10% 奖励消费 (Rewards)** - 无罪恶感享受生活
+- **25% 增长投资 (Growth)** - 让钱为你工作，通过指数基金、房地产等增值资产实现财富增长
+- **15% 稳定基金 (Stability)** - 建立5个月开支的应急储备，在危机中保持冷静
+- **50% 基本开支 (Essentials)** - 生活必需品（房租、食品、水电、交通），不包括奢侈消费
+- **10% 奖励消费 (Rewards)** - 无罪恶感享受生活，保持长期动力
 
-## 功能特点
+## 🚀 Tech Stack
 
-### 1. 财富之旅引导
-- 欢迎页面介绍25-15-50-10法则
-- 引导用户完成初始设置流程
-- 可自定义调整分配比例
+- **Framework**: Vite + React 18 + TypeScript
+- **State Management**: Zustand with localStorage persistence
+- **Styling**: Tailwind CSS v4 with custom design system
+- **Charts**: Recharts (responsive, animated)
+- **Routing**: React Router v6 with protected routes
+- **Animations**: Framer Motion
 
-### 2. 智能财富分配
-基于25-15-50-10法则的资金分配：
-- **增长投资 (25%)** - 指数基金、房地产、技能学习、在线业务等增值资产
-- **稳定基金 (15%)** - 应急储备金（目标：5个月基本开支）
-- **基本开支 (50%)** - 房租、食品、水电、交通、保险、基本衣物
-- **奖励消费 (10%)** - 度假、爱好、社交、礼物等体验式消费
+## ✨ 核心功能
 
-### 3. 可视化财务仪表盘
-- 月度财务规划展示
-- 年度资金分配饼图
-- 各类别详细金额自动计算
-- 彩色卡片直观展示
+### 1. 引导式设置流程
+- 欢迎页介绍25-15-50-10法则核心概念
+- 收入输入与验证
+- 可自定义调整分配比例（默认25/15/50/10）
+- 财富目标设定
+
+### 2. 智能财富管理
+- **智能配置算法**: 基于当前偏差自动平衡资产配置（Plan A固定比例 vs Plan B智能平衡）
+- **多账户管理**: 每个类别支持多个账户，灵活管理不同资产
+- **自动计算**: 实时计算各类别总额、百分比、目标偏差
+- **历史记录**: 追踪每次资金分配，用于趋势分析
+
+### 3. 数据可视化
+- **仪表盘**: 目标进度、四类别卡片、饼图展示
+- **分析页**: 历史趋势图、预测算法（基于历史增长率预测达成时间）
+- **响应式图表**: 使用Recharts替代WeChat Canvas，支持交互式tooltip
 
 ### 4. 深度教育内容
 每个财富类别都包含详细的行动指南：
+- **增长投资**: 选择增长型资产 → 设置税收优惠账户 → 开始定投
+- **稳定基金**: 计算目标金额 → 正确存储 → 快速积累策略
+- **基本开支**: 明确必需品 → 缩减两大关键开支 → 用规则代替意志力
+- **奖励消费**: 无罪恶感消费类别 → 预加载"快乐罐" → 优先体验而非物质
 
-**增长投资 (25%)**
-- Step 1: 选择增长型资产（指数基金到另类投资）
-- Step 2: 设置税收优惠账户（中国、美国、英国等）
-- Step 3: 开始自动定投（三基金组合策略）
+## 🔧 Quick Start
 
-**稳定基金 (15%)**
-- Step 1: 计算稳定基金（月开支 × 5）
-- Step 2: 正确存储（易取、零风险、有收益）
-- Step 3: 快速积累（工资扫描、替换承诺、四舍五入）
+\`\`\`bash
+# 安装依赖
+npm install
 
-**基本开支 (50%)**
-- Step 1: 明确真正的必需品
-- Step 2: 缩减两大关键开支（住房和交通）
-- Step 3: 用规则代替意志力（7天法则、价值vs品牌）
+# 开发服务器 (http://localhost:5173)
+npm run dev
 
-**奖励消费 (10%)**
-- Step 1: 无罪恶感消费类别（旅行、爱好、社交、礼物）
-- Step 2: 预加载"快乐罐"（独立账户管理）
-- Step 3: 优先体验而非物质
+# 生产构建
+npm run build
 
-## 项目结构
+# 预览生产构建
+npm run preview
+\`\`\`
 
-```
-hi-money/
-├── app.js              # 小程序逻辑入口
-├── app.json            # 小程序配置
-├── app.wxss            # 全局样式
-├── sitemap.json        # 索引配置
-└── pages/              # 页面目录
-    ├── welcome/        # 欢迎引导页
-    ├── income/         # 月收入输入页
-    ├── allocation/     # 财富比例设置页（25-15-50-10）
-    ├── dashboard/      # 财务仪表盘主页
-    └── detail/         # 类别详情教育页
-```
+## 📁 项目结构
 
-## 核心功能说明
+\`\`\`
+src/
+├── main.tsx                    # 入口文件
+├── App.tsx                     # 路由配置与Protected Routes
+├── components/
+│   ├── common/                 # 通用组件 (Button, Card, Input, Modal)
+│   ├── charts/                 # 图表组件 (PieChart, TrendChart, ProgressBar)
+│   ├── wealth/                 # 财富管理组件 (WealthCard, AllocationSlider, etc)
+│   └── layout/                 # 布局组件 (PageContainer, Header)
+├── pages/                      # 9个页面组件
+│   ├── WelcomePage.tsx         # 欢迎引导页
+│   ├── IncomePage.tsx          # 月收入输入
+│   ├── AllocationPage.tsx      # 比例自定义（含自动调整算法）
+│   ├── GoalPage.tsx            # 目标设定
+│   ├── DashboardPage.tsx       # 主仪表盘
+│   ├── DetailPage.tsx          # 类别详情教育页
+│   ├── AccountsPage.tsx        # 多账户管理
+│   ├── AllocateIncomePage.tsx  # 智能收入分配
+│   └── AnalyticsPage.tsx       # 数据分析预测
+├── store/
+│   └── useAppStore.ts          # Zustand全局状态 (替代WeChat globalData)
+├── algorithms/
+│   ├── autoAdjustSliders.ts    # 滑块自动调整算法（确保总和100%）
+│   ├── smartAllocation.ts      # 智能分配算法（偏差优化）
+│   └── prediction.ts           # 目标预测算法（基于历史增长率）
+├── utils/
+│   └── constants.ts            # 常量配置（颜色、路由、类别名称）
+├── types/
+│   └── store.types.ts          # TypeScript类型定义
+└── data/
+    └── educationContent.ts     # 教育内容数据
+\`\`\`
 
-### 数据存储
-使用微信小程序的本地存储 API (`wx.setStorageSync` / `wx.getStorageSync`) 保存：
-- 月收入
-- 财富分配比例（支持自定义调整）
-- 设置完成状态
+## 🎯 核心算法
 
-### 智能比例调整
-财富分配页面实现了智能滑块调整机制：
-- 拖动任意滑块时，其他滑块自动按比例调整
-- 确保四个类别总和始终为 100%
-- 平滑的用户体验，实时反馈
+### 1. 滑块自动调整算法
+**文件**: src/algorithms/autoAdjustSliders.ts
 
-### 可视化展示
-- 使用 Canvas 绘制年度资金分配饼图
-- 彩色卡片展示各类别金额
-- 渐变背景增强视觉效果
-- 响应式布局适配不同屏幕
+当用户拖动任意类别滑块时，其他三个滑块按比例自动调整，确保四类别总和始终为100%。
 
-## 快速开始
+### 2. 智能配置算法
+**文件**: src/algorithms/smartAllocation.ts
 
-### 1. 环境准备
-- 安装[微信开发者工具](https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html)
-- 注册微信小程序账号（可使用测试号）
+分析当前各类别偏差（实际百分比 - 目标百分比），优先分配资金到under-allocated类别，加速达成目标比例。
 
-### 2. 导入项目
-1. 打开微信开发者工具
-2. 选择"导入项目"
-3. 选择 `hi-money` 目录
-4. 填入 AppID（可使用测试 AppID）
+### 3. 目标预测算法
+**文件**: src/algorithms/prediction.ts
 
-### 3. 运行预览
-- 点击"编译"按钮即可预览
-- 可以使用模拟器或真机调试
+基于历史记录计算月均增长率，预测达成财富目标所需月数和预计日期。
 
-## 使用流程
+## 🎨 设计系统
 
-1. **欢迎页** - 了解25-15-50-10法则，点击"开始财富之旅"
-2. **输入月收入** - 输入税后月收入
-3. **设置分配比例** - 调整四个类别的分配比例（默认25/15/50/10，可自定义）
-4. **查看财务规划** - 在仪表盘查看月度规划和年度分配
-5. **学习理财知识** - 点击任意类别卡片查看详细教育内容和行动步骤
+### 颜色方案
+- **增长投资**: #10B981 (绿色)
+- **稳定基金**: #3B82F6 (蓝色)
+- **基本开支**: #F59E0B (橙色)
+- **奖励消费**: #F9A8D4 (粉色)
 
-## 为什么是25-15-50-10？
+### 响应式设计
+- Mobile-first: 基础样式为移动端
+- Breakpoints: sm (640px), md (768px), lg (1024px), xl (1280px)
+- 网格自适应: WealthCards 1列(mobile) → 2列(tablet+)
+
+## 🔐 Protected Routes
+
+使用\`hasCompletedSetup\`状态控制路由访问：
+- 未完成设置 → 自动重定向到Welcome页
+- 已完成设置 → 可访问Dashboard及所有功能页
+
+## 📊 状态管理
+
+使用Zustand with persist middleware替代WeChat的\`wx.setStorageSync/getStorageSync\`：
+- 自动localStorage持久化
+- Computed getters (getCategoryTotal, getTotalAssets, etc)
+- Actions for all state mutations
+
+## 🚀 WeChat Mini App → React Web 迁移对照表
+
+| WeChat API | React Equivalent |
+|------------|------------------|
+| \`wx.navigateTo()\` | \`navigate('/path')\` |
+| \`wx.redirectTo()\` | \`navigate('/path', { replace: true })\` |
+| \`wx.navigateBack()\` | \`navigate(-1)\` |
+| \`wx.setStorageSync()\` | Zustand persist middleware |
+| \`wx.getStorageSync()\` | Zustand persist middleware |
+| \`wx.showToast()\` | Browser alert |
+| \`wx.showModal()\` | Browser confirm |
+| \`wx.createCanvasContext()\` | Recharts |
+| \`<view>\` | \`<div>\` |
+| \`<slider>\` | \`<input type="range">\` |
+| \`Page()\` | React function component |
+| \`getApp().globalData\` | \`useAppStore()\` hook |
+
+## ✅ Migration Complete
+
+全部9个页面已从WeChat mini app迁移至React Web App：
+- ✅ 所有WeChat API已替换为Web标准API
+- ✅ Canvas图表已替换为Recharts
+- ✅ 所有业务逻辑算法已完整迁移
+- ✅ TypeScript类型安全
+- ✅ 生产构建成功
+- ✅ 响应式设计
+- ✅ 状态持久化
+
+## 🎯 为什么是25-15-50-10？
 
 这个比例经过大量成功案例验证：
 
-- **25%增长投资** - 足够让复利发挥威力，20岁开始每月投$200，60岁能积累$126万（vs 30岁开始每月$300只有$67万）
+- **25%增长投资** - 足够让复利发挥威力（20岁开始每月投$200，60岁能积累$126万 vs 30岁开始每月$300只有$67万）
 - **15%稳定基金** - 92%的人会在紧急情况下被迫动用投资或负债，5个月储备让你保持冷静
 - **50%基本开支** - 大多数人花60-70%在"必需品"上，压缩到50%迫使你分清需求和欲望
 - **10%奖励消费** - 研究表明预留奖励金的人储蓄成功率更高，因为不会因压抑而反弹
 
-## 技术特点
+## 🔮 未来扩展方向
 
-- 纯原生微信小程序开发，无需额外框架
-- 响应式设计，适配各种屏幕尺寸
-- 本地数据存储，保护用户隐私
-- 流畅的动画和交互效果
-- 教育导向的内容设计，基于真实理财原则
+- [ ] PWA支持（离线功能）
+- [ ] 暗色模式
+- [ ] 多语言支持（i18n）
+- [ ] 数据导出（CSV/PDF）
+- [ ] 云端同步（Firebase/Supabase）
+- [ ] 单元测试（Vitest）
+- [ ] E2E测试（Playwright）
 
-## 设计理念
-
-- **教育优先** - 不只是工具，更是理财教练
-- **行动导向** - 每个类别都有具体的执行步骤
-- **可持续性** - 10%奖励金确保长期坚持
-- **灵活性** - 支持根据个人情况调整比例
-
-## 未来扩展方向
-
-- [ ] 添加月度/年度记录跟踪
-- [ ] 实现数据导出功能
-- [ ] 添加理财目标设定和进度追踪
-- [ ] 集成投资回报计算器
-- [ ] 添加提醒和通知功能
-- [ ] 支持多账户管理
-- [ ] 云端数据同步
-- [ ] 理财知识库扩展
-- [ ] 社区分享功能
-
-## 灵感来源
-
-本项目基于Mark Tilbury的YouTube视频《How To Manage Your Money Like The 1%》中的25-15-50-10法则，并结合中国用户的实际情况进行了本地化调整。
-
-## 许可证
+## 📄 License
 
 MIT License
 
-## 贡献
+## 🙏 灵感来源
 
-欢迎提交 Issue 和 Pull Request！如果这个项目帮助了你，请给个⭐️支持一下！
+本项目基于Mark Tilbury的YouTube视频《How To Manage Your Money Like The 1%》中的25-15-50-10法则，并结合中国用户的实际情况进行了本地化调整。
