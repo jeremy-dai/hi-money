@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Lightbulb } from 'lucide-react';
 import { PageContainer } from '../components/layout/PageContainer';
 import { Card } from '../components/common/Card';
 import { Button } from '../components/common/Button';
@@ -38,7 +39,7 @@ export default function AccountsPage() {
         {/* Info Banner - Phase 4: Focus on investments only */}
         <Card className="mb-6 bg-gradient-to-r from-gold-primary/10 to-gold-primary/5 border-gold-primary/30">
           <div className="flex items-start gap-3">
-            <span className="text-2xl">💡</span>
+            <Lightbulb className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-white font-semibold mb-1">专注于投资追踪</p>
               <p className="text-gray-400 text-sm">生活开支和娱乐消费无需记录。Hi Money 专注于帮助您管理投资资产。</p>

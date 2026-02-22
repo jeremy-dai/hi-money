@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Lightbulb } from 'lucide-react';
 import { PageContainer } from '../components/layout/PageContainer';
 import { Card } from '../components/common/Card';
 import { Button } from '../components/common/Button';
@@ -94,7 +95,7 @@ export default function AllocateIncomePage() {
         {/* Info Banner - Phase 4: Educational note about essentials/rewards */}
         <Card className="mb-6 bg-gradient-to-r from-gold-primary/10 to-gold-primary/5 border-gold-primary/30">
           <div className="flex items-start gap-3">
-            <span className="text-2xl">💡</span>
+            <Lightbulb className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-white font-semibold mb-1">关于生活开支和奖励消费</p>
               <p className="text-gray-400 text-sm">基本开支（Essentials）和奖励消费（Rewards）是您每月的生活支出，无需在 Hi Money 中追踪。本页面仅分配投资资金到增长投资、稳定基金和特殊用途账户。</p>

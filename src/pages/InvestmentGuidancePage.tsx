@@ -1,6 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import {
+  Rocket, CheckCircle2, Star, Lightbulb, BarChart3,
+  AlertTriangle, Globe, Trophy, Calendar, DollarSign,
+  HelpCircle, ChevronDown, ChevronUp,
+} from 'lucide-react';
 import { PageContainer } from '../components/layout/PageContainer';
 import { Card } from '../components/common/Card';
 import { Button } from '../components/common/Button';
@@ -53,7 +58,7 @@ export default function InvestmentGuidancePage() {
     },
     {
       question: 'Q3: QDII溢价率高时怎么办？',
-      answer: '溢价率>3%时，有两个选择：\n1️⃣ 等待溢价率降低后再买入场内ETF\n2️⃣ 改为场外申购对应的QDII基金（无溢价，但申购费稍高）\n场外代码：标普500 - 050025（博时）、纳指100 - 040048（华安）',
+      answer: '溢价率>3%时，有两个选择：\n1. 等待溢价率降低后再买入场内ETF\n2. 改为场外申购对应的QDII基金（无溢价，但申购费稍高）\n场外代码：标普500 - 050025（博时）、纳指100 - 040048（华安）',
     },
     {
       question: 'Q4: 什么时候可以卖出？',
@@ -86,7 +91,7 @@ export default function InvestmentGuidancePage() {
           className="mb-8 text-center"
         >
           <Card className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 border-indigo-500/30">
-            <div className="text-5xl mb-3">🚀</div>
+            <Rocket className="w-12 h-12 mb-3 text-indigo-400 mx-auto" />
             <h1 className="text-3xl font-bold mb-2 text-white">新手投资行动指南</h1>
             <p className="text-gray-400">3步开始定投，让财富自动增长</p>
           </Card>
@@ -101,7 +106,7 @@ export default function InvestmentGuidancePage() {
         >
           <Card className="border-l-4 border-growth bg-black-elevated">
             <div className="flex items-start gap-4 mb-4">
-              <div className="text-4xl">✅</div>
+              <CheckCircle2 className="w-10 h-10 text-green-500 flex-shrink-0 mt-1" />
               <div>
                 <h2 className="text-2xl font-bold text-growth mb-2">
                   第一步：开通证券账户
@@ -125,14 +130,15 @@ export default function InvestmentGuidancePage() {
                 >
                   <div className="font-semibold text-growth">
                     {platform.name}
-                    {platform.recommended && ' ⭐'}
+                    {platform.recommended && <Star className="inline w-4 h-4 ml-1 text-yellow-400 fill-yellow-400" />}
                   </div>
                 </a>
               ))}
             </div>
 
-            <div className="bg-gold-primary/10 p-3 rounded-lg text-sm text-gray-300 border border-gold-primary/20">
-              💡 <strong>准备材料：</strong>身份证 + 银行卡 + 手机号，按APP指引完成实名认证即可
+            <div className="bg-gold-primary/10 p-3 rounded-lg text-sm text-gray-300 border border-gold-primary/20 flex items-start gap-2">
+              <Lightbulb className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+              <span><strong>准备材料：</strong>身份证 + 银行卡 + 手机号，按APP指引完成实名认证即可</span>
             </div>
           </Card>
         </motion.div>
@@ -146,7 +152,7 @@ export default function InvestmentGuidancePage() {
         >
           <Card className="border-l-4 border-stability bg-black-elevated">
             <div className="flex items-start gap-4 mb-4">
-              <div className="text-4xl">✅</div>
+              <CheckCircle2 className="w-10 h-10 text-green-500 flex-shrink-0 mt-1" />
               <div>
                 <h2 className="text-2xl font-bold text-stability mb-2">
                   第二步：选择投资产品
@@ -158,31 +164,33 @@ export default function InvestmentGuidancePage() {
             {/* A-Stock Products */}
             <div className="mb-6">
               <h3 className="font-bold text-white mb-2 flex items-center gap-2">
-                <span className="text-xl">📊</span>
+                <BarChart3 className="w-5 h-5 text-emerald-400" />
                 A股指数（场内ETF - 需开通股票账户）
               </h3>
               <ProductGrid products={aStockProducts} bgColor="bg-emerald-900/20" />
-              <p className="text-xs text-gray-400 mt-2">
-                ⚠️ 场内ETF需要在股票交易时间（工作日9:30-15:00）通过证券账户购买
+              <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3 text-yellow-500 flex-shrink-0" />
+                场内ETF需要在股票交易时间（工作日9:30-15:00）通过证券账户购买
               </p>
             </div>
 
             {/* US-Stock Products */}
             <div className="mb-6">
               <h3 className="font-bold text-white mb-2 flex items-center gap-2">
-                <span className="text-xl">🌍</span>
+                <Globe className="w-5 h-5 text-indigo-400" />
                 美股指数（QDII - 场内/场外均可）
               </h3>
               <ProductGrid products={usStockProducts} bgColor="bg-indigo-900/20" />
-              <p className="text-xs text-orange-400 mt-2">
-                ⚠️ 买入前必须检查溢价率！溢价&gt;3%建议场外申购或等待溢价降低
+              <p className="text-xs text-orange-400 mt-2 flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3 flex-shrink-0" />
+                买入前必须检查溢价率！溢价&gt;3%建议场外申购或等待溢价降低
               </p>
             </div>
 
             {/* Gold Products */}
             <div>
               <h3 className="font-bold text-white mb-2 flex items-center gap-2">
-                <span className="text-xl">🏆</span>
+                <Trophy className="w-5 h-5 text-amber-400" />
                 黄金ETF（避险资产）
               </h3>
               <ProductGrid products={goldProducts} bgColor="bg-amber-900/20" />
@@ -199,7 +207,7 @@ export default function InvestmentGuidancePage() {
         >
           <Card className="border-l-4 border-green-500 bg-black-elevated">
             <div className="flex items-start gap-4 mb-4">
-              <div className="text-4xl">✅</div>
+              <CheckCircle2 className="w-10 h-10 text-green-500 flex-shrink-0 mt-1" />
               <div>
                 <h2 className="text-2xl font-bold text-green-500 mb-2">
                   第三步：设置自动定投
@@ -210,7 +218,7 @@ export default function InvestmentGuidancePage() {
 
             <div className="space-y-3 mb-4">
               <div className="flex items-start gap-2">
-                <span className="text-lg">📅</span>
+                <Calendar className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
                 <div>
                   <strong className="text-white">定投日期：</strong>
                   <span className="text-gray-300">发薪日后1-3天（例如每月5号或10号）</span>
@@ -218,7 +226,7 @@ export default function InvestmentGuidancePage() {
               </div>
 
               <div className="flex items-start gap-2">
-                <span className="text-lg">💰</span>
+                <DollarSign className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
                 <div>
                   <strong className="text-white">定投金额：</strong>
                   <span className="text-gray-300">月收入的25%（增长投资部分）</span>
@@ -226,7 +234,7 @@ export default function InvestmentGuidancePage() {
               </div>
 
               <div className="flex items-start gap-2">
-                <span className="text-lg">📊</span>
+                <BarChart3 className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
                 <div>
                   <strong className="text-white">资产配置建议：</strong>
                   <div className="mt-2 ml-4 space-y-1 text-sm text-gray-300">
@@ -241,12 +249,15 @@ export default function InvestmentGuidancePage() {
             </div>
 
             <div className="bg-emerald-900/20 p-4 rounded-lg border border-emerald-500/20">
-              <div className="font-semibold text-emerald-400 mb-2">💡 定投设置小贴士</div>
+              <div className="font-semibold text-emerald-400 mb-2 flex items-center gap-2">
+                <Lightbulb className="w-4 h-4" />
+                定投设置小贴士
+              </div>
               <div className="text-sm text-gray-300 space-y-1">
-                <div>1️⃣ 场内ETF：通过证券APP设置智能定投（自动扣款买入）</div>
-                <div>2️⃣ 场外基金：在天天基金/支付宝设置定投计划</div>
-                <div>3️⃣ 根据估值面板每月调整金额（加倍/正常/减半）</div>
-                <div>4️⃣ 至少坚持3年，中途不要因市场波动停止</div>
+                <div>1. 场内ETF：通过证券APP设置智能定投（自动扣款买入）</div>
+                <div>2. 场外基金：在天天基金/支付宝设置定投计划</div>
+                <div>3. 根据估值面板每月调整金额（加倍/正常/减半）</div>
+                <div>4. 至少坚持3年，中途不要因市场波动停止</div>
               </div>
             </div>
           </Card>
@@ -260,7 +271,10 @@ export default function InvestmentGuidancePage() {
           className="mb-8"
         >
           <Card>
-            <h3 className="text-xl font-bold mb-4 text-white">❓ 新手常见问题</h3>
+            <h3 className="text-xl font-bold mb-4 text-white flex items-center gap-2">
+              <HelpCircle className="w-5 h-5 text-gray-400" />
+              新手常见问题
+            </h3>
             <div className="space-y-3">
               {faqs.map((faq, idx) => (
                 <div
@@ -272,7 +286,10 @@ export default function InvestmentGuidancePage() {
                     className="w-full text-left p-4 font-semibold text-growth hover:bg-white/5 transition-colors flex items-center justify-between"
                   >
                     <span>{faq.question}</span>
-                    <span className="text-xl">{expandedFaq === idx ? '−' : '+'}</span>
+                    {expandedFaq === idx
+                      ? <ChevronUp className="w-5 h-5 flex-shrink-0" />
+                      : <ChevronDown className="w-5 h-5 flex-shrink-0" />
+                    }
                   </button>
                   {expandedFaq === idx && (
                     <motion.div

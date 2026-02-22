@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   motion,
   AnimatePresence,
@@ -7,7 +7,7 @@ import {
   useMotionValueEvent,
 } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export const FloatingNav = ({
   navItems,
@@ -26,13 +26,13 @@ export const FloatingNav = ({
   endContent?: React.ReactNode;
 }) => {
   const { scrollYProgress } = useScroll();
+  const location = useLocation();
 
   const [visible, setVisible] = useState(true);
 
   useMotionValueEvent(scrollYProgress, "change", (current) => {
-    // Check if current is not undefined and is a number
     if (typeof current === "number") {
-      let direction = current - scrollYProgress.getPrevious()!;
+      const direction = current - scrollYProgress.getPrevious()!;
 
       if (scrollYProgress.get() < 0.05) {
         setVisible(true);
@@ -48,7 +48,7 @@ export const FloatingNav = ({
 
   return (
     <AnimatePresence mode="wait">
-      <motion.div
+      <motion.nav
         initial={{
           opacity: 1,
           y: -100,
@@ -61,28 +61,55 @@ export const FloatingNav = ({
           duration: 0.2,
         }}
         className={cn(
-          "flex max-w-fit fixed top-10 inset-x-0 mx-auto border border-transparent dark:border-white/[0.2] rounded-full dark:bg-black bg-white shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)] z-[5000] px-4 py-2 items-center justify-center space-x-4",
+          "fixed top-4 inset-x-0 mx-auto z-[5000]",
+          "w-[calc(100%-2rem)] max-w-4xl",
+          "flex items-center justify-between",
+          "px-4 py-3 sm:px-6",
+          "rounded-2xl",
+          "bg-gray-950/70 backdrop-blur-xl backdrop-saturate-150",
+          "border border-white/[0.08]",
+          "shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.05)]",
           className
         )}
       >
+        {/* Left: Logo */}
         {startContent}
-        
-        {navItems.map((navItem: any, idx: number) => (
-          <Link
-            key={`link=${idx}`}
-            to={navItem.link}
-            onClick={navItem.onClick}
-            className={cn(
-              "relative dark:text-neutral-50 items-center flex space-x-1 text-neutral-600 dark:hover:text-neutral-300 hover:text-neutral-500"
-            )}
-          >
-            <span className="block sm:hidden">{navItem.icon}</span>
-            <span className="hidden sm:block text-sm">{navItem.name}</span>
-          </Link>
-        ))}
 
+        {/* Center: Nav Items */}
+        <div className="flex items-center gap-1">
+          {navItems.map((navItem, idx) => {
+            const isActive = location.pathname === navItem.link;
+            return (
+              <Link
+                key={`nav-${idx}`}
+                to={navItem.link}
+                onClick={navItem.onClick}
+                className={cn(
+                  "relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200",
+                  isActive
+                    ? "text-amber-400"
+                    : "text-gray-400 hover:text-gray-200 hover:bg-white/[0.06]"
+                )}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="activeNavBg"
+                    className="absolute inset-0 rounded-lg bg-amber-500/10 border border-amber-500/20"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-1.5">
+                  {navItem.icon}
+                  <span className="hidden sm:inline">{navItem.name}</span>
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Right: End Content */}
         {endContent}
-      </motion.div>
+      </motion.nav>
     </AnimatePresence>
   );
 };
