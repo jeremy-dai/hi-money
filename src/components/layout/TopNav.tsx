@@ -3,7 +3,6 @@ import { Home, Wallet, BarChart3, BookOpen, LogOut } from 'lucide-react';
 import { ROUTES } from '../../utils/constants';
 import { useAppStore } from '../../store/useAppStore';
 import { FloatingNav } from '@/components/ui/floating-nav';
-import React from 'react';
 
 export function TopNav() {
   const navigate = useNavigate();

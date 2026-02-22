@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { TopNav } from './TopNav';
 import { BackgroundBeams } from '@/components/ui/background-beams';
 import { Spotlight } from '@/components/ui/spotlight';

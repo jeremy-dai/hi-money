@@ -1,24 +1,17 @@
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
-  TrendingUp,
-  Shield,
-  Sparkles,
   DollarSign,
   Target,
   BarChart3,
   Zap,
   ArrowRight,
-  CheckCircle2
 } from 'lucide-react';
 import { PageContainer } from '../components/layout/PageContainer';
 import { Button } from '../components/common/Button';
-import { Card } from '../components/common/Card';
 import { ROUTES } from '../utils/constants';
 import { TextGenerateEffect } from '@/components/ui/text-generate';
 import { HoverEffect } from '@/components/ui/hover-effect';
 import { BentoGrid, BentoGridItem } from '@/components/ui/bento-grid';
-import React from 'react';
 
 export default function WelcomePage() {
   const navigate = useNavigate();

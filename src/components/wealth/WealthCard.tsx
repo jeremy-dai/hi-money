@@ -4,7 +4,6 @@ import type { CategoryType } from '../../types';
 import { CATEGORY_COLORS } from '../../utils/constants';
 import { CategoryIcon } from '../../utils/icons';
 import { formatCNY } from '@/lib/format';
-import React from 'react';
 
 interface WealthCardProps {
   type: CategoryType;

@@ -16,10 +16,8 @@ import {
 import type { InvestmentCategoryType } from '../types';
 import { ScoreBar } from '@/components/common/ScoreBar';
 import { GapAlert } from '@/components/common/GapAlert';
-import { BentoGrid, BentoGridItem } from '@/components/ui/bento-grid';
 import { CardSpotlight } from '@/components/ui/card-spotlight';
 import { formatCNY } from '@/lib/format';
-import React from 'react';
 
 export default function DashboardPage() {
   const navigate = useNavigate();

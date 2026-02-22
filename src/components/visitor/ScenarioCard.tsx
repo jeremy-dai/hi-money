@@ -20,7 +20,7 @@ export function ScenarioCard({ scenario, onSelect, onViewDetails }: ScenarioCard
   const { name, description, profile } = scenario;
 
   return (
-    <Card hoverable className="h-full flex flex-col">
+    <Card className="h-full flex flex-col">
       <div className="flex-1">
         {/* Header */}
         <div className="mb-4">

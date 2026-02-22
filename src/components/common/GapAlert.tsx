@@ -1,7 +1,6 @@
 import { AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatCNY } from '@/lib/format';
-import React from 'react';
 
 interface GapAlertProps {
   type: 'insurance' | 'retirement';
