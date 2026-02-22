@@ -9,6 +9,7 @@ export interface CategoryStatus {
 export interface CurrentStatus {
   growth: CategoryStatus;
   stability: CategoryStatus;
+  special: CategoryStatus;
   essentials: CategoryStatus;
   rewards: CategoryStatus;
 }
@@ -28,6 +29,7 @@ export function calculateSmartAllocation(
   const deviations = {
     growth: currentStatus.growth.deviation,
     stability: currentStatus.stability.deviation,
+    special: currentStatus.special.deviation,
     essentials: currentStatus.essentials.deviation,
     rewards: currentStatus.rewards.deviation,
   };
@@ -95,11 +97,13 @@ export function calculateSmartAllocation(
     }
   }
 
+  // Phase 4: Essentials and rewards are spent, not tracked
   return {
     growth: allocation.growth || 0,
     stability: allocation.stability || 0,
-    essentials: allocation.essentials || 0,
-    rewards: allocation.rewards || 0,
+    special: allocation.special || 0,
+    essentials: 0, // Not tracked - spent on living expenses
+    rewards: 0,    // Not tracked - spent on rewards
   };
 }
 
@@ -107,10 +111,12 @@ export function calculateSmartAllocation(
  * Calculate fixed allocation based on target percentages (Plan A)
  */
 export function calculateFixedAllocation(income: number, targetAllocation: Allocation): Allocation {
+  // Phase 4: Essentials and rewards are spent, not tracked
   return {
     growth: (income * targetAllocation.growth) / 100,
     stability: (income * targetAllocation.stability) / 100,
-    essentials: (income * targetAllocation.essentials) / 100,
-    rewards: (income * targetAllocation.rewards) / 100,
+    special: (income * targetAllocation.special) / 100,
+    essentials: 0, // Not tracked - spent on living expenses
+    rewards: 0,    // Not tracked - spent on rewards
   };
 }

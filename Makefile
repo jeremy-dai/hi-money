@@ -17,6 +17,8 @@ install:
 
 # Start development server
 dev:
+	@echo "Checking for processes on port 5173..."
+	@lsof -ti:5173 | xargs kill -9 2>/dev/null || true
 	npm run dev
 
 # Build for production

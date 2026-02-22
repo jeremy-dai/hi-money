@@ -1,60 +1,56 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
-import { useAppStore } from './store/useAppStore';
 import { ROUTES } from './utils/constants';
+import { TopNav } from './components/layout/TopNav';
 
 // Lazy-loaded pages
 const WelcomePage = lazy(() => import('./pages/WelcomePage'));
-const IncomePage = lazy(() => import('./pages/IncomePage'));
-const AllocationPage = lazy(() => import('./pages/AllocationPage'));
-const GoalPage = lazy(() => import('./pages/GoalPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const DetailPage = lazy(() => import('./pages/DetailPage'));
 const AccountsPage = lazy(() => import('./pages/AccountsPage'));
 const AllocateIncomePage = lazy(() => import('./pages/AllocateIncomePage'));
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
 const InvestmentGuidancePage = lazy(() => import('./pages/InvestmentGuidancePage'));
+const InsurancePlanningPage = lazy(() => import('./pages/InsurancePlanningPage'));
+const RetirementPlanningPage = lazy(() => import('./pages/RetirementPlanningPage'));
+const VisitorModePage = lazy(() => import('./pages/VisitorModePage'));
+const PresentationMode = lazy(() => import('./components/visitor/PresentationMode').then(m => ({ default: m.PresentationMode })));
 
-// Loading component
+// Loading component with black-gold theme
 function LoadingSpinner() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 to-purple-800">
-      <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-white"></div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-black-primary">
+      <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-gold-primary shadow-gold-lg"></div>
+      <p className="mt-6 text-gold-primary font-semibold text-lg">加载中...</p>
     </div>
   );
 }
 
-// Protected route wrapper
+// Protected route wrapper - no longer needed, all routes are public
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const hasCompletedSetup = useAppStore((state) => state.hasCompletedSetup);
-  return hasCompletedSetup ? <>{children}</> : <Navigate to={ROUTES.WELCOME} replace />;
+  return <>{children}</>;
 }
 
 function App() {
   return (
     <BrowserRouter>
+      <TopNav />
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
-          {/* Public routes */}
+          {/* Public routes - Always accessible */}
           <Route path={ROUTES.WELCOME} element={<WelcomePage />} />
-          <Route path={ROUTES.INCOME} element={<IncomePage />} />
-          <Route path={ROUTES.ALLOCATION} element={<AllocationPage />} />
-          <Route path={ROUTES.GOAL} element={<GoalPage />} />
+          <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+          <Route path={ROUTES.ONBOARDING} element={<OnboardingPage />} />
+          <Route path={ROUTES.DETAIL} element={<DetailPage />} />
 
-          {/* Protected routes */}
+          {/* Protected routes - Require setup completion */}
           <Route
             path={ROUTES.DASHBOARD}
             element={
               <ProtectedRoute>
                 <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path={ROUTES.DETAIL}
-            element={
-              <ProtectedRoute>
-                <DetailPage />
               </ProtectedRoute>
             }
           />
@@ -89,6 +85,30 @@ function App() {
                 <InvestmentGuidancePage />
               </ProtectedRoute>
             }
+          />
+          <Route
+            path={ROUTES.INSURANCE_PLANNING}
+            element={
+              <ProtectedRoute>
+                <InsurancePlanningPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path={ROUTES.RETIREMENT_PLANNING}
+            element={
+              <ProtectedRoute>
+                <RetirementPlanningPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path={ROUTES.VISITOR}
+            element={<VisitorModePage />}
+          />
+          <Route
+            path="/visitor/presentation"
+            element={<PresentationMode />}
           />
         </Routes>
       </Suspense>

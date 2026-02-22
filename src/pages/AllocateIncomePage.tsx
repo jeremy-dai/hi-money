@@ -25,6 +25,7 @@ export default function AllocateIncomePage() {
 
   const amount = parseFloat(income) || 0;
 
+  // Phase 4: Only investment categories (essentials/rewards are spent, not tracked)
   const currentStatus = {
     growth: {
       amount: getCategoryTotal('growth'),
@@ -36,15 +37,20 @@ export default function AllocateIncomePage() {
       percentage: getCategoryPercentage('stability'),
       deviation: getCategoryDeviation('stability'),
     },
+    special: {
+      amount: getCategoryTotal('special'),
+      percentage: getCategoryPercentage('special'),
+      deviation: getCategoryDeviation('special'),
+    },
     essentials: {
-      amount: getCategoryTotal('essentials'),
-      percentage: getCategoryPercentage('essentials'),
-      deviation: getCategoryDeviation('essentials'),
+      amount: 0, // Not tracked
+      percentage: 0,
+      deviation: 0,
     },
     rewards: {
-      amount: getCategoryTotal('rewards'),
-      percentage: getCategoryPercentage('rewards'),
-      deviation: getCategoryDeviation('rewards'),
+      amount: 0, // Not tracked
+      percentage: 0,
+      deviation: 0,
     },
   };
 
@@ -56,12 +62,15 @@ export default function AllocateIncomePage() {
 
     const plan = selectedPlan === 'A' ? planA : planB;
 
-    // Add to accounts (simplified - adds to first account or creates new)
-    (Object.keys(plan) as CategoryType[]).forEach((category) => {
-      addAccount(category, {
-        name: `收入分配-${new Date().toLocaleDateString()}`,
-        amount: plan[category],
-      });
+    // Add to accounts (only investment categories - Phase 4)
+    const investmentCategories: CategoryType[] = ['growth', 'stability', 'special'];
+    investmentCategories.forEach((category) => {
+      if (plan[category] > 0) {
+        addAccount(category, {
+          name: `收入分配-${new Date().toLocaleDateString()}`,
+          amount: plan[category],
+        });
+      }
     });
 
     // Add to history
@@ -71,15 +80,27 @@ export default function AllocateIncomePage() {
     navigate(-1);
   };
 
-  const categories: CategoryType[] = ['growth', 'stability', 'essentials', 'rewards'];
+  // Phase 4: Only investment categories (essentials/rewards are spent, not tracked)
+  const categories: CategoryType[] = ['growth', 'stability', 'special'];
 
   return (
     <PageContainer>
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">分配收入</h1>
-          <p className="text-purple-100">智能分配您的新收入</p>
+          <p className="text-white-soft">智能分配您的新收入到投资账户</p>
         </div>
+
+        {/* Info Banner - Phase 4: Educational note about essentials/rewards */}
+        <Card className="mb-6 bg-gradient-to-r from-gold-primary/10 to-gold-primary/5 border-gold-primary/30">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">💡</span>
+            <div>
+              <p className="text-white font-semibold mb-1">关于生活开支和奖励消费</p>
+              <p className="text-gray-400 text-sm">基本开支（Essentials）和奖励消费（Rewards）是您每月的生活支出，无需在 Hi Money 中追踪。本页面仅分配投资资金到增长投资、稳定基金和特殊用途账户。</p>
+            </div>
+          </div>
+        </Card>
 
         <Card className="mb-6">
           <Input
@@ -128,7 +149,7 @@ export default function AllocateIncomePage() {
                     </div>
                   ))}
                 </div>
-                <p className="text-sm text-gray-500 mt-4">根据当前偏离度智能调整</p>
+                <p className="text-sm text-gray-400 mt-4">根据当前偏离度智能调整</p>
               </Card>
             </div>
 

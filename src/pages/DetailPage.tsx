@@ -1,11 +1,22 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Lightbulb, Zap, CheckCircle, Home, Car } from 'lucide-react';
 import { PageContainer } from '../components/layout/PageContainer';
 import { Card } from '../components/common/Card';
 import { Button } from '../components/common/Button';
 import { CATEGORY_COLORS } from '../utils/constants';
 import { educationContent } from '../data/educationContent';
+import { CategoryIcon } from '../utils/icons';
 import type { CategoryType } from '../types';
+
+// Helper to get icon component by name
+const getIconComponent = (iconName: string) => {
+  const icons: Record<string, typeof Home> = {
+    Home,
+    Car,
+  };
+  return icons[iconName];
+};
 
 export default function DetailPage() {
   const navigate = useNavigate();
@@ -44,12 +55,14 @@ export default function DetailPage() {
               className="absolute top-0 left-0 right-0 h-2"
               style={{ background: color }}
             />
-            <div className="text-6xl mb-4">{content.icon}</div>
+            <div className="mb-4">
+              <CategoryIcon type={type} className="icon-glow" size={64} strokeWidth={2} style={{ color }} />
+            </div>
             <h1 className="text-4xl font-bold mb-2" style={{ color }}>
               {content.title}
             </h1>
-            <p className="text-xl text-gray-600 mb-4">{content.subtitle}</p>
-            <p className="text-gray-700 leading-relaxed">{content.intro}</p>
+            <p className="text-xl text-gray-400 mb-4">{content.subtitle}</p>
+            <p className="text-white-soft leading-relaxed">{content.intro}</p>
           </Card>
         </motion.div>
 
@@ -69,49 +82,57 @@ export default function DetailPage() {
 
                 {step.type === 'questions' && step.questions ? (
                   <>
-                    <p className="text-gray-700 mb-4 whitespace-pre-line">
+                    <p className="text-white-soft mb-4 whitespace-pre-line">
                       {step.description}
                     </p>
                     <div className="space-y-3">
-                      {step.questions.map((q, qIndex) => (
-                        <div
-                          key={qIndex}
-                          className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl"
-                        >
-                          <span className="text-3xl">{q.icon}</span>
-                          <p className="text-gray-700 flex-1">{q.text}</p>
-                        </div>
-                      ))}
+                      {step.questions.map((q, qIndex) => {
+                        const IconComponent = getIconComponent(q.iconName);
+                        return (
+                          <div
+                            key={qIndex}
+                            className="flex items-start gap-3 p-4 bg-black-soft rounded-xl border border-gold-primary/10"
+                          >
+                            {IconComponent && (
+                              <IconComponent className="text-gold-primary flex-shrink-0" size={28} strokeWidth={2} />
+                            )}
+                            <p className="text-white-soft flex-1">{q.text}</p>
+                          </div>
+                        );
+                      })}
                     </div>
                   </>
                 ) : (
                   <div className="prose max-w-none">
-                    <p className="text-gray-700 whitespace-pre-line leading-relaxed">
+                    <p className="text-white-soft whitespace-pre-line leading-relaxed">
                       {step.description}
                     </p>
                   </div>
                 )}
 
                 {step.type === 'risk-ladder' && (
-                  <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl">
-                    <p className="text-sm text-gray-600">
-                      💡 <strong>建议</strong>: 从低风险的指数基金开始，随着经验增长逐步多元化投资组合。
+                  <div className="mt-6 p-4 bg-black-soft/50 rounded-xl border border-gold-primary/20 flex items-start gap-3">
+                    <Lightbulb className="text-gold-primary shrink-0" size={20} strokeWidth={2} />
+                    <p className="text-sm text-gray-400">
+                      <strong className="text-white">建议</strong>: 从低风险的指数基金开始，随着经验增长逐步多元化投资组合。
                     </p>
                   </div>
                 )}
 
                 {step.type === 'flow' && (
-                  <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl">
-                    <p className="text-sm text-gray-600">
-                      ⚡ <strong>关键</strong>: 设置自动转账是成功的关键。不要依赖记忆或意志力。
+                  <div className="mt-6 p-4 bg-black-soft/50 rounded-xl border border-gold-primary/20 flex items-start gap-3">
+                    <Zap className="text-gold-primary shrink-0" size={20} strokeWidth={2} />
+                    <p className="text-sm text-gray-400">
+                      <strong className="text-white">关键</strong>: 设置自动转账是成功的关键。不要依赖记忆或意志力。
                     </p>
                   </div>
                 )}
 
                 {step.type === 'list' && (
-                  <div className="mt-6 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl">
-                    <p className="text-sm text-gray-600">
-                      ✅ <strong>自检</strong>: 每月审查开支，区分"需要"和"想要"。这会变得越来越容易。
+                  <div className="mt-6 p-4 bg-black-soft/50 rounded-xl border border-gold-primary/20 flex items-start gap-3">
+                    <CheckCircle className="text-gold-primary shrink-0" size={20} strokeWidth={2} />
+                    <p className="text-sm text-gray-400">
+                      <strong className="text-white">自检</strong>: 每月审查开支，区分"需要"和"想要"。这会变得越来越容易。
                     </p>
                   </div>
                 )}
@@ -126,7 +147,7 @@ export default function DetailPage() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
-          <Button onClick={() => navigate(-1)} variant="outline" className="w-full">
+          <Button onClick={() => navigate(-1)} variant="secondary" className="w-full">
             返回仪表盘
           </Button>
         </motion.div>

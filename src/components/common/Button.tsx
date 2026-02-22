@@ -1,8 +1,11 @@
 import type { ButtonHTMLAttributes } from 'react';
-import clsx from 'clsx';
+import { cn } from '@/lib/utils';
+import { ShimmerButton } from '@/components/ui/shimmer-button';
+import { Button as MovingBorderButton } from '@/components/ui/moving-border';
+import React from 'react';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline';
+  variant?: 'primary' | 'secondary' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   children: React.ReactNode;
 }
@@ -16,24 +19,54 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    'font-semibold rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:scale-105 active:scale-95 transform';
-
-  const variants = {
-    primary: 'bg-gradient-primary text-white hover:opacity-90 focus:ring-primary-500 disabled:opacity-50',
-    secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-400',
-    outline:
-      'border-2 border-primary-500 text-primary-500 hover:bg-primary-500 hover:text-white focus:ring-primary-500',
-  };
+    'font-semibold rounded-lg transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black-primary disabled:opacity-50 disabled:cursor-not-allowed transform';
 
   const sizes = {
+    sm: 'h-10 px-4 text-sm',
+    md: 'h-12 px-6 text-base',
+    lg: 'h-14 px-8 text-lg',
+  };
+
+  const ghostSizes = {
     sm: 'px-4 py-2 text-sm',
     md: 'px-6 py-3 text-base',
     lg: 'px-8 py-4 text-lg',
   };
 
+  if (variant === 'primary') {
+    return (
+      <ShimmerButton
+        className={cn("w-full md:w-auto", sizes[size], className)}
+        disabled={disabled}
+        {...props}
+      >
+        {children}
+      </ShimmerButton>
+    );
+  }
+
+  if (variant === 'secondary') {
+    return (
+      <MovingBorderButton
+        borderRadius="0.5rem"
+        containerClassName={cn("w-full md:w-auto h-auto", className)}
+        className={cn("bg-black text-white border-neutral-200 dark:border-slate-800", sizes[size])}
+        disabled={disabled}
+        {...props}
+      >
+        {children}
+      </MovingBorderButton>
+    );
+  }
+
   return (
     <button
-      className={clsx(baseStyles, variants[variant], sizes[size], className)}
+      className={cn(
+        baseStyles,
+        'bg-black-soft text-white border-none hover:bg-gold-primary/10 hover:text-gold-primary focus-visible:ring-gold-primary',
+        ghostSizes[size],
+        className
+      )}
       disabled={disabled}
       {...props}
     >

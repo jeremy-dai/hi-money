@@ -1,165 +1,138 @@
-import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import {
+  TrendingUp,
+  Shield,
+  Sparkles,
+  DollarSign,
+  Target,
+  BarChart3,
+  Zap,
+  ArrowRight,
+  CheckCircle2
+} from 'lucide-react';
 import { PageContainer } from '../components/layout/PageContainer';
 import { Button } from '../components/common/Button';
 import { Card } from '../components/common/Card';
-import { useAppStore } from '../store/useAppStore';
 import { ROUTES } from '../utils/constants';
+import { TextGenerateEffect } from '@/components/ui/text-generate';
+import { HoverEffect } from '@/components/ui/hover-effect';
+import { BentoGrid, BentoGridItem } from '@/components/ui/bento-grid';
+import React from 'react';
 
 export default function WelcomePage() {
   const navigate = useNavigate();
-  const hasCompletedSetup = useAppStore((state) => state.hasCompletedSetup);
 
-  useEffect(() => {
-    if (hasCompletedSetup) {
-      navigate(ROUTES.DASHBOARD, { replace: true });
-    }
-  }, [hasCompletedSetup, navigate]);
-
-  const features = [
+  const investmentCategories = [
     {
-      icon: '📈',
-      title: '25% 增长投资',
-      description: '让钱为你工作，通过复利实现财富增长',
-      color: '#10B981',
+      title: '成长投资 (60%)',
+      description: '股票、ETF等高增长资产。例如：指数基金、优质股票、成长型ETF',
+      link: '#',
     },
     {
-      icon: '🛡️',
-      title: '15% 稳定基金',
-      description: '建立应急储备，在危机中保持冷静',
-      color: '#3B82F6',
+      title: '稳健储蓄 (25%)',
+      description: '债券与应急储备。例如：应急基金、债券基金、定期存款',
+      link: '#',
     },
     {
-      icon: '🏠',
-      title: '50% 基本开支',
-      description: '生活必需品，聪明消费不是削减快乐',
-      color: '#F59E0B',
-    },
-    {
-      icon: '🎉',
-      title: '10% 奖励消费',
-      description: '无罪恶感享受生活，保持长期动力',
-      color: '#F9A8D4',
+      title: '特殊用途 (15%)',
+      description: '教育、机会、其他目标。例如：教育基金、机会投资、特别储蓄',
+      link: '#',
     },
   ];
 
   const benefits = [
     {
-      icon: '💰',
-      title: '复利的威力',
-      text: '20岁开始每月投$200，60岁能积累$126万。30岁开始每月$300只有$67万',
+      title: '复利的魔力',
+      description: '20岁开始每月投资¥2000，到60岁约有¥380万。30岁开始同样金额只有¥150万。早10年，多2.5倍。',
+      header: <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-900 to-neutral-800 border border-white/10" />,
+      icon: <DollarSign className="h-4 w-4 text-neutral-500" />,
     },
     {
-      icon: '🎯',
-      title: '智能配置',
-      text: 'AI算法自动平衡资产配置，优先分配到under-allocated类别',
+      title: '智能资产配置',
+      description: 'AI算法自动分析您的资产状况，优先分配到under-allocated类别，保持投资组合平衡。自动再平衡。',
+      header: <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-900 to-neutral-800 border border-white/10" />,
+      icon: <Target className="h-4 w-4 text-neutral-500" />,
     },
     {
-      icon: '📊',
-      title: '数据可视化',
-      text: '实时追踪目标进度，预测达成时间，让财富增长一目了然',
+      title: '可视化追踪',
+      description: '实时追踪投资进度，预测目标达成时间，让每一分钱的增长都清晰可见。一目了然。',
+      header: <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-900 to-neutral-800 border border-white/10" />,
+      icon: <BarChart3 className="h-4 w-4 text-neutral-500" />,
     },
   ];
 
   return (
     <PageContainer>
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-6xl mx-auto px-4 pb-20">
         {/* Hero Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
-          <h1 className="text-6xl md:text-7xl font-bold text-white mb-4">Hi Money</h1>
-          <p className="text-2xl text-purple-100 mb-2">智能财富管理系统</p>
-          <p className="text-lg text-purple-200">像1%的富人一样管理金钱</p>
-        </motion.div>
-
-        {/* What is 25-15-50-10 */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mb-12"
-        >
-          <Card>
-            <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-primary bg-clip-text text-transparent">
-              什么是25-15-50-10法则？
-            </h2>
-            <p className="text-gray-700 text-center mb-8 leading-relaxed">
-              这是一套经过验证的财富管理框架，帮助任何收入水平的人都能有效管理金钱。
-              <br />
-              将每月收入按固定比例分配到四个类别，平衡当下与未来。
+        <div className="text-center mb-16 pt-20">
+          <div className="mb-6">
+            <h1 className="text-7xl md:text-8xl font-bold text-white mb-6 glow-gold">
+              Hi Money
+            </h1>
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="h-px w-12 bg-gradient-to-r from-transparent to-gold-primary"></div>
+              <div className="text-3xl text-gold-primary font-light">
+                <TextGenerateEffect words="智能财富管理系统" className="text-gold-primary font-light" />
+              </div>
+              <div className="h-px w-12 bg-gradient-to-l from-transparent to-gold-primary"></div>
+            </div>
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-8">
+              基于 "I Will Teach You To Be Rich" 理念，助您轻松掌控财务自由
             </p>
-          </Card>
-        </motion.div>
+          </div>
 
-        {/* Feature Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          {features.map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
+          <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+            <Button
+              size="lg"
+              onClick={() => navigate(ROUTES.LOGIN)}
+              className="w-full md:w-auto min-w-[200px]"
             >
-              <Card className="hover:transform hover:scale-105 transition-all duration-200 h-full">
-                <div className="text-center">
-                  <div className="text-5xl mb-4">{feature.icon}</div>
-                  <h3
-                    className="text-xl font-bold mb-2"
-                    style={{ color: feature.color }}
-                  >
-                    {feature.title}
-                  </h3>
-                  <p className="text-gray-600">{feature.description}</p>
-                </div>
-              </Card>
-            </motion.div>
-          ))}
+              开始使用
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="lg"
+              onClick={() => navigate(ROUTES.VISITOR)}
+              className="w-full md:w-auto min-w-[200px]"
+            >
+              <Zap className="mr-2 w-5 h-5 text-gold-primary" />
+              演示模式
+            </Button>
+          </div>
+        </div>
+
+        {/* Categories Section */}
+        <div className="mb-20">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold mb-4">核心投资策略</h2>
+            <p className="text-gray-400">科学的资产配置比例，让财富稳健增长</p>
+          </div>
+          
+          <HoverEffect items={investmentCategories} />
         </div>
 
         {/* Benefits Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-          className="mb-12"
-        >
-          <Card className="bg-gradient-to-br from-purple-50 to-pink-50">
-            <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
-              为什么选择Hi Money？
-            </h2>
-            <div className="space-y-4">
-              {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-start gap-4">
-                  <div className="text-3xl flex-shrink-0">{benefit.icon}</div>
-                  <div>
-                    <h4 className="font-bold text-gray-800 mb-1">{benefit.title}</h4>
-                    <p className="text-sm text-gray-600">{benefit.text}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* CTA Button */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.9 }}
-          className="text-center"
-        >
-          <Button size="lg" onClick={() => navigate(ROUTES.INCOME)} className="shadow-2xl">
-            开始财富之旅 →
-          </Button>
-          <p className="text-purple-100 text-sm mt-4">
-            只需3步设置，开启智能理财
-          </p>
-        </motion.div>
+        <div className="mb-20">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold mb-4">为什么选择 Hi Money</h2>
+          </div>
+          
+          <BentoGrid className="max-w-4xl mx-auto">
+            {benefits.map((item, i) => (
+              <BentoGridItem
+                key={i}
+                title={item.title}
+                description={item.description}
+                header={item.header}
+                icon={item.icon}
+                className={i === 1 ? "md:col-span-2" : ""}
+              />
+            ))}
+          </BentoGrid>
+        </div>
       </div>
     </PageContainer>
   );

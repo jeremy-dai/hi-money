@@ -10,7 +10,7 @@ import type { CategoryType } from '../types';
 
 export default function AnalyticsPage() {
   const navigate = useNavigate();
-  const { goal, history, getCategoryTotal, getTotalAssets, getCategoryPercentage } = useAppStore();
+  const { history, getCategoryTotal, getTotalAssets, getCategoryPercentage } = useAppStore();
 
   const totalAssets = getTotalAssets();
   const categories: CategoryType[] = ['growth', 'stability', 'essentials', 'rewards'];
@@ -21,28 +21,22 @@ export default function AnalyticsPage() {
     color: CATEGORY_COLORS[category],
   }));
 
-  const prediction = calculatePrediction(goal.totalAmount, totalAssets, history);
+  const prediction = calculatePrediction(0, totalAssets, history); // Goal removed
 
   return (
     <PageContainer>
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">数据分析</h1>
-          <p className="text-purple-100">洞察您的财富增长</p>
+          <p className="text-white-soft">洞察您的财富增长</p>
         </div>
 
-        {/* Goal Progress */}
+        {/* Total Assets */}
         <Card className="mb-6">
-          <h2 className="text-2xl font-bold mb-4">目标进度</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-gray-600">目标金额</p>
-              <p className="text-2xl font-bold">¥{goal.totalAmount.toFixed(2)}</p>
-            </div>
-            <div>
-              <p className="text-gray-600">当前资产</p>
-              <p className="text-2xl font-bold text-primary-500">¥{totalAssets.toFixed(2)}</p>
-            </div>
+          <h2 className="text-2xl font-bold mb-4">总资产</h2>
+          <div>
+            <p className="text-gray-400">当前资产</p>
+            <p className="text-4xl font-bold text-growth">¥{totalAssets.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           </div>
         </Card>
 
@@ -76,15 +70,15 @@ export default function AnalyticsPage() {
           <h2 className="text-2xl font-bold mb-4">目标预测</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center p-4 bg-gray-50 rounded-2xl">
-              <p className="text-gray-600 mb-2">预计月数</p>
+              <p className="text-gray-400 mb-2">预计月数</p>
               <p className="text-3xl font-bold text-primary-500">{prediction.monthsNeeded}</p>
             </div>
             <div className="text-center p-4 bg-gray-50 rounded-2xl">
-              <p className="text-gray-600 mb-2">预计达成日期</p>
+              <p className="text-gray-400 mb-2">预计达成日期</p>
               <p className="text-lg font-bold">{prediction.estimatedDate}</p>
             </div>
             <div className="text-center p-4 bg-gray-50 rounded-2xl">
-              <p className="text-gray-600 mb-2">月均增长</p>
+              <p className="text-gray-400 mb-2">月均增长</p>
               <p className="text-2xl font-bold text-green-500">¥{prediction.monthlyGrowthRate}</p>
             </div>
           </div>

@@ -1,33 +1,30 @@
 import { motion } from 'framer-motion';
-import clsx from 'clsx';
+import { TopNav } from './TopNav';
+import { BackgroundBeams } from '@/components/ui/background-beams';
+import { Spotlight } from '@/components/ui/spotlight';
+import React from 'react';
 
 interface PageContainerProps {
   children: React.ReactNode;
-  className?: string;
   gradient?: boolean;
 }
 
-const pageVariants = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -20 },
-};
-
-export function PageContainer({ children, className, gradient = true }: PageContainerProps) {
+export function PageContainer({ children, gradient = true }: PageContainerProps) {
   return (
-    <motion.div
-      variants={pageVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      transition={{ duration: 0.3 }}
-      className={clsx(
-        'min-h-screen p-4 md:p-8',
-        gradient && 'bg-gradient-to-br from-purple-600 to-purple-800',
-        className
+    <div className="min-h-screen bg-black-primary text-white font-sans selection:bg-gold-primary/30 relative overflow-hidden">
+      {!gradient && <BackgroundBeams />}
+      {gradient && (
+        <Spotlight
+          className="-top-40 left-0 md:left-60 md:-top-20"
+          fill="white"
+        />
       )}
-    >
-      {children}
-    </motion.div>
+
+      <TopNav />
+
+      <main className="relative z-10 pt-28 px-4 md:px-8 pb-12">
+        {children}
+      </main>
+    </div>
   );
 }

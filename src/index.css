@@ -1,12 +1,84 @@
 @import "tailwindcss";
 
 @theme {
-  --color-growth: #10B981;
-  --color-stability: #3B82F6;
-  --color-essentials: #F59E0B;
-  --color-rewards: #F9A8D4;
-  --color-primary-500: #667eea;
-  --color-primary-600: #764ba2;
+  /* Modern Fintech - Dark Base (subtle, not pure black) */
+  --color-black-primary: #030712; /* gray-950 */
+  --color-black-elevated: #111827; /* gray-900 */
+  --color-black-soft: #1F2937; /* gray-800 */
+  --color-black-border: #374151; /* gray-700 */
+
+  /* Primary Brand - Indigo (modern fintech) */
+  --color-indigo-50: #EEF2FF;
+  --color-indigo-100: #E0E7FF;
+  --color-indigo-500: #6366F1;
+  --color-indigo-600: #4F46E5;
+  --color-indigo-700: #4338CA;
+
+  /* Accent - Refined Gold (kept for premium feel) */
+  --color-gold-primary: #F59E0B; /* amber-500 */
+  --color-gold-light: #FEF3C7; /* amber-100 */
+  --color-gold-rich: #D97706; /* amber-600 */
+  --color-gold-deep: #B45309; /* amber-700 */
+
+  /* Neutral Grays (better contrast) */
+  --color-gray-50: #F9FAFB;
+  --color-gray-100: #F3F4F6;
+  --color-gray-200: #E5E7EB;
+  --color-gray-300: #D1D5DB;
+  --color-gray-400: #9CA3AF;
+  --color-gray-500: #6B7280;
+  --color-gray-600: #4B5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1F2937;
+  --color-gray-900: #111827;
+
+  /* White System */
+  --color-white: #FFFFFF;
+  --color-white-soft: #F9FAFB; /* gray-50 */
+
+  /* Investment Category Colors */
+  --color-growth: #10B981; /* emerald-500 - Growth/Stocks */
+  --color-growth-light: #34D399; /* emerald-400 */
+  --color-stability: #3B82F6; /* blue-500 - Stability/Bonds */
+  --color-stability-light: #60A5FA; /* blue-400 */
+  --color-special: #8B5CF6; /* violet-500 - Special Purpose */
+  --color-special-light: #A78BFA; /* violet-400 */
+
+  /* Education Framework Colors (for Welcome/Detail pages) */
+  --color-essentials: #F59E0B; /* amber-500 */
+  --color-essentials-light: #FBBF24; /* amber-400 */
+  --color-rewards: #EC4899; /* pink-500 */
+  --color-rewards-light: #F472B6; /* pink-400 */
+
+  /* Semantic Colors */
+  --color-success: #10B981; /* emerald-500 */
+  --color-warning: #F59E0B; /* amber-500 */
+  --color-error: #EF4444; /* red-500 */
+  --color-info: #3B82F6; /* blue-500 */
+
+  /* Aceternity UI Animations */
+  --animate-spotlight: spotlight 2s ease .75s 1 forwards;
+  --animate-shimmer: shimmer 2s linear infinite;
+
+  @keyframes spotlight {
+    0% {
+      opacity: 0;
+      transform: translate(-72%, -62%) scale(0.5);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(-50%, -40%) scale(1);
+    }
+  }
+
+  @keyframes shimmer {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }
 }
 
 :root {
@@ -14,32 +86,107 @@
     'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+
+  /* Font smoothing */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  background-color: var(--color-black-primary);
+  color: var(--color-white);
 }
 
 * {
   box-sizing: border-box;
 }
 
+/* Number formatting - tabular numbers for alignment */
+.amount, .percentage, .number {
+  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Currency formatting with gold color */
+.currency {
+  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', monospace;
+  color: var(--color-gold-primary);
+  font-weight: 600;
+}
+
 /* Custom gradient utilities for Tailwind v4 */
 @layer utilities {
-  .bg-gradient-primary {
-    background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* Gold Gradients */
+  .bg-gold-gradient {
+    background-image: linear-gradient(135deg, #FFD700 0%, #D4AF37 100%);
   }
+  .bg-gold-gradient-vertical {
+    background-image: linear-gradient(180deg, #FFD700 0%, #B8960F 100%);
+  }
+
+  /* Investment Category Gradients */
   .bg-gradient-growth {
     background-image: linear-gradient(135deg, #10B981 0%, #059669 100%);
   }
   .bg-gradient-stability {
     background-image: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
   }
+  .bg-gradient-special {
+    background-image: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+  }
+
+  /* Education Framework Gradients */
   .bg-gradient-essentials {
     background-image: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
   }
   .bg-gradient-rewards {
-    background-image: linear-gradient(135deg, #F9A8D4 0%, #F472B6 100%);
+    background-image: linear-gradient(135deg, #EC4899 0%, #DB2777 100%);
+  }
+
+  /* Brand Gradients */
+  .bg-indigo-gradient {
+    background-image: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+  }
+
+  /* Gold Glow Effects */
+  .glow-gold {
+    color: var(--color-gold-primary);
+    text-shadow:
+      0 0 10px rgba(212, 175, 55, 0.5),
+      0 0 20px rgba(212, 175, 55, 0.3),
+      0 0 30px rgba(212, 175, 55, 0.1);
+  }
+
+  .shadow-gold {
+    box-shadow: 0 4px 24px rgba(212, 175, 55, 0.08);
+  }
+
+  .shadow-gold-lg {
+    box-shadow: 0 8px 32px rgba(212, 175, 55, 0.15);
+  }
+
+  .icon-glow {
+    filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.6));
+  }
+
+  /* Border with gold accent */
+  .border-gold-subtle {
+    border: 1px solid rgba(212, 175, 55, 0.2);
+  }
+
+  .border-gold-medium {
+    border: 1px solid rgba(212, 175, 55, 0.4);
+  }
+}
+
+/* Accessibility - Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

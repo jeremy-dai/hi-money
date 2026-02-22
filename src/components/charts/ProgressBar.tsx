@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import clsx from 'clsx';
 
 interface ProgressBarProps {
   current: number;
@@ -10,35 +11,45 @@ interface ProgressBarProps {
 export function ProgressBar({
   current,
   target,
-  color = '#667eea',
+  color: _color,
   showPercentage = true,
 }: ProgressBarProps) {
   const percentage = target > 0 ? Math.min((current / target) * 100, 100) : 0;
+  const isComplete = percentage >= 100;
 
   return (
     <div className="w-full">
       <div className="flex justify-between items-center mb-2">
-        <span className="text-sm text-gray-600">当前进度</span>
+        <span className="text-sm text-gray-400">当前进度</span>
         {showPercentage && (
-          <span className="text-lg font-bold" style={{ color }}>
+          <span className="text-lg font-bold font-mono text-gold-primary">
             {percentage.toFixed(1)}%
           </span>
         )}
       </div>
 
-      <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden">
+      {/* Progress track */}
+      <div className="w-full h-2 bg-black-soft rounded-full overflow-hidden relative">
         <motion.div
-          className="h-full rounded-full"
-          style={{ background: color }}
+          className={clsx(
+            'h-full rounded-full bg-gold-gradient',
+            'shadow-gold',
+            isComplete && 'animate-pulse'
+          )}
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
           transition={{ duration: 1, ease: 'easeOut' }}
         />
       </div>
 
-      <div className="flex justify-between items-center mt-2 text-sm text-gray-600">
-        <span>¥{current.toFixed(2)}</span>
-        <span>¥{target.toFixed(2)}</span>
+      {/* Amount labels */}
+      <div className="flex justify-between items-center mt-2 text-sm font-mono">
+        <span className="text-gray-400">
+          ¥{current.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}
+        </span>
+        <span className="text-gray-400">
+          ¥{target.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}
+        </span>
       </div>
     </div>
   );

@@ -64,11 +64,11 @@ export default function InvestmentGuidancePage() {
   const ProductGrid = ({ products, bgColor }: { products: Product[]; bgColor: string }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
       {products.map((product, idx) => (
-        <div key={idx} className={`${bgColor} p-4 rounded-xl`}>
-          <div className="font-semibold text-sm mb-1">
+        <div key={idx} className={`${bgColor} p-4 rounded-xl border border-white/5`}>
+          <div className="font-semibold text-sm mb-1 text-white">
             {product.code} - {product.name}
           </div>
-          <div className="text-xs text-gray-600">
+          <div className="text-xs text-gray-400">
             {product.company} · {product.description}
           </div>
         </div>
@@ -85,10 +85,10 @@ export default function InvestmentGuidancePage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8 text-center"
         >
-          <Card className="bg-gradient-to-br from-green-50 to-blue-50">
+          <Card className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 border-indigo-500/30">
             <div className="text-5xl mb-3">🚀</div>
-            <h1 className="text-3xl font-bold mb-2 text-gray-800">新手投资行动指南</h1>
-            <p className="text-gray-600">3步开始定投，让财富自动增长</p>
+            <h1 className="text-3xl font-bold mb-2 text-white">新手投资行动指南</h1>
+            <p className="text-gray-400">3步开始定投，让财富自动增长</p>
           </Card>
         </motion.div>
 
@@ -99,18 +99,18 @@ export default function InvestmentGuidancePage() {
           transition={{ delay: 0.1 }}
           className="mb-6"
         >
-          <Card className="border-l-4 border-growth">
+          <Card className="border-l-4 border-growth bg-black-elevated">
             <div className="flex items-start gap-4 mb-4">
               <div className="text-4xl">✅</div>
               <div>
                 <h2 className="text-2xl font-bold text-growth mb-2">
                   第一步：开通证券账户
                 </h2>
-                <p className="text-sm text-gray-600">10分钟完成</p>
+                <p className="text-sm text-gray-400">10分钟完成</p>
               </div>
             </div>
 
-            <p className="text-gray-700 mb-4">
+            <p className="text-gray-300 mb-4">
               推荐券商：天天基金、支付宝（蚂蚁财富）、微信理财通、华泰证券、东方财富
             </p>
 
@@ -121,7 +121,7 @@ export default function InvestmentGuidancePage() {
                   href={platform.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block p-3 bg-growth/10 hover:bg-growth/20 rounded-lg text-center transition-colors"
+                  className="block p-3 bg-growth/10 hover:bg-growth/20 rounded-lg text-center transition-colors border border-growth/20"
                 >
                   <div className="font-semibold text-growth">
                     {platform.name}
@@ -131,7 +131,7 @@ export default function InvestmentGuidancePage() {
               ))}
             </div>
 
-            <div className="bg-blue-50 p-3 rounded-lg text-sm text-gray-700">
+            <div className="bg-gold-primary/10 p-3 rounded-lg text-sm text-gray-300 border border-gold-primary/20">
               💡 <strong>准备材料：</strong>身份证 + 银行卡 + 手机号，按APP指引完成实名认证即可
             </div>
           </Card>
@@ -144,48 +144,48 @@ export default function InvestmentGuidancePage() {
           transition={{ delay: 0.2 }}
           className="mb-6"
         >
-          <Card className="border-l-4 border-stability">
+          <Card className="border-l-4 border-stability bg-black-elevated">
             <div className="flex items-start gap-4 mb-4">
               <div className="text-4xl">✅</div>
               <div>
                 <h2 className="text-2xl font-bold text-stability mb-2">
                   第二步：选择投资产品
                 </h2>
-                <p className="text-sm text-gray-600">根据面板建议配置</p>
+                <p className="text-sm text-gray-400">根据面板建议配置</p>
               </div>
             </div>
 
             {/* A-Stock Products */}
             <div className="mb-6">
-              <h3 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+              <h3 className="font-bold text-white mb-2 flex items-center gap-2">
                 <span className="text-xl">📊</span>
                 A股指数（场内ETF - 需开通股票账户）
               </h3>
-              <ProductGrid products={aStockProducts} bgColor="bg-green-50" />
-              <p className="text-xs text-gray-600 mt-2">
+              <ProductGrid products={aStockProducts} bgColor="bg-emerald-900/20" />
+              <p className="text-xs text-gray-400 mt-2">
                 ⚠️ 场内ETF需要在股票交易时间（工作日9:30-15:00）通过证券账户购买
               </p>
             </div>
 
             {/* US-Stock Products */}
             <div className="mb-6">
-              <h3 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+              <h3 className="font-bold text-white mb-2 flex items-center gap-2">
                 <span className="text-xl">🌍</span>
                 美股指数（QDII - 场内/场外均可）
               </h3>
-              <ProductGrid products={usStockProducts} bgColor="bg-blue-50" />
-              <p className="text-xs text-orange-600 mt-2">
+              <ProductGrid products={usStockProducts} bgColor="bg-indigo-900/20" />
+              <p className="text-xs text-orange-400 mt-2">
                 ⚠️ 买入前必须检查溢价率！溢价&gt;3%建议场外申购或等待溢价降低
               </p>
             </div>
 
             {/* Gold Products */}
             <div>
-              <h3 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+              <h3 className="font-bold text-white mb-2 flex items-center gap-2">
                 <span className="text-xl">🏆</span>
                 黄金ETF（避险资产）
               </h3>
-              <ProductGrid products={goldProducts} bgColor="bg-yellow-50" />
+              <ProductGrid products={goldProducts} bgColor="bg-amber-900/20" />
             </div>
           </Card>
         </motion.div>
@@ -197,14 +197,14 @@ export default function InvestmentGuidancePage() {
           transition={{ delay: 0.3 }}
           className="mb-6"
         >
-          <Card className="border-l-4 border-green-500">
+          <Card className="border-l-4 border-green-500 bg-black-elevated">
             <div className="flex items-start gap-4 mb-4">
               <div className="text-4xl">✅</div>
               <div>
-                <h2 className="text-2xl font-bold text-green-600 mb-2">
+                <h2 className="text-2xl font-bold text-green-500 mb-2">
                   第三步：设置自动定投
                 </h2>
-                <p className="text-sm text-gray-600">最重要的一步！</p>
+                <p className="text-sm text-gray-400">最重要的一步！</p>
               </div>
             </div>
 
@@ -212,24 +212,24 @@ export default function InvestmentGuidancePage() {
               <div className="flex items-start gap-2">
                 <span className="text-lg">📅</span>
                 <div>
-                  <strong className="text-gray-800">定投日期：</strong>
-                  <span className="text-gray-700">发薪日后1-3天（例如每月5号或10号）</span>
+                  <strong className="text-white">定投日期：</strong>
+                  <span className="text-gray-300">发薪日后1-3天（例如每月5号或10号）</span>
                 </div>
               </div>
 
               <div className="flex items-start gap-2">
                 <span className="text-lg">💰</span>
                 <div>
-                  <strong className="text-gray-800">定投金额：</strong>
-                  <span className="text-gray-700">月收入的25%（增长投资部分）</span>
+                  <strong className="text-white">定投金额：</strong>
+                  <span className="text-gray-300">月收入的25%（增长投资部分）</span>
                 </div>
               </div>
 
               <div className="flex items-start gap-2">
                 <span className="text-lg">📊</span>
                 <div>
-                  <strong className="text-gray-800">资产配置建议：</strong>
-                  <div className="mt-2 ml-4 space-y-1 text-sm text-gray-700">
+                  <strong className="text-white">资产配置建议：</strong>
+                  <div className="mt-2 ml-4 space-y-1 text-sm text-gray-300">
                     <div>• 沪深300：30% （稳健）</div>
                     <div>• 中证500：20% （成长）</div>
                     <div>• 标普500：25% （美股大盘）</div>
@@ -240,9 +240,9 @@ export default function InvestmentGuidancePage() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
-              <div className="font-semibold text-green-700 mb-2">💡 定投设置小贴士</div>
-              <div className="text-sm text-gray-700 space-y-1">
+            <div className="bg-emerald-900/20 p-4 rounded-lg border border-emerald-500/20">
+              <div className="font-semibold text-emerald-400 mb-2">💡 定投设置小贴士</div>
+              <div className="text-sm text-gray-300 space-y-1">
                 <div>1️⃣ 场内ETF：通过证券APP设置智能定投（自动扣款买入）</div>
                 <div>2️⃣ 场外基金：在天天基金/支付宝设置定投计划</div>
                 <div>3️⃣ 根据估值面板每月调整金额（加倍/正常/减半）</div>
@@ -260,16 +260,16 @@ export default function InvestmentGuidancePage() {
           className="mb-8"
         >
           <Card>
-            <h3 className="text-xl font-bold mb-4 text-gray-800">❓ 新手常见问题</h3>
+            <h3 className="text-xl font-bold mb-4 text-white">❓ 新手常见问题</h3>
             <div className="space-y-3">
               {faqs.map((faq, idx) => (
                 <div
                   key={idx}
-                  className="bg-gray-50 rounded-lg overflow-hidden"
+                  className="bg-black-soft rounded-lg overflow-hidden border border-white/5"
                 >
                   <button
                     onClick={() => setExpandedFaq(expandedFaq === idx ? null : idx)}
-                    className="w-full text-left p-4 font-semibold text-growth hover:bg-gray-100 transition-colors flex items-center justify-between"
+                    className="w-full text-left p-4 font-semibold text-growth hover:bg-white/5 transition-colors flex items-center justify-between"
                   >
                     <span>{faq.question}</span>
                     <span className="text-xl">{expandedFaq === idx ? '−' : '+'}</span>
@@ -279,7 +279,7 @@ export default function InvestmentGuidancePage() {
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      className="px-4 pb-4 text-sm text-gray-700 whitespace-pre-line border-l-2 border-growth ml-4"
+                      className="px-4 pb-4 text-sm text-gray-300 whitespace-pre-line border-l-2 border-growth ml-4"
                     >
                       {faq.answer}
                     </motion.div>
@@ -296,7 +296,7 @@ export default function InvestmentGuidancePage() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
-          <Button onClick={() => navigate(-1)} variant="outline" className="w-full">
+          <Button onClick={() => navigate(-1)} variant="secondary" className="w-full">
             返回仪表盘
           </Button>
         </motion.div>
