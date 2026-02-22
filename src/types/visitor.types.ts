@@ -24,24 +24,3 @@ export interface DemoScenario {
   mockAllocation?: Allocation;
   mockMonthlyIncome?: number;
 }
-
-/**
- * Visitor session state
- * Tracks the current visitor mode session
- */
-export interface VisitorSession {
-  scenario: DemoScenario;
-  activatedAt: string;
-  currentSlide?: number; // For presentation mode
-}
-
-/**
- * Presentation slide data
- */
-export interface PresentationSlide {
-  id: string;
-  title: string;
-  content: React.ReactNode;
-  type: 'profile' | 'allocation' | 'insurance' | 'retirement' | 'action';
-}
-

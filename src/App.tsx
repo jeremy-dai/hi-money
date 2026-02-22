@@ -28,11 +28,6 @@ function LoadingSpinner() {
   );
 }
 
-// Protected route wrapper - no longer needed, all routes are public
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
-}
-
 function App() {
   return (
     <BrowserRouter>
@@ -45,63 +40,13 @@ function App() {
           <Route path={ROUTES.ONBOARDING} element={<OnboardingPage />} />
           <Route path={ROUTES.DETAIL} element={<DetailPage />} />
 
-          {/* Protected routes - Require setup completion */}
-          <Route
-            path={ROUTES.DASHBOARD}
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path={ROUTES.ACCOUNTS}
-            element={
-              <ProtectedRoute>
-                <AccountsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path={ROUTES.ALLOCATE_INCOME}
-            element={
-              <ProtectedRoute>
-                <AllocateIncomePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path={ROUTES.ANALYTICS}
-            element={
-              <ProtectedRoute>
-                <AnalyticsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path={ROUTES.INVESTMENT_GUIDANCE}
-            element={
-              <ProtectedRoute>
-                <InvestmentGuidancePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path={ROUTES.INSURANCE_PLANNING}
-            element={
-              <ProtectedRoute>
-                <InsurancePlanningPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path={ROUTES.RETIREMENT_PLANNING}
-            element={
-              <ProtectedRoute>
-                <RetirementPlanningPage />
-              </ProtectedRoute>
-            }
-          />
+          <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
+          <Route path={ROUTES.ACCOUNTS} element={<AccountsPage />} />
+          <Route path={ROUTES.ALLOCATE_INCOME} element={<AllocateIncomePage />} />
+          <Route path={ROUTES.ANALYTICS} element={<AnalyticsPage />} />
+          <Route path={ROUTES.INVESTMENT_GUIDANCE} element={<InvestmentGuidancePage />} />
+          <Route path={ROUTES.INSURANCE_PLANNING} element={<InsurancePlanningPage />} />
+          <Route path={ROUTES.RETIREMENT_PLANNING} element={<RetirementPlanningPage />} />
           <Route
             path={ROUTES.VISITOR}
             element={<VisitorModePage />}

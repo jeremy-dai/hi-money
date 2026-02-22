@@ -4,10 +4,8 @@ export type {
   EducationCategoryType,
   Allocation,
   InvestmentAllocation,
-  Goal,
   Account,
   Accounts,
-  InvestmentAccounts,
   HistoryRecord,
   AppState,
 } from './store.types';

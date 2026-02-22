@@ -37,7 +37,7 @@
 - **State Management**: Zustand with localStorage persistence
 - **Styling**: Tailwind CSS v4 with custom design system (Dark Mode Optimized)
 - **Charts**: Recharts (responsive, animated)
-- **Routing**: React Router v6 with protected routes
+- **Routing**: React Router v6 with lazy-loaded pages
 - **Animations**: Framer Motion
 - **UI UX**: Refined Dark Mode experience with optimized contrast and spotlight effects
 
@@ -90,52 +90,72 @@ npm run preview
 \`\`\`
 src/
 ├── main.tsx                    # 入口文件
-├── App.tsx                     # 路由配置与Protected Routes
+├── App.tsx                     # 路由配置（lazy-loaded pages）
 ├── components/
 │   ├── common/                 # 通用组件 (Button, Card, Input, Modal)
 │   ├── charts/                 # 图表组件 (PieChart, TrendChart, ProgressBar)
 │   ├── wealth/                 # 财富管理组件 (WealthCard, AllocationSlider, etc)
-│   └── layout/                 # 布局组件 (PageContainer, Header)
-├── pages/                      # 9个页面组件
+│   ├── visitor/                # 访客模式组件 (PresentationMode)
+│   └── layout/                 # 布局组件 (PageContainer, TopNav)
+├── pages/
 │   ├── WelcomePage.tsx         # 欢迎引导页
-│   ├── IncomePage.tsx          # 月收入输入
-│   ├── AllocationPage.tsx      # 比例自定义（含自动调整算法）
-│   ├── GoalPage.tsx            # 目标设定
+│   ├── LoginPage.tsx           # 登录页
+│   ├── OnboardingPage.tsx      # 用户画像引导
 │   ├── DashboardPage.tsx       # 主仪表盘
 │   ├── DetailPage.tsx          # 类别详情教育页
 │   ├── AccountsPage.tsx        # 多账户管理
 │   ├── AllocateIncomePage.tsx  # 智能收入分配
-│   └── AnalyticsPage.tsx       # 数据分析预测
+│   ├── AnalyticsPage.tsx       # 数据分析预测
+│   ├── InvestmentGuidancePage  # 新手投资行动指南
+│   ├── InsurancePlanningPage   # 保险规划
+│   ├── RetirementPlanningPage  # 退休规划
+│   └── VisitorModePage.tsx     # 访客演示模式
 ├── store/
-│   └── useAppStore.ts          # Zustand全局状态 (替代WeChat globalData)
+│   └── useAppStore.ts          # Zustand全局状态
 ├── algorithms/
-│   ├── autoAdjustSliders.ts    # 滑块自动调整算法（确保总和100%）
 │   ├── smartAllocation.ts      # 智能分配算法（偏差优化）
-│   └── prediction.ts           # 目标预测算法（基于历史增长率）
+│   ├── recommendAllocation.ts  # 推荐配置算法
+│   ├── insuranceCalculator.ts  # 保险缺口计算
+│   ├── retirementCalculator.ts # 退休缺口计算
+│   └── prediction.ts           # 目标预测算法
 ├── utils/
-│   └── constants.ts            # 常量配置（颜色、路由、类别名称）
-├── types/
-│   └── store.types.ts          # TypeScript类型定义
+│   ├── constants.ts            # 常量配置（颜色、路由、类别名称）
+│   └── icons.tsx               # 图标组件映射
+├── types/                      # TypeScript类型定义
+│   ├── store.types.ts
+│   ├── profile.types.ts
+│   ├── allocation.types.ts
+│   ├── insurance.types.ts
+│   ├── retirement.types.ts
+│   ├── visitor.types.ts
+│   └── index.ts
+├── lib/
+│   └── format.ts               # 格式化工具
 └── data/
     └── educationContent.ts     # 教育内容数据
 \`\`\`
 
 ## 🎯 核心算法
 
-### 1. 滑块自动调整算法
-**文件**: src/algorithms/autoAdjustSliders.ts
-
-当用户拖动任意类别滑块时，其他三个滑块按比例自动调整，确保四类别总和始终为100%。
-
-### 2. 智能配置算法
+### 1. 智能配置算法
 **文件**: src/algorithms/smartAllocation.ts
 
 分析当前各类别偏差（实际百分比 - 目标百分比），优先分配资金到under-allocated类别，加速达成目标比例。
 
-### 3. 目标预测算法
+### 2. 目标预测算法
 **文件**: src/algorithms/prediction.ts
 
 基于历史记录计算月均增长率，预测达成财富目标所需月数和预计日期。
+
+### 3. 保险缺口计算
+**文件**: src/algorithms/insuranceCalculator.ts
+
+根据用户画像和现有保险情况，计算保障缺口并给出建议。
+
+### 4. 退休缺口计算
+**文件**: src/algorithms/retirementCalculator.ts
+
+基于退休目标和当前储蓄，计算退休资金缺口和所需月供。
 
 ## 🎨 设计系统
 
@@ -165,36 +185,12 @@ src/
 - 网格自适应: WealthCards 1列(mobile) → 2列(tablet+)
 - 所有交互保持触摸友好 (≥44px点击区域)
 
-## 🔐 Protected Routes
-
-使用\`hasCompletedSetup\`状态控制路由访问：
-- 未完成设置 → 自动重定向到Welcome页
-- 已完成设置 → 可访问Dashboard及所有功能页
-
 ## 📊 状态管理
 
-使用Zustand with persist middleware替代WeChat的\`wx.setStorageSync/getStorageSync\`：
+使用Zustand with persist middleware：
 - 自动localStorage持久化
 - Computed getters (getCategoryTotal, getTotalAssets, etc)
 - Actions for all state mutations
-
-## 🚀 WeChat Mini App → React Web 迁移对照表
-
-| WeChat API | React Equivalent |
-|------------|------------------|
-| \`wx.navigateTo()\` | \`navigate('/path')\` |
-| \`wx.redirectTo()\` | \`navigate('/path', { replace: true })\` |
-| \`wx.navigateBack()\` | \`navigate(-1)\` |
-| \`wx.setStorageSync()\` | Zustand persist middleware |
-| \`wx.getStorageSync()\` | Zustand persist middleware |
-| \`wx.showToast()\` | Browser alert |
-| \`wx.showModal()\` | Browser confirm |
-| \`wx.createCanvasContext()\` | Recharts |
-| \`<view>\` | \`<div>\` |
-| \`<slider>\` | \`<input type="range">\` |
-| \`Page()\` | React function component |
-| \`getApp().globalData\` | \`useAppStore()\` hook |
-
 
 ## 🎯 为什么是25-15-50-10？
 

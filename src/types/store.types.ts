@@ -23,22 +23,9 @@ export interface Allocation {
   rewards: number; // For education framework (0 if not used)
 }
 
-export interface Goal {
-  name: string;
-  totalAmount: number;
-  createdAt: string;
-}
-
 export interface Account {
   name: string;
   amount: number;
-}
-
-// Investment accounts (dashboard)
-export interface InvestmentAccounts {
-  growth: Account[];
-  stability: Account[];
-  special: Account[];
 }
 
 // Combined structure (includes all categories for flexibility)
@@ -89,7 +76,6 @@ export interface AppState {
   // Computed getters
   getCategoryTotal: (category: CategoryType) => number;
   getTotalAssets: () => number;
-  getCategoryGoal: (category: CategoryType) => number;
   getCategoryPercentage: (category: CategoryType) => number;
   getCategoryDeviation: (category: CategoryType) => number;
 

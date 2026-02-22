@@ -53,12 +53,6 @@ export const useAppStore = create<AppState>()(
         );
       },
 
-      getCategoryGoal: (category: CategoryType) => {
-        const { allocation } = get();
-        const percentage = allocation[category] || 0;
-        return (0 * percentage) / 100; // Deprecated: goals removed
-      },
-
       getCategoryPercentage: (category: CategoryType) => {
         const { getCategoryTotal, getTotalAssets } = get();
         const total = getTotalAssets();
