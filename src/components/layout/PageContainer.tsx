@@ -1,4 +1,3 @@
-import { TopNav } from './TopNav';
 import { BackgroundBeams } from '@/components/ui/background-beams';
 import { Spotlight } from '@/components/ui/spotlight';
 import React from 'react';
@@ -19,9 +18,7 @@ export function PageContainer({ children, gradient = true }: PageContainerProps)
         />
       )}
 
-      <TopNav />
-
-      <main className="relative z-10 pt-28 px-4 md:px-8 pb-12">
+      <main className="relative z-10 pt-24 px-4 md:px-8 pb-12">
         {children}
       </main>
     </div>

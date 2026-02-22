@@ -25,57 +25,54 @@ export function TopNav() {
     {
       name: '仪表盘',
       link: ROUTES.DASHBOARD,
-      icon: <Home className="h-4 w-4 text-neutral-500 dark:text-white" />,
+      icon: <Home className="h-4 w-4" />,
     },
     {
       name: '账户',
       link: ROUTES.ACCOUNTS,
-      icon: <Wallet className="h-4 w-4 text-neutral-500 dark:text-white" />,
+      icon: <Wallet className="h-4 w-4" />,
     },
     {
       name: '分析',
       link: ROUTES.ANALYTICS,
-      icon: <BarChart3 className="h-4 w-4 text-neutral-500 dark:text-white" />,
+      icon: <BarChart3 className="h-4 w-4" />,
     },
     {
       name: '投资指南',
       link: ROUTES.INVESTMENT_GUIDANCE,
-      icon: <BookOpen className="h-4 w-4 text-neutral-500 dark:text-white" />,
+      icon: <BookOpen className="h-4 w-4" />,
     },
   ];
 
   return (
-    <div className="relative w-full">
-      <FloatingNav 
-        navItems={navItems}
-        className="bg-black-elevated/80 backdrop-blur-md border-gold-primary/20"
-        startContent={
-          <div 
-            onClick={() => navigate(ROUTES.DASHBOARD)}
-            className="flex items-center gap-2 cursor-pointer mr-2"
-          >
-             <div className="text-lg font-bold bg-gradient-to-r from-gold-primary to-gold-secondary bg-clip-text text-transparent">
-              Hi Money
-            </div>
-            {totalAssets > 0 && (
-              <span className="hidden md:inline text-xs text-gray-400 hover:text-gold-primary transition-colors font-mono">
-                ¥{(totalAssets / 10000).toFixed(1)}万
-              </span>
-            )}
+    <FloatingNav
+      navItems={navItems}
+      startContent={
+        <div
+          onClick={() => navigate(ROUTES.DASHBOARD)}
+          className="flex items-center gap-2 cursor-pointer flex-shrink-0"
+        >
+          <div className="text-lg font-bold bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">
+            Hi Money
           </div>
-        }
-        endContent={
-          isVisitorMode ? (
-            <button
-              onClick={handleExitVisitorMode}
-              className="flex items-center gap-1 px-3 py-1 rounded-full text-xs text-amber-400 hover:text-amber-300 hover:bg-amber-400/10 transition-all border border-amber-400/30 ml-2"
-            >
-              <LogOut size={12} strokeWidth={2} />
-              <span className="hidden md:inline font-medium">退出演示</span>
-            </button>
-          ) : undefined
-        }
-      />
-    </div>
+          {totalAssets > 0 && (
+            <span className="hidden md:inline text-xs text-gray-500 hover:text-amber-400 transition-colors font-mono">
+              ¥{(totalAssets / 10000).toFixed(1)}万
+            </span>
+          )}
+        </div>
+      }
+      endContent={
+        isVisitorMode ? (
+          <button
+            onClick={handleExitVisitorMode}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-amber-400 hover:text-amber-300 hover:bg-amber-400/10 transition-all border border-amber-400/20 flex-shrink-0"
+          >
+            <LogOut size={14} strokeWidth={2} />
+            <span className="hidden md:inline font-medium">退出演示</span>
+          </button>
+        ) : undefined
+      }
+    />
   );
 }
