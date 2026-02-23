@@ -6,9 +6,9 @@ import {
   Target,
   type LucideIcon,
 } from 'lucide-react';
-import type { CategoryType } from '../types';
+import type { InvestmentCategoryType } from '../types';
 
-export const CATEGORY_ICON_COMPONENTS: Record<CategoryType, LucideIcon> = {
+export const CATEGORY_ICON_COMPONENTS: Record<InvestmentCategoryType | 'essentials' | 'rewards', LucideIcon> = {
   growth: TrendingUp,
   stability: Shield,
   special: Target,
@@ -29,7 +29,7 @@ export function CategoryIcon({
   size = 24,
   strokeWidth = 2,
   style,
-}: IconProps & { type: CategoryType }) {
+}: IconProps & { type: InvestmentCategoryType | 'essentials' | 'rewards' }) {
   const Icon = CATEGORY_ICON_COMPONENTS[type];
   return <Icon className={className} size={size} strokeWidth={strokeWidth} style={style} />;
 }

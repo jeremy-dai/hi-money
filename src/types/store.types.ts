@@ -1,26 +1,24 @@
-// Investment categories (tracked on dashboard)
+import type { UserProfile } from './profile.types';
+import type { AllocationRecommendation } from './allocation.types';
+import type { InsurancePolicy } from './insurance.types';
+import type { WorkspaceSettings } from './settings.types';
+
+// ---------------------------------------------------------------------------
+// Workspace mode
+// ---------------------------------------------------------------------------
+export type WorkspaceMode = 'PERSONAL' | 'EXAMPLE' | 'SANDBOX';
+
+// ---------------------------------------------------------------------------
+// Core data primitives
+// ---------------------------------------------------------------------------
 export type InvestmentCategoryType = 'growth' | 'stability' | 'special';
 
-// Education framework categories (for welcome/detail pages)
-export type EducationCategoryType = 'growth' | 'stability' | 'essentials' | 'rewards';
-
-// All categories combined
-export type CategoryType = InvestmentCategoryType | EducationCategoryType;
-
-// Investment allocation (dashboard tracking)
-export interface InvestmentAllocation {
-  growth: number;
-  stability: number;
-  special: number;
-}
-
-// Allocation - includes all 5 categories (set unused ones to 0)
+/** Income allocation targets (the 25-15-50-10 framework) */
 export interface Allocation {
   growth: number;
   stability: number;
-  special: number; // For investment tracking (0 if not used)
-  essentials: number; // For education framework (0 if not used)
-  rewards: number; // For education framework (0 if not used)
+  essentials: number;
+  rewards: number;
 }
 
 export interface Account {
@@ -28,79 +26,97 @@ export interface Account {
   amount: number;
 }
 
-// Combined structure (includes all categories for flexibility)
+/** Accounts only hold ASSET categories (no spending categories) */
 export interface Accounts {
   growth: Account[];
   stability: Account[];
   special: Account[];
-  essentials: Account[];
-  rewards: Account[];
 }
 
+/** Monthly spending record */
+export interface SpendingRecord {
+  month: string;   // "2025-01" format
+  amount: number;
+  note?: string;
+}
+
+/**
+ * History snapshot — captures the FULL state at a point in time
+ * enabling time-travel visualization of every subcategory
+ */
 export interface HistoryRecord {
   date: string;
   type: 'initial' | 'income' | 'update';
   totalAmount: number;
-  snapshot: {
-    growth: number;
-    stability: number;
-    essentials: number;
-    rewards: number;
-  };
   income?: number;
-  allocation?: Allocation;
+  snapshot: {
+    accounts: Accounts;
+    policies: InsurancePolicy[];
+    monthlyIncome: number;
+    allocation: Allocation;
+  };
 }
 
-// Import profile types (using type-only import to avoid circular dependency)
-import type { UserProfile, InsuranceProfile, RetirementProfile } from './profile.types';
-import type { AllocationRecommendation } from './allocation.types';
-import type { DemoScenario } from './visitor.types';
-import type { InsuranceGapResult } from './insurance.types';
-import type { RetirementGapResult } from './retirement.types';
-
-export interface AppState {
-  // State
+// ---------------------------------------------------------------------------
+// ProfileData — the unit of isolation per workspace
+// ---------------------------------------------------------------------------
+export interface ProfileData {
   monthlyIncome: number;
   allocation: Allocation;
-  isAuthenticated: boolean; // Whether user is logged in (enables AI features)
   accounts: Accounts;
   history: HistoryRecord[];
-
-  // NEW: Profile state
+  spending: SpendingRecord[];
   userProfile: UserProfile | null;
-  insuranceProfile: InsuranceProfile | null;
-  retirementProfile: RetirementProfile | null;
-  isVisitorMode: boolean;
-  visitorScenario: DemoScenario | null;
+  policies: InsurancePolicy[];
+  settings: WorkspaceSettings | null;
+}
 
-  // Computed getters
-  getCategoryTotal: (category: CategoryType) => number;
+// ---------------------------------------------------------------------------
+// AppState — the full Zustand store shape
+// ---------------------------------------------------------------------------
+export interface AppState {
+  // Workspace
+  activeMode: WorkspaceMode;
+  activeExampleId: string | null;
+  personalData: ProfileData;
+  sandboxData: ProfileData | null;
+  isAuthenticated: boolean;
+
+  // Getters (read from getCurrentData())
+  getCurrentData: () => ProfileData;
+  getCategoryTotal: (category: InvestmentCategoryType) => number;
   getTotalAssets: () => number;
-  getCategoryPercentage: (category: CategoryType) => number;
-  getCategoryDeviation: (category: CategoryType) => number;
-
-  // NEW: Profile getters
+  getCategoryPercentage: (category: InvestmentCategoryType) => number;
+  getCategoryDeviation: (category: InvestmentCategoryType) => number;
+  getTotalCoverage: () => number;
+  getRiskLeverageRatio: () => number;
+  getMA3Spending: () => number;
+  getTargetAllocation: () => Allocation;
   getRecommendedAllocation: () => AllocationRecommendation | null;
-  getInsuranceGap: () => InsuranceGapResult | null;
-  getRetirementGap: () => RetirementGapResult | null;
 
-  // Actions
+  // Workspace actions
+  switchMode: (mode: WorkspaceMode, exampleId?: string) => void;
+  createSandbox: (base?: Partial<ProfileData>) => void;
+  clearSandbox: () => void;
+  loadPersonalData: (data: ProfileData) => void;
+
+  // Data mutations
   setMonthlyIncome: (income: number) => void;
   setAllocation: (allocation: Allocation) => void;
   setAuthenticated: (isAuthenticated: boolean) => void;
-  updateAccounts: (accounts: Accounts) => void;
-  addAccount: (category: CategoryType, account: Account) => void;
-  updateAccountAmount: (category: CategoryType, index: number, amount: number) => void;
-  deleteAccount: (category: CategoryType, index: number) => void;
-  addHistory: (type: HistoryRecord['type'], income?: number, allocation?: Allocation) => void;
-  resetAll: () => void;
-
-  // NEW: Profile actions
+  addAccount: (category: InvestmentCategoryType, account: Account) => void;
+  updateAccountAmount: (category: InvestmentCategoryType, index: number, amount: number) => void;
+  deleteAccount: (category: InvestmentCategoryType, index: number) => void;
+  addHistory: (type: HistoryRecord['type'], income?: number) => void;
+  addSpending: (record: SpendingRecord) => void;
+  updateSpending: (month: string, updates: Partial<SpendingRecord>) => void;
+  deleteSpending: (month: string) => void;
   setUserProfile: (profile: UserProfile) => void;
   updateUserProfile: (updates: Partial<UserProfile>) => void;
-  setInsuranceProfile: (profile: InsuranceProfile) => void;
-  setRetirementProfile: (profile: RetirementProfile) => void;
+  addPolicy: (policy: InsurancePolicy) => void;
+  updatePolicy: (id: string, updates: Partial<InsurancePolicy>) => void;
+  deletePolicy: (id: string) => void;
+  updateSettings: (settings: Partial<WorkspaceSettings>) => void;
+  resetAll: () => void;
   applyRecommendedAllocation: () => void;
-  activateVisitorMode: (scenario: DemoScenario) => void;
-  deactivateVisitorMode: () => void;
 }

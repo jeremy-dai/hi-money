@@ -1,48 +1,34 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Wallet, BarChart3, BookOpen, LogOut } from 'lucide-react';
+import { LayoutDashboard, TrendingDown, Landmark, Settings2 } from 'lucide-react';
 import { ROUTES } from '../../utils/constants';
 import { useAppStore } from '../../store/useAppStore';
 import { FloatingNav } from '@/components/ui/floating-nav';
+import { EXAMPLE_PROFILE_METADATA } from '../../data/exampleProfiles';
 
 export function TopNav() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isVisitorMode, deactivateVisitorMode, getTotalAssets } = useAppStore();
+  const { activeMode, activeExampleId, getTotalAssets } = useAppStore();
 
-  const hideNavPaths = [ROUTES.WELCOME, ROUTES.LOGIN, ROUTES.ONBOARDING, ROUTES.VISITOR, '/visitor/presentation'];
-  if (hideNavPaths.includes(location.pathname)) {
-    return null;
-  }
-
-  const handleExitVisitorMode = () => {
-    deactivateVisitorMode();
-    navigate(ROUTES.WELCOME);
-  };
+  const hideNavPaths = [ROUTES.WELCOME, ROUTES.LOGIN, ROUTES.ONBOARDING];
+  if (hideNavPaths.includes(location.pathname as '/')) return null;
 
   const totalAssets = getTotalAssets();
 
   const navItems = [
-    {
-      name: '仪表盘',
-      link: ROUTES.DASHBOARD,
-      icon: <Home className="h-4 w-4" />,
-    },
-    {
-      name: '账户',
-      link: ROUTES.ACCOUNTS,
-      icon: <Wallet className="h-4 w-4" />,
-    },
-    {
-      name: '分析',
-      link: ROUTES.ANALYTICS,
-      icon: <BarChart3 className="h-4 w-4" />,
-    },
-    {
-      name: '投资指南',
-      link: ROUTES.INVESTMENT_GUIDANCE,
-      icon: <BookOpen className="h-4 w-4" />,
-    },
+    { name: '看板', link: ROUTES.DASHBOARD, icon: <LayoutDashboard className="h-4 w-4" /> },
+    { name: '支出', link: ROUTES.SPENDING, icon: <TrendingDown className="h-4 w-4" /> },
+    { name: '资产', link: ROUTES.ASSETS, icon: <Landmark className="h-4 w-4" /> },
+    { name: '设置', link: ROUTES.SETTINGS, icon: <Settings2 className="h-4 w-4" /> },
   ];
+
+  // Workspace mode indicator for nav
+  const modeLabel =
+    activeMode === 'SANDBOX'
+      ? '沙盒'
+      : activeMode === 'EXAMPLE'
+      ? (EXAMPLE_PROFILE_METADATA.find(m => m.id === activeExampleId)?.name?.split('（')[0] ?? '案例')
+      : null;
 
   return (
     <FloatingNav
@@ -63,14 +49,16 @@ export function TopNav() {
         </div>
       }
       endContent={
-        isVisitorMode ? (
-          <button
-            onClick={handleExitVisitorMode}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-amber-400 hover:text-amber-300 hover:bg-amber-400/10 transition-all border border-amber-400/20 flex-shrink-0"
+        modeLabel ? (
+          <span
+            className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${
+              activeMode === 'SANDBOX'
+                ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+            }`}
           >
-            <LogOut size={14} strokeWidth={2} />
-            <span className="hidden md:inline font-medium">退出演示</span>
-          </button>
+            {modeLabel}
+          </span>
         ) : undefined
       }
     />
