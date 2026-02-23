@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   motion,
   AnimatePresence,
@@ -29,6 +29,11 @@ export const FloatingNav = ({
   const location = useLocation();
 
   const [visible, setVisible] = useState(true);
+
+  // Reset visibility when route changes
+  useEffect(() => {
+    setVisible(true);
+  }, [location.pathname]);
 
   useMotionValueEvent(scrollYProgress, "change", (current) => {
     if (typeof current === "number") {

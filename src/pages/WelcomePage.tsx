@@ -1,8 +1,6 @@
 
 import { useNavigate } from 'react-router-dom';
 import {
-  DollarSign,
-  Target,
   BarChart3,
   ArrowRight,
   ShieldCheck,

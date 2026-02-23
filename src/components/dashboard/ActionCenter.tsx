@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ArrowRight, AlertCircle, Info, CheckCircle2 } from 'lucide-react';
 import type { ActionItem } from '../../algorithms/spendingAnalytics';
 
@@ -31,8 +31,6 @@ const PRIORITY_LABELS: Record<ActionItem['priority'], string> = {
 };
 
 export function ActionCenter({ items }: Props) {
-  const navigate = useNavigate();
-
   if (items.length === 0) {
     return (
       <div className="text-center py-6 text-gray-500">
@@ -46,12 +44,8 @@ export function ActionCenter({ items }: Props) {
     <div className="space-y-2">
       {items.map((item) => {
         const cfg = PRIORITY_CONFIG[item.priority];
-        return (
-          <button
-            key={item.id}
-            onClick={() => item.route && navigate(item.route)}
-            className={`w-full flex items-start gap-3 p-3 rounded-lg border ${cfg.border} bg-white/2 hover:bg-white/5 transition-colors text-left group`}
-          >
+        const content = (
+          <>
             {cfg.icon}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
@@ -68,7 +62,23 @@ export function ActionCenter({ items }: Props) {
                 className="text-gray-600 group-hover:text-gray-300 transition-colors shrink-0 mt-0.5"
               />
             )}
-          </button>
+          </>
+        );
+
+        const className = `w-full flex items-start gap-3 p-3 rounded-lg border ${cfg.border} bg-white/2 hover:bg-white/5 transition-colors text-left group`;
+
+        if (item.route) {
+          return (
+            <Link key={item.id} to={item.route} className={className}>
+              {content}
+            </Link>
+          );
+        }
+
+        return (
+          <div key={item.id} className={className}>
+            {content}
+          </div>
         );
       })}
     </div>

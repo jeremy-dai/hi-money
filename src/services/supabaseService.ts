@@ -6,14 +6,6 @@ import { DEFAULT_ALLOCATION } from '../utils/constants';
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-const flattenAccounts = (accounts: Accounts): any[] => {
-  const result: any[] = [];
-  accounts.growth.forEach(acc => result.push({ ...acc, category: 'growth' }));
-  accounts.stability.forEach(acc => result.push({ ...acc, category: 'stability' }));
-  accounts.special.forEach(acc => result.push({ ...acc, category: 'special' }));
-  return result;
-};
-
 const groupAccounts = (rows: any[]): Accounts => {
   const accounts: Accounts = { growth: [], stability: [], special: [] };
   rows.forEach(row => {

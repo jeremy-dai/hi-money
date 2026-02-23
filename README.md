@@ -29,6 +29,8 @@
 - **沙盒模式 (Sandbox)**: 
   - 基于当前数据或案例创建的临时克隆。
   - **完全隔离**：在沙盒中的任何修改（买入资产、调整预算）都不会影响真实数据。
+  - **本地持久化**：沙盒数据保存在本地，刷新页面不丢失，支持随时暂停/恢复演示。
+  - **导入/导出**：支持将沙盒状态导出为 JSON 文件分享，或导入他人的沙盒剧本。
   - 适合进行 "What-if" 模拟演练（例如：如果我失业了？如果我买了一份大额保险？）。
 
 ### 2. ⚡️ 保险三重调度机制 (Triple-Dispatch)
@@ -73,8 +75,10 @@ npm install
 cp .env.example .env
 # 编辑 .env 填入你的 Supabase 凭证
 
-# 4. 初始化数据库
-# 在 Supabase SQL Editor 中运行 supabase/schema.sql
+# 4. 初始化数据库与案例数据
+# 在 Supabase SQL Editor 中依次运行:
+# - supabase/schema.sql (表结构)
+# - supabase/seed_examples.sql (职场新人/中产家庭/高净值 案例数据)
 
 # 5. 启动开发服务器
 npm run dev

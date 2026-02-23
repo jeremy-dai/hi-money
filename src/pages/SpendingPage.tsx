@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Pencil, Trash2, Check, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, Check, X, FileText, List } from 'lucide-react';
 import { PageContainer } from '../components/layout/PageContainer';
 import { Card } from '../components/common/Card';
 import { useAppStore } from '../store/useAppStore';
@@ -20,7 +20,7 @@ const formatMonthLabel = (month: string): string => {
 };
 
 export default function SpendingPage() {
-  const { getCurrentData, getMA3Spending, addSpending, updateSpending, deleteSpending, activeMode } =
+  const { getCurrentData, getMA3Spending, addSpending, addSpendingBatch, updateSpending, deleteSpending, activeMode } =
     useAppStore();
   const { spending, monthlyIncome } = getCurrentData();
   const ma3 = getMA3Spending();
@@ -29,6 +29,11 @@ export default function SpendingPage() {
   const [showAdd, setShowAdd] = useState(false);
   const [editMonth, setEditMonth] = useState<string | null>(null);
   const [form, setForm] = useState<SpendingRecord>({ month: currentMonth(), amount: 0, note: '' });
+
+  // Batch mode state
+  const [isBatchMode, setIsBatchMode] = useState(false);
+  const [batchText, setBatchText] = useState('');
+  const [parsedBatch, setParsedBatch] = useState<SpendingRecord[]>([]);
 
   const sorted = [...spending].sort((a, b) => b.month.localeCompare(a.month));
   const chartData = getMonthlySpendingChartData(spending);
@@ -39,6 +44,60 @@ export default function SpendingPage() {
     addSpending(form);
     setShowAdd(false);
     setForm({ month: currentMonth(), amount: 0, note: '' });
+  };
+
+  const handleBatchParse = (text: string) => {
+    setBatchText(text);
+    const lines = text.split('\n').filter(line => line.trim());
+    const records: SpendingRecord[] = [];
+
+    lines.forEach(line => {
+      // Split by tab, comma, or multiple spaces
+      const parts = line.split(/[\t,]+|\s{2,}/).map(p => p.trim()).filter(p => p);
+      if (parts.length >= 2) {
+        let month = parts[0];
+
+        // Normalize separators
+        month = month.replace(new RegExp('[年/.]', 'g'), '-').replace(/月/g, '');
+
+        // Handle YYYYMM format
+        if (/^\d{6}$/.test(month)) {
+            month = `${month.substring(0, 4)}-${month.substring(4, 6)}`;
+        }
+
+        // Parse and validate date
+        const dateParts = month.split('-');
+        if (dateParts.length >= 2) {
+            const y = parseInt(dateParts[0]);
+            const m = parseInt(dateParts[1]);
+
+            if (y > 0 && m > 0 && m <= 12) {
+                 month = `${y}-${String(m).padStart(2, '0')}`;
+
+                 const amountStr = parts[1].replace(/[,¥]/g, '');
+                 const amount = parseFloat(amountStr);
+                 const note = parts.slice(2).join(' ') || '';
+
+                 if (!isNaN(amount)) {
+                    records.push({ month, amount, note });
+                 }
+            }
+        }
+      }
+    });
+
+    // Sort parsed records by month desc
+    records.sort((a, b) => b.month.localeCompare(a.month));
+    setParsedBatch(records);
+  };
+
+  const handleBatchSave = () => {
+    if (parsedBatch.length === 0) return;
+    addSpendingBatch(parsedBatch);
+    setShowAdd(false);
+    setBatchText('');
+    setParsedBatch([]);
+    setIsBatchMode(false);
   };
 
   const handleEdit = (record: SpendingRecord) => {
@@ -119,52 +178,120 @@ export default function SpendingPage() {
         {showAdd && !isReadOnly && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
             <Card className="border-indigo-600/40">
-              <h3 className="text-base font-semibold text-white mb-4">录入月度支出</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="text-xs text-gray-400 block mb-1">月份</label>
-                  <input
-                    type="month"
-                    value={form.month}
-                    onChange={(e) => setForm((f) => ({ ...f, month: e.target.value }))}
-                    className="w-full bg-black-soft border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-gray-400 block mb-1">总支出 (元)</label>
-                  <input
-                    type="number"
-                    value={form.amount || ''}
-                    onChange={(e) => setForm((f) => ({ ...f, amount: parseFloat(e.target.value) || 0 }))}
-                    placeholder="10000"
-                    className="w-full bg-black-soft border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-gray-400 block mb-1">备注 (选填)</label>
-                  <input
-                    type="text"
-                    value={form.note || ''}
-                    onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
-                    placeholder="例：年假旅行"
-                    className="w-full bg-black-soft border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
+              <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-base font-semibold text-white">{isBatchMode ? '批量录入支出' : '录入月度支出'}</h3>
+                  <button 
+                    onClick={() => setIsBatchMode(!isBatchMode)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-indigo-300 text-xs font-medium transition-colors"
+                  >
+                    {isBatchMode ? <><List size={14}/> 切换单条录入</> : <><FileText size={14}/> 切换批量录入</>}
+                  </button>
               </div>
-              <div className="flex gap-2 mt-4">
-                <button
-                  onClick={handleSave}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-colors"
-                >
-                  <Check size={15} /> 保存
-                </button>
-                <button
-                  onClick={() => setShowAdd(false)}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg text-sm transition-colors"
-                >
-                  <X size={15} /> 取消
-                </button>
-              </div>
+
+              {isBatchMode ? (
+                <div className="space-y-4">
+                    <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                        <p className="text-xs text-blue-200">
+                            支持直接从 Excel 或文本粘贴。每行一条记录，格式：<br/>
+                            <code className="bg-black/30 px-1 py-0.5 rounded text-blue-100">月份 支出金额 备注(可选)</code><br/>
+                            分隔符支持空格、制表符(Tab)或逗号。月份格式支持：2024-01, 2024/01, 202401, 2024年01月
+                        </p>
+                    </div>
+
+                    <textarea
+                        value={batchText}
+                        onChange={(e) => handleBatchParse(e.target.value)}
+                        placeholder={`2024-01 5000 新年\n2024年02月 3500\n202403 4200 聚餐`}
+                        className="w-full h-32 bg-black-soft border border-white/10 rounded-lg px-3 py-2 text-white text-sm font-mono focus:outline-none focus:border-indigo-500"
+                    />
+
+                    {parsedBatch.length > 0 && (
+                        <div className="bg-black-soft rounded-lg overflow-hidden border border-white/10">
+                            <div className="px-3 py-2 bg-white/5 border-b border-white/10 flex text-xs text-gray-400 font-medium">
+                                <div className="w-24">月份</div>
+                                <div className="w-24">金额</div>
+                                <div className="flex-1">备注</div>
+                            </div>
+                            <div className="max-h-40 overflow-y-auto">
+                                {parsedBatch.map((record, i) => (
+                                    <div key={i} className="px-3 py-2 flex text-sm text-gray-300 border-b border-white/5 last:border-0">
+                                        <div className="w-24 font-mono">{record.month}</div>
+                                        <div className="w-24 font-mono">{record.amount}</div>
+                                        <div className="flex-1 truncate">{record.note}</div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="px-3 py-2 bg-white/5 border-t border-white/10 text-xs text-gray-400 text-right">
+                                共解析 {parsedBatch.length} 条记录
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex gap-2 pt-2">
+                        <button
+                          onClick={handleBatchSave}
+                          disabled={parsedBatch.length === 0}
+                          className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
+                        >
+                          <Check size={15} /> 批量保存
+                        </button>
+                        <button
+                          onClick={() => setShowAdd(false)}
+                          className="flex items-center gap-1.5 px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg text-sm transition-colors"
+                        >
+                          <X size={15} /> 取消
+                        </button>
+                    </div>
+                </div>
+              ) : (
+                  <>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                          <label className="text-xs text-gray-400 block mb-1">月份</label>
+                          <input
+                            type="month"
+                            value={form.month}
+                            onChange={(e) => setForm((f) => ({ ...f, month: e.target.value }))}
+                            className="w-full bg-black-soft border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-gray-400 block mb-1">总支出 (元)</label>
+                          <input
+                            type="number"
+                            value={form.amount || ''}
+                            onChange={(e) => setForm((f) => ({ ...f, amount: parseFloat(e.target.value) || 0 }))}
+                            placeholder="10000"
+                            className="w-full bg-black-soft border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-gray-400 block mb-1">备注 (选填)</label>
+                          <input
+                            type="text"
+                            value={form.note || ''}
+                            onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
+                            placeholder="例：年假旅行"
+                            className="w-full bg-black-soft border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-2 mt-4">
+                        <button
+                          onClick={handleSave}
+                          className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-colors"
+                        >
+                          <Check size={15} /> 保存
+                        </button>
+                        <button
+                          onClick={() => setShowAdd(false)}
+                          className="flex items-center gap-1.5 px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg text-sm transition-colors"
+                        >
+                          <X size={15} /> 取消
+                        </button>
+                      </div>
+                  </>
+              )}
             </Card>
           </motion.div>
         )}

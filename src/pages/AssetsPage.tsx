@@ -11,6 +11,7 @@ import {
   Landmark,
   ChevronDown,
   ChevronUp,
+  Clock,
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { PageContainer } from '../components/layout/PageContainer';
@@ -219,6 +220,12 @@ export default function AssetsPage() {
                                     </div>
                                   ) : (
                                     <div className="flex items-center gap-3">
+                                      {account.updatedAt && (
+                                        <div className="flex items-center gap-1 text-xs text-gray-600">
+                                          <Clock size={10} />
+                                          <span>{new Date(account.updatedAt).toLocaleDateString()}</span>
+                                        </div>
+                                      )}
                                       <span className="text-sm font-mono text-gray-200">
                                         {formatCNY(account.amount)}
                                       </span>

@@ -16,10 +16,9 @@ import type {
 import type { UserProfile } from '../types/profile.types';
 import type { InsurancePolicy } from '../types/insurance.types';
 import type { WorkspaceSettings } from '../types/settings.types';
-import { DEFAULT_ALLOCATION } from '../utils/constants';
-import { EXAMPLE_PROFILES } from '../data/exampleProfiles';
+import { DEFAULT_ALLOCATION, EXAMPLE_USER_IDS } from '../utils/constants';
 import { calculateRecommendedAllocation } from '../algorithms/recommendAllocation';
-import { saveProfileData } from '../services/supabaseService';
+import { saveProfileData, fetchProfileData } from '../services/supabaseService';
 import { supabase } from '../lib/supabase';
 
 // Helper to get total cash value from policies
@@ -67,20 +66,68 @@ export const useAppStore = create<AppState>()(
       activeExampleId: null as string | null,
       personalData: createEmptyProfile(),
       sandboxData: null as ProfileData | null,
+      exampleDataCache: {},
+      isLoadingExample: false,
       isAuthenticated: false,
+      viewingHistoryIndex: null as number | null,
+      viewingDate: null as string | null,
 
       // -----------------------------------------------------------------------
       // Core getter — all reads go through this
       // -----------------------------------------------------------------------
       getCurrentData: (): ProfileData => {
-        const { activeMode, activeExampleId, personalData, sandboxData } = get();
+        const { activeMode, activeExampleId, personalData, sandboxData, exampleDataCache, viewingHistoryIndex, viewingDate } = get();
+        let current: ProfileData;
+
         if (activeMode === 'EXAMPLE' && activeExampleId) {
-          return EXAMPLE_PROFILES[activeExampleId] ?? personalData;
+          current = exampleDataCache[activeExampleId] ?? EXAMPLE_PROFILES[activeExampleId] ?? personalData;
+        } else if (activeMode === 'SANDBOX' && sandboxData) {
+          current = sandboxData;
+        } else {
+          current = personalData;
         }
-        if (activeMode === 'SANDBOX' && sandboxData) {
-          return sandboxData;
+
+        // Apply history snapshot if viewing
+        // Logic: if viewingDate is set, find the latest snapshot BEFORE or ON that date
+        if (viewingDate && current.history && current.history.length > 0) {
+           // Sort history by date ascending just in case
+           const sortedHistory = [...current.history].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+           const targetTime = new Date(viewingDate).getTime();
+           
+           // Find the last record that is <= targetTime
+           let bestMatch: HistoryRecord | null = null;
+           for (const record of sortedHistory) {
+             if (new Date(record.date).getTime() <= targetTime) {
+               bestMatch = record;
+             } else {
+               break; // records are sorted, so we can stop once we exceed targetTime
+             }
+           }
+
+           if (bestMatch) {
+             const snapshot = bestMatch.snapshot;
+             return {
+               ...current,
+               accounts: snapshot.accounts,
+               policies: snapshot.policies,
+               monthlyIncome: snapshot.monthlyIncome,
+               allocation: snapshot.allocation,
+             };
+           }
         }
-        return personalData;
+        // Fallback to index-based for backward compatibility or direct index usage
+        else if (viewingHistoryIndex !== null && current.history[viewingHistoryIndex]) {
+          const snapshot = current.history[viewingHistoryIndex].snapshot;
+          return {
+            ...current,
+            accounts: snapshot.accounts,
+            policies: snapshot.policies,
+            monthlyIncome: snapshot.monthlyIncome,
+            allocation: snapshot.allocation,
+          };
+        }
+
+        return current;
       },
 
       // -----------------------------------------------------------------------
@@ -162,12 +209,46 @@ export const useAppStore = create<AppState>()(
       // -----------------------------------------------------------------------
       // Workspace actions
       // -----------------------------------------------------------------------
-      switchMode: (mode: WorkspaceMode, exampleId?: string) =>
+      switchMode: (mode: WorkspaceMode, exampleId?: string) => {
+        if (mode === 'EXAMPLE' && exampleId) {
+          get().loadExampleProfile(exampleId);
+        }
         set((state) => {
           state.activeMode = mode;
           state.activeExampleId = exampleId ?? null;
-          if (mode !== 'SANDBOX') state.sandboxData = null;
-        }),
+          // Don't auto-clear sandbox data when switching modes
+          // if (mode !== 'SANDBOX') state.sandboxData = null;
+        });
+      },
+
+      loadExampleProfile: async (exampleId: string) => {
+        const { exampleDataCache } = get();
+        // If already cached, don't refetch to save bandwidth/latency
+        // To force refresh, we could add a force flag or check timestamp
+        if (exampleDataCache[exampleId]) return;
+
+        const userId = EXAMPLE_USER_IDS[exampleId];
+        if (!userId) return;
+
+        set((state) => {
+          state.isLoadingExample = true;
+        });
+
+        try {
+          const data = await fetchProfileData(userId);
+          if (data) {
+            set((state) => {
+              state.exampleDataCache[exampleId] = data;
+            });
+          }
+        } catch (error) {
+          console.error('Failed to load example profile', error);
+        } finally {
+          set((state) => {
+            state.isLoadingExample = false;
+          });
+        }
+      },
 
       createSandbox: (base?: Partial<ProfileData>) =>
         set((state) => {
@@ -188,6 +269,21 @@ export const useAppStore = create<AppState>()(
         set((state) => {
           state.personalData = data;
           state.activeMode = 'PERSONAL';
+        }),
+
+      setViewingHistoryIndex: (index: number | null) =>
+        set((state) => {
+          state.viewingHistoryIndex = index;
+        }),
+
+      setViewingHistoryIndex: (index: number | null) =>
+        set((state) => {
+          state.viewingHistoryIndex = index;
+        }),
+
+      setViewingDate: (date: string | null) =>
+        set((state) => {
+          state.viewingDate = date;
         }),
 
       // -----------------------------------------------------------------------
@@ -214,7 +310,12 @@ export const useAppStore = create<AppState>()(
       addAccount: (category: InvestmentCategoryType, account: Account) => {
         set((state) => {
           const data = getMutableSlice(state, state.activeMode);
-          if (data) data.accounts[category].push(account);
+          if (data) {
+             data.accounts[category].push({
+               ...account,
+               updatedAt: new Date().toISOString(),
+             });
+          }
         });
         if (get().activeMode === 'PERSONAL') syncProfile(get().personalData);
       },
@@ -224,6 +325,7 @@ export const useAppStore = create<AppState>()(
           const data = getMutableSlice(state, state.activeMode);
           if (data && data.accounts[category][index]) {
             data.accounts[category][index].amount = amount;
+            data.accounts[category][index].updatedAt = new Date().toISOString();
           }
         });
         if (get().activeMode === 'PERSONAL') syncProfile(get().personalData);
@@ -275,6 +377,25 @@ export const useAppStore = create<AppState>()(
             data.spending.push(record);
             data.spending.sort((a, b) => a.month.localeCompare(b.month));
           }
+        });
+        if (get().activeMode === 'PERSONAL') syncProfile(get().personalData);
+      },
+
+      addSpendingBatch: (records: SpendingRecord[]) => {
+        set((state) => {
+          const data = getMutableSlice(state, state.activeMode);
+          if (!data) return;
+
+          records.forEach((record) => {
+            const idx = data.spending.findIndex((s) => s.month === record.month);
+            if (idx >= 0) {
+              data.spending[idx] = record;
+            } else {
+              data.spending.push(record);
+            }
+          });
+
+          data.spending.sort((a, b) => a.month.localeCompare(b.month));
         });
         if (get().activeMode === 'PERSONAL') syncProfile(get().personalData);
       },
@@ -382,6 +503,7 @@ export const useAppStore = create<AppState>()(
       partialize: (state) => ({
         activeMode: state.activeMode,
         personalData: state.personalData,
+        sandboxData: state.sandboxData,
         isAuthenticated: state.isAuthenticated,
       }),
     }

@@ -24,6 +24,7 @@ export interface Allocation {
 export interface Account {
   name: string;
   amount: number;
+  updatedAt?: string; // ISO date string
 }
 
 /** Accounts only hold ASSET categories (no spending categories) */
@@ -80,7 +81,11 @@ export interface AppState {
   activeExampleId: string | null;
   personalData: ProfileData;
   sandboxData: ProfileData | null;
+  exampleDataCache: Record<string, ProfileData>;
+  isLoadingExample: boolean;
   isAuthenticated: boolean;
+  viewingHistoryIndex: number | null;
+  viewingDate: string | null;
 
   // Getters (read from getCurrentData())
   getCurrentData: () => ProfileData;
@@ -96,9 +101,12 @@ export interface AppState {
 
   // Workspace actions
   switchMode: (mode: WorkspaceMode, exampleId?: string) => void;
+  loadExampleProfile: (exampleId: string) => Promise<void>;
   createSandbox: (base?: Partial<ProfileData>) => void;
   clearSandbox: () => void;
   loadPersonalData: (data: ProfileData) => void;
+  setViewingHistoryIndex: (index: number | null) => void;
+  setViewingDate: (date: string | null) => void;
 
   // Data mutations
   setMonthlyIncome: (income: number) => void;
@@ -109,6 +117,7 @@ export interface AppState {
   deleteAccount: (category: InvestmentCategoryType, index: number) => void;
   addHistory: (type: HistoryRecord['type'], income?: number) => void;
   addSpending: (record: SpendingRecord) => void;
+  addSpendingBatch: (records: SpendingRecord[]) => void;
   updateSpending: (month: string, updates: Partial<SpendingRecord>) => void;
   deleteSpending: (month: string) => void;
   setUserProfile: (profile: UserProfile) => void;

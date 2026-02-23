@@ -3,7 +3,7 @@ import React from 'react';
 import { useAppStore } from '../../store/useAppStore';
 
 export const ModeBanner: React.FC = () => {
-  const { activeMode, activeExampleId, clearSandbox, switchMode } = useAppStore();
+  const { activeMode, activeExampleId, switchMode } = useAppStore();
 
   if (activeMode === 'PERSONAL') {
     return null;
@@ -12,15 +12,11 @@ export const ModeBanner: React.FC = () => {
   const isSandbox = activeMode === 'SANDBOX';
   const bgColor = isSandbox ? 'bg-amber-600' : 'bg-blue-600';
   const label = isSandbox 
-    ? '客户演示模式 (Sandbox) - 数据不会保存' 
+    ? '客户演示模式 (Sandbox) - 数据保存在本地' 
     : `演示案例: ${activeExampleId}`;
 
   const handleExit = () => {
-    if (isSandbox) {
-      clearSandbox();
-    } else {
-      switchMode('PERSONAL');
-    }
+    switchMode('PERSONAL');
   };
 
   return (

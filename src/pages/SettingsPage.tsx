@@ -12,6 +12,9 @@ import {
   CheckCircle2,
   FlaskConical,
   BookOpen,
+  History,
+  Download,
+  Upload,
 } from 'lucide-react';
 import { PageContainer } from '../components/layout/PageContainer';
 import { Card } from '../components/common/Card';
@@ -156,11 +159,14 @@ export default function SettingsPage() {
     activeMode,
     activeExampleId,
     switchMode,
+    isLoadingExample,
     createSandbox,
     clearSandbox,
     updateSettings,
     resetAll,
     getCurrentData,
+    addHistory,
+    sandboxData,
   } = useAppStore();
 
   const currentData = getCurrentData();
@@ -210,6 +216,45 @@ export default function SettingsPage() {
     resetAll();
     setShowResetConfirm(false);
     navigate(ROUTES.ONBOARDING);
+  };
+
+  // Download Sandbox Data
+  const handleDownloadSandbox = () => {
+    if (!sandboxData) return;
+    const blob = new Blob([JSON.stringify(sandboxData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `hi-money-sandbox-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  // Upload Sandbox Data
+  const handleUploadSandbox = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target?.result as string);
+        // Simple validation
+        if (typeof json === 'object' && json !== null) {
+            createSandbox(json);
+        } else {
+            alert('Invalid JSON file');
+        }
+      } catch (err) {
+        console.error('Failed to parse JSON', err);
+        alert('Failed to parse JSON file');
+      }
+      // Reset input
+      e.target.value = '';
+    };
+    reader.readAsText(file);
   };
 
   // Selected example metadata
@@ -362,9 +407,12 @@ export default function SettingsPage() {
 
                 <button
                   onClick={() => switchMode('EXAMPLE', selectedExampleId)}
-                  className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
+                  disabled={isLoadingExample}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors ${
+                    isLoadingExample ? 'opacity-50 cursor-wait' : ''
+                  }`}
                 >
-                  加载案例
+                  {isLoadingExample ? '加载中...' : '加载案例'}
                 </button>
               </div>
 
@@ -390,14 +438,46 @@ export default function SettingsPage() {
                     <CheckCircle2 size={18} className="text-amber-400 shrink-0" />
                   )}
                 </div>
-                <div className="flex gap-2 mt-3">
+                <div className="flex gap-2 mt-3 flex-wrap">
+                  {activeMode !== 'SANDBOX' && sandboxData && (
+                    <button
+                      onClick={() => switchMode('SANDBOX')}
+                      className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 transition-colors"
+                    >
+                      回到沙盒
+                    </button>
+                  )}
                   <button
                     onClick={() => createSandbox()}
-                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 transition-colors"
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-800 text-gray-300 hover:bg-amber-500/20 hover:text-amber-400 transition-colors"
                   >
                     新建沙盒
                   </button>
-                  {activeMode === 'SANDBOX' && (
+                  
+                  {/* Download/Upload */}
+                  {sandboxData && (
+                    <>
+                      <button
+                        onClick={handleDownloadSandbox}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-800 text-gray-300 hover:bg-white/10 transition-colors"
+                        title="导出沙盒数据"
+                      >
+                        <Download size={14} /> 导出
+                      </button>
+                    </>
+                  )}
+                  
+                  <label className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-800 text-gray-300 hover:bg-white/10 transition-colors cursor-pointer">
+                    <Upload size={14} /> 导入
+                    <input 
+                      type="file" 
+                      accept=".json" 
+                      className="hidden" 
+                      onChange={handleUploadSandbox}
+                    />
+                  </label>
+
+                  {sandboxData && (
                     <button
                       onClick={() => clearSandbox()}
                       className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
@@ -587,9 +667,35 @@ export default function SettingsPage() {
         </motion.div>
 
         {/* ------------------------------------------------------------------ */}
-        {/* Section 4: Data Management                                         */}
+        {/* Section 4: History Snapshots                                       */}
         {/* ------------------------------------------------------------------ */}
         <motion.div custom={3} variants={fadeUp} initial="hidden" animate="visible">
+          <Card>
+            <SectionHeader
+              icon={<History size={20} />}
+              title="时光机"
+              subtitle="手动创建当前状态的快照，以便日后回溯"
+            />
+            
+            <div className="flex items-center gap-4">
+               <button
+                 onClick={() => addHistory('update')}
+                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 text-sm font-semibold text-white hover:bg-gray-700 transition-colors active:scale-95"
+               >
+                 <History size={16} className="text-gold-primary" />
+                 创建当前快照
+               </button>
+               <p className="text-xs text-gray-500">
+                 当前共有 {currentData.history?.length || 0} 个历史快照
+               </p>
+            </div>
+          </Card>
+        </motion.div>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* Section 5: Data Management                                         */}
+        {/* ------------------------------------------------------------------ */}
+        <motion.div custom={4} variants={fadeUp} initial="hidden" animate="visible">
           <Card>
             <SectionHeader
               icon={<AlertTriangle size={20} />}
