@@ -6,12 +6,30 @@
  */
 
 /**
+ * Insurance Categories & Subcategories
+ */
+export type InsuranceCategory = 'protection' | 'savings' | 'investment' | 'group';
+
+export type InsuranceSubCategory =
+  // Protection (保障型)
+  | 'criticalIllness' | 'medical' | 'accident' | 'termLife' | 'cancer'
+  // Savings (储蓄型)
+  | 'increasingWholeLife' | 'pensionAnnuity' | 'educationAnnuity' | 'endowment' | 'wholeLife'
+  // Investment (投资型)
+  | 'participating' | 'universalLife' | 'unitLinked'
+  // Group (团体/企业)
+  | 'enterpriseAnnuity' | 'groupAccident' | 'supplementaryMedical';
+
+/**
  * Individual insurance policy with triple-dispatch values
  */
 export interface InsurancePolicy {
   id: string;
   name: string;
-  type: string;
+  type: string; // Legacy field, kept for compatibility but will be derived/mapped
+  category?: InsuranceCategory;
+  subCategory?: InsuranceSubCategory;
+  isTaxAdvantaged?: boolean;
   annualPremium: number;
   cashValue: number;
   coverageAmount: number;

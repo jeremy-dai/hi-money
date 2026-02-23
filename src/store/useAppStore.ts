@@ -6,9 +6,7 @@ import type {
   AppState,
   WorkspaceMode,
   Allocation,
-  Accounts,
   Account,
-  HistoryRecord,
   SpendingRecord,
   ProfileData,
   InvestmentCategoryType,
@@ -35,7 +33,6 @@ const createEmptyProfile = (): ProfileData => ({
   monthlyIncome: 0,
   allocation: { ...DEFAULT_ALLOCATION },
   accounts: { growth: [], stability: [], special: [] },
-  history: [],
   spending: [],
   userProfile: null,
   policies: [],
@@ -69,65 +66,20 @@ export const useAppStore = create<AppState>()(
       exampleDataCache: {},
       isLoadingExample: false,
       isAuthenticated: false,
-      viewingHistoryIndex: null as number | null,
-      viewingDate: null as string | null,
 
       // -----------------------------------------------------------------------
       // Core getter — all reads go through this
       // -----------------------------------------------------------------------
       getCurrentData: (): ProfileData => {
-        const { activeMode, activeExampleId, personalData, sandboxData, exampleDataCache, viewingHistoryIndex, viewingDate } = get();
-        let current: ProfileData;
+        const { activeMode, activeExampleId, personalData, sandboxData, exampleDataCache } = get();
 
         if (activeMode === 'EXAMPLE' && activeExampleId) {
-          current = exampleDataCache[activeExampleId] ?? EXAMPLE_PROFILES[activeExampleId] ?? personalData;
+          return exampleDataCache[activeExampleId] ?? personalData;
         } else if (activeMode === 'SANDBOX' && sandboxData) {
-          current = sandboxData;
-        } else {
-          current = personalData;
+          return sandboxData;
         }
 
-        // Apply history snapshot if viewing
-        // Logic: if viewingDate is set, find the latest snapshot BEFORE or ON that date
-        if (viewingDate && current.history && current.history.length > 0) {
-           // Sort history by date ascending just in case
-           const sortedHistory = [...current.history].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-           const targetTime = new Date(viewingDate).getTime();
-           
-           // Find the last record that is <= targetTime
-           let bestMatch: HistoryRecord | null = null;
-           for (const record of sortedHistory) {
-             if (new Date(record.date).getTime() <= targetTime) {
-               bestMatch = record;
-             } else {
-               break; // records are sorted, so we can stop once we exceed targetTime
-             }
-           }
-
-           if (bestMatch) {
-             const snapshot = bestMatch.snapshot;
-             return {
-               ...current,
-               accounts: snapshot.accounts,
-               policies: snapshot.policies,
-               monthlyIncome: snapshot.monthlyIncome,
-               allocation: snapshot.allocation,
-             };
-           }
-        }
-        // Fallback to index-based for backward compatibility or direct index usage
-        else if (viewingHistoryIndex !== null && current.history[viewingHistoryIndex]) {
-          const snapshot = current.history[viewingHistoryIndex].snapshot;
-          return {
-            ...current,
-            accounts: snapshot.accounts,
-            policies: snapshot.policies,
-            monthlyIncome: snapshot.monthlyIncome,
-            allocation: snapshot.allocation,
-          };
-        }
-
-        return current;
+        return personalData;
       },
 
       // -----------------------------------------------------------------------
@@ -182,10 +134,10 @@ export const useAppStore = create<AppState>()(
         const coverage = getTC();
         const spending = getCurrentData().spending;
         // Simple calculation based on monthly income if no spending data
-        const annualSpending = spending.length > 0 
+        const annualSpending = spending.length > 0
           ? (spending.reduce((sum, s) => sum + s.amount, 0) / spending.length) * 12
           : getCurrentData().monthlyIncome * 0.5 * 12; // Assume 50% spending rate
-        
+
         if (annualSpending === 0) return 0;
         return parseFloat((coverage / annualSpending).toFixed(1));
       },
@@ -201,8 +153,6 @@ export const useAppStore = create<AppState>()(
       getRecommendedAllocation: () => {
         const userProfile = get().getCurrentData().userProfile;
         if (!userProfile) return null;
-        // Map new UserProfile to algorithm input if needed
-        // Assuming algorithm handles it or we pass undefined for 2nd arg
         return calculateRecommendedAllocation(userProfile);
       },
 
@@ -216,15 +166,11 @@ export const useAppStore = create<AppState>()(
         set((state) => {
           state.activeMode = mode;
           state.activeExampleId = exampleId ?? null;
-          // Don't auto-clear sandbox data when switching modes
-          // if (mode !== 'SANDBOX') state.sandboxData = null;
         });
       },
 
       loadExampleProfile: async (exampleId: string) => {
         const { exampleDataCache } = get();
-        // If already cached, don't refetch to save bandwidth/latency
-        // To force refresh, we could add a force flag or check timestamp
         if (exampleDataCache[exampleId]) return;
 
         const userId = EXAMPLE_USER_IDS[exampleId];
@@ -269,21 +215,6 @@ export const useAppStore = create<AppState>()(
         set((state) => {
           state.personalData = data;
           state.activeMode = 'PERSONAL';
-        }),
-
-      setViewingHistoryIndex: (index: number | null) =>
-        set((state) => {
-          state.viewingHistoryIndex = index;
-        }),
-
-      setViewingHistoryIndex: (index: number | null) =>
-        set((state) => {
-          state.viewingHistoryIndex = index;
-        }),
-
-      setViewingDate: (date: string | null) =>
-        set((state) => {
-          state.viewingDate = date;
         }),
 
       // -----------------------------------------------------------------------
@@ -335,33 +266,6 @@ export const useAppStore = create<AppState>()(
         set((state) => {
           const data = getMutableSlice(state, state.activeMode);
           if (data) data.accounts[category].splice(index, 1);
-        });
-        if (get().activeMode === 'PERSONAL') syncProfile(get().personalData);
-      },
-
-      addHistory: (type: HistoryRecord['type'], income?: number) => {
-        set((state) => {
-          const data = getMutableSlice(state, state.activeMode);
-          if (!data) return;
-          const { getCategoryTotal, getCurrentData } = get();
-          const current = getCurrentData();
-          const record: HistoryRecord = {
-            date: new Date().toISOString(),
-            type,
-            income,
-            totalAmount:
-              getCategoryTotal('growth') +
-              getCategoryTotal('stability') +
-              getCategoryTotal('special') +
-              getTotalCashValue(current.policies),
-            snapshot: {
-              accounts: JSON.parse(JSON.stringify(current.accounts)) as Accounts,
-              policies: JSON.parse(JSON.stringify(current.policies)) as InsurancePolicy[],
-              monthlyIncome: current.monthlyIncome,
-              allocation: { ...current.allocation },
-            },
-          };
-          data.history.push(record);
         });
         if (get().activeMode === 'PERSONAL') syncProfile(get().personalData);
       },

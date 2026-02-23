@@ -11,12 +11,12 @@ import {
   Landmark,
   ChevronDown,
   ChevronUp,
-  Clock,
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { PageContainer } from '../components/layout/PageContainer';
 import { Card } from '../components/common/Card';
 import { PolicyForm } from '../components/insurance/PolicyForm';
+import { FreshnessIndicator } from '../components/common/FreshnessIndicator';
 import { formatCNY } from '../lib/format';
 import {
   getTotalCashValue,
@@ -24,12 +24,17 @@ import {
   getTotalCoverage,
   getMonthlyPremiumCost,
 } from '../algorithms/insuranceDispatch';
-import type { InvestmentCategoryType, InsurancePolicy } from '../types';
+import type { InvestmentCategoryType } from '../types';
+import type { InsurancePolicy, InsuranceCategory } from '../types/insurance.types';
 import {
   INVESTMENT_CATEGORY_NAMES,
-
   INVESTMENT_CATEGORY_DESCRIPTIONS,
 } from '../utils/constants';
+import {
+  INSURANCE_CATEGORY_LABELS,
+  INSURANCE_CATEGORY_COLORS,
+  INSURANCE_SUBCATEGORY_LABELS
+} from '../utils/insuranceConstants';
 
 type TabType = 'investments' | 'insurance' | 'networth';
 
@@ -78,6 +83,15 @@ export default function AssetsPage() {
   const totalAnnualPremiums = getTotalAnnualPremiums(policies);
   const monthlyPremiumCost = getMonthlyPremiumCost(policies);
   const riskLeverageRatio = store.getRiskLeverageRatio();
+
+  const groupedPolicies = policies.reduce((acc, policy) => {
+    const cat = policy.category || 'other';
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(policy);
+    return acc;
+  }, {} as Record<string, typeof policies>);
+
+  const insuranceCategories: InsuranceCategory[] = ['protection', 'savings', 'investment', 'group'];
 
   const categories: InvestmentCategoryType[] = ['growth', 'stability', 'special'];
 
@@ -188,7 +202,7 @@ export default function AssetsPage() {
                               const isEditing =
                                 editingAccount?.category === cat && editingAccount?.index === idx;
                               return (
-                                <div key={idx} className="flex items-center gap-3 px-4 py-2.5">
+                                <div key={idx} className="flex items-center gap-3 px-4 py-2.5 group">
                                   <span className="text-sm text-gray-300 flex-1 truncate">
                                     {account.name}
                                   </span>
@@ -220,12 +234,7 @@ export default function AssetsPage() {
                                     </div>
                                   ) : (
                                     <div className="flex items-center gap-3">
-                                      {account.updatedAt && (
-                                        <div className="flex items-center gap-1 text-xs text-gray-600">
-                                          <Clock size={10} />
-                                          <span>{new Date(account.updatedAt).toLocaleDateString()}</span>
-                                        </div>
-                                      )}
+                                      <FreshnessIndicator date={account.updatedAt} />
                                       <span className="text-sm font-mono text-gray-200">
                                         {formatCNY(account.amount)}
                                       </span>
@@ -363,54 +372,178 @@ export default function AssetsPage() {
                   <p className="text-xs text-gray-600 mt-1">点击下方按钮添加保单</p>
                 </Card>
               ) : (
-                <div className="space-y-3">
-                  {policies.map((policy) => (
-                    <Card key={policy.id} className="space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="text-sm font-semibold text-white">{policy.name}</p>
-                          <p className="text-xs text-gray-500 mt-0.5">{policy.type}</p>
-                        </div>
-                        {!isReadOnly && (
-                          <div className="flex gap-1">
-                            <button
-                              onClick={() => {
-                                setEditingPolicy(policy);
-                                setShowPolicyForm(true);
-                              }}
-                              className="text-gray-500 hover:text-white p-1.5 rounded hover:bg-white/5"
-                            >
-                              <Pencil size={13} />
-                            </button>
-                            <button
-                              onClick={() => store.deletePolicy(policy.id)}
-                              className="text-gray-500 hover:text-red-400 p-1.5 rounded hover:bg-white/5"
-                            >
-                              <Trash2 size={13} />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[
-                          { label: '年保费', value: policy.annualPremium, color: 'text-indigo-400', desc: '→ 支出' },
-                          { label: '现金价值', value: policy.cashValue, color: 'text-blue-400', desc: '→ 资产' },
-                          { label: '保障额度', value: policy.coverageAmount, color: 'text-emerald-400', desc: '→ 杠杆' },
-                        ].map((item) => (
+                <div className="space-y-6">
+                  {/* Categorized Policies */}
+                  {insuranceCategories.map((cat) => {
+                    const catPolicies = groupedPolicies[cat];
+                    if (!catPolicies?.length) return null;
+
+                    return (
+                      <div key={cat} className="space-y-3">
+                        <div className="flex items-center gap-2 px-1">
                           <div
-                            key={item.label}
-                            className="bg-black-soft rounded-lg p-2 text-center"
-                          >
-                            <p className={`text-xs ${item.color} mb-1`}>{item.desc}</p>
-                            <p className="text-xs font-mono font-semibold text-white">
-                              {formatCNY(item.value)}
-                            </p>
-                            <p className="text-xs text-gray-600">{item.label}</p>
-                          </div>
+                            className="w-1 h-4 rounded-full"
+                            style={{ backgroundColor: INSURANCE_CATEGORY_COLORS[cat] }}
+                          />
+                          <h3 className="text-sm font-bold text-white">
+                            {INSURANCE_CATEGORY_LABELS[cat]}
+                          </h3>
+                          <span className="text-xs text-gray-500">
+                            ({catPolicies.length})
+                          </span>
+                        </div>
+
+                        {catPolicies.map((policy) => (
+                          <Card key={policy.id} className="space-y-3 relative overflow-hidden">
+                            {policy.isTaxAdvantaged && (
+                              <div className="absolute top-0 right-0 bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-bl-lg font-medium border-l border-b border-emerald-500/10">
+                                税优
+                              </div>
+                            )}
+                            <div className="flex items-start justify-between pr-8">
+                              <div>
+                                <p className="text-sm font-semibold text-white">{policy.name}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className="text-xs text-indigo-300 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20">
+                                    {policy.subCategory
+                                      ? INSURANCE_SUBCATEGORY_LABELS[policy.subCategory]
+                                      : policy.type}
+                                  </span>
+                                </div>
+                              </div>
+                              {!isReadOnly && (
+                                <div className="flex gap-1">
+                                  <button
+                                    onClick={() => {
+                                      setEditingPolicy(policy);
+                                      setShowPolicyForm(true);
+                                    }}
+                                    className="text-gray-500 hover:text-white p-1.5 rounded hover:bg-white/5"
+                                  >
+                                    <Pencil size={13} />
+                                  </button>
+                                  <button
+                                    onClick={() => store.deletePolicy(policy.id)}
+                                    className="text-gray-500 hover:text-red-400 p-1.5 rounded hover:bg-white/5"
+                                  >
+                                    <Trash2 size={13} />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                              {[
+                                {
+                                  label: '年保费',
+                                  value: policy.annualPremium,
+                                  color: 'text-indigo-400',
+                                  desc: '→ 支出',
+                                },
+                                {
+                                  label: '现金价值',
+                                  value: policy.cashValue,
+                                  color: 'text-blue-400',
+                                  desc: '→ 资产',
+                                },
+                                {
+                                  label: '保障额度',
+                                  value: policy.coverageAmount,
+                                  color: 'text-emerald-400',
+                                  desc: '→ 杠杆',
+                                },
+                              ].map((item) => (
+                                <div
+                                  key={item.label}
+                                  className="bg-black-soft rounded-lg p-2 text-center"
+                                >
+                                  <p className={`text-xs ${item.color} mb-1`}>{item.desc}</p>
+                                  <p className="text-xs font-mono font-semibold text-white">
+                                    {formatCNY(item.value)}
+                                  </p>
+                                  <p className="text-xs text-gray-600">{item.label}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </Card>
                         ))}
                       </div>
-                    </Card>
-                  ))}
+                    );
+                  })}
+
+                  {/* Other / Uncategorized */}
+                  {groupedPolicies['other']?.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 px-1">
+                        <div className="w-1 h-4 rounded-full bg-gray-600" />
+                        <h3 className="text-sm font-bold text-white">未分类</h3>
+                        <span className="text-xs text-gray-500">
+                          ({groupedPolicies['other'].length})
+                        </span>
+                      </div>
+                      {groupedPolicies['other'].map((policy) => (
+                        <Card key={policy.id} className="space-y-3">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <p className="text-sm font-semibold text-white">{policy.name}</p>
+                              <p className="text-xs text-gray-500 mt-0.5">{policy.type}</p>
+                            </div>
+                            {!isReadOnly && (
+                              <div className="flex gap-1">
+                                <button
+                                  onClick={() => {
+                                    setEditingPolicy(policy);
+                                    setShowPolicyForm(true);
+                                  }}
+                                  className="text-gray-500 hover:text-white p-1.5 rounded hover:bg-white/5"
+                                >
+                                  <Pencil size={13} />
+                                </button>
+                                <button
+                                  onClick={() => store.deletePolicy(policy.id)}
+                                  className="text-gray-500 hover:text-red-400 p-1.5 rounded hover:bg-white/5"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            {[
+                              {
+                                label: '年保费',
+                                value: policy.annualPremium,
+                                color: 'text-indigo-400',
+                                desc: '→ 支出',
+                              },
+                              {
+                                label: '现金价值',
+                                value: policy.cashValue,
+                                color: 'text-blue-400',
+                                desc: '→ 资产',
+                              },
+                              {
+                                label: '保障额度',
+                                value: policy.coverageAmount,
+                                color: 'text-emerald-400',
+                                desc: '→ 杠杆',
+                              },
+                            ].map((item) => (
+                              <div
+                                key={item.label}
+                                className="bg-black-soft rounded-lg p-2 text-center"
+                              >
+                                <p className={`text-xs ${item.color} mb-1`}>{item.desc}</p>
+                                <p className="text-xs font-mono font-semibold text-white">
+                                  {formatCNY(item.value)}
+                                </p>
+                                <p className="text-xs text-gray-600">{item.label}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 

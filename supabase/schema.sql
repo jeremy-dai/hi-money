@@ -116,7 +116,10 @@ create table public.insurance_policies (
   user_id uuid references public.profiles(id) on delete cascade not null,
   
   name text not null,
-  type text,
+  type text, -- Legacy field, kept for compatibility
+  category text, -- New category: protection, savings, investment, group
+  sub_category text, -- New subcategory
+  is_tax_advantaged boolean default false,
   annual_premium numeric default 0,
   cash_value numeric default 0,
   coverage_amount numeric default 0,
@@ -148,34 +151,10 @@ create policy "Users can delete own policies"
   using (auth.uid() = user_id);
 
 --------------------------------------------------------------------------------
--- 5. History Snapshots (For time-travel visualization)
+-- 5. [Removed] History Snapshots (Deprecated)
 --------------------------------------------------------------------------------
-create table public.history_snapshots (
-  id uuid default uuid_generate_v4() primary key,
-  user_id uuid references public.profiles(id) on delete cascade not null,
-  
-  date date not null,
-  type text not null, -- 'initial', 'income', 'update'
-  total_amount numeric not null,
-  snapshot_data jsonb not null, -- Stores complete state: { accounts, policies, monthlyIncome, allocation }
-  
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-
--- RLS
-alter table public.history_snapshots enable row level security;
-
-create policy "Users can view own history" 
-  on public.history_snapshots for select 
-  using (auth.uid() = user_id);
-
-create policy "Users can insert own history" 
-  on public.history_snapshots for insert 
-  with check (auth.uid() = user_id);
-
-create policy "Users can delete own history" 
-  on public.history_snapshots for delete 
-  using (auth.uid() = user_id);
+-- Table removed as part of simplified architecture.
+-- Was: create table public.history_snapshots (...);
 
 --------------------------------------------------------------------------------
 -- 6. Triggers for Automatic Profile Creation

@@ -12,13 +12,14 @@ import {
   CheckCircle2,
   FlaskConical,
   BookOpen,
-  History,
   Download,
   Upload,
+  LogOut,
 } from 'lucide-react';
 import { PageContainer } from '../components/layout/PageContainer';
 import { Card } from '../components/common/Card';
 import { useAppStore } from '../store/useAppStore';
+import { supabase } from '../lib/supabase';
 import { EXAMPLE_PROFILE_METADATA } from '../data/exampleProfiles';
 import { ROUTES, CITY_TIER_NAMES, MARITAL_STATUS_NAMES, RISK_TOLERANCE_NAMES } from '../utils/constants';
 import type { WorkspaceMode } from '../types';
@@ -165,8 +166,9 @@ export default function SettingsPage() {
     updateSettings,
     resetAll,
     getCurrentData,
-    addHistory,
     sandboxData,
+    isAuthenticated,
+    setAuthenticated,
   } = useAppStore();
 
   const currentData = getCurrentData();
@@ -667,35 +669,9 @@ export default function SettingsPage() {
         </motion.div>
 
         {/* ------------------------------------------------------------------ */}
-        {/* Section 4: History Snapshots                                       */}
+        {/* Section 4: Data Management                                         */}
         {/* ------------------------------------------------------------------ */}
         <motion.div custom={3} variants={fadeUp} initial="hidden" animate="visible">
-          <Card>
-            <SectionHeader
-              icon={<History size={20} />}
-              title="时光机"
-              subtitle="手动创建当前状态的快照，以便日后回溯"
-            />
-            
-            <div className="flex items-center gap-4">
-               <button
-                 onClick={() => addHistory('update')}
-                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 text-sm font-semibold text-white hover:bg-gray-700 transition-colors active:scale-95"
-               >
-                 <History size={16} className="text-gold-primary" />
-                 创建当前快照
-               </button>
-               <p className="text-xs text-gray-500">
-                 当前共有 {currentData.history?.length || 0} 个历史快照
-               </p>
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* ------------------------------------------------------------------ */}
-        {/* Section 5: Data Management                                         */}
-        {/* ------------------------------------------------------------------ */}
-        <motion.div custom={4} variants={fadeUp} initial="hidden" animate="visible">
           <Card>
             <SectionHeader
               icon={<AlertTriangle size={20} />}
@@ -757,6 +733,32 @@ export default function SettingsPage() {
             </AnimatePresence>
           </Card>
         </motion.div>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* Section 5: Account / Logout                                       */}
+        {/* ------------------------------------------------------------------ */}
+        {isAuthenticated && (
+          <motion.div custom={4} variants={fadeUp} initial="hidden" animate="visible">
+            <Card>
+              <SectionHeader
+                icon={<LogOut size={20} />}
+                title="账户"
+                subtitle="登录状态管理"
+              />
+              <button
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  setAuthenticated(false);
+                  navigate(ROUTES.WELCOME);
+                }}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 text-sm font-semibold text-white hover:bg-gray-700 transition-colors active:scale-95"
+              >
+                <LogOut size={15} />
+                退出登录
+              </button>
+            </Card>
+          </motion.div>
+        )}
 
         {/* Bottom spacer for floating nav */}
         <div className="h-8" />

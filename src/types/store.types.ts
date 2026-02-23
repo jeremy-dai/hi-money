@@ -41,23 +41,6 @@ export interface SpendingRecord {
   note?: string;
 }
 
-/**
- * History snapshot — captures the FULL state at a point in time
- * enabling time-travel visualization of every subcategory
- */
-export interface HistoryRecord {
-  date: string;
-  type: 'initial' | 'income' | 'update';
-  totalAmount: number;
-  income?: number;
-  snapshot: {
-    accounts: Accounts;
-    policies: InsurancePolicy[];
-    monthlyIncome: number;
-    allocation: Allocation;
-  };
-}
-
 // ---------------------------------------------------------------------------
 // ProfileData — the unit of isolation per workspace
 // ---------------------------------------------------------------------------
@@ -65,7 +48,6 @@ export interface ProfileData {
   monthlyIncome: number;
   allocation: Allocation;
   accounts: Accounts;
-  history: HistoryRecord[];
   spending: SpendingRecord[];
   userProfile: UserProfile | null;
   policies: InsurancePolicy[];
@@ -84,8 +66,6 @@ export interface AppState {
   exampleDataCache: Record<string, ProfileData>;
   isLoadingExample: boolean;
   isAuthenticated: boolean;
-  viewingHistoryIndex: number | null;
-  viewingDate: string | null;
 
   // Getters (read from getCurrentData())
   getCurrentData: () => ProfileData;
@@ -105,8 +85,6 @@ export interface AppState {
   createSandbox: (base?: Partial<ProfileData>) => void;
   clearSandbox: () => void;
   loadPersonalData: (data: ProfileData) => void;
-  setViewingHistoryIndex: (index: number | null) => void;
-  setViewingDate: (date: string | null) => void;
 
   // Data mutations
   setMonthlyIncome: (income: number) => void;
@@ -115,7 +93,6 @@ export interface AppState {
   addAccount: (category: InvestmentCategoryType, account: Account) => void;
   updateAccountAmount: (category: InvestmentCategoryType, index: number, amount: number) => void;
   deleteAccount: (category: InvestmentCategoryType, index: number) => void;
-  addHistory: (type: HistoryRecord['type'], income?: number) => void;
   addSpending: (record: SpendingRecord) => void;
   addSpendingBatch: (records: SpendingRecord[]) => void;
   updateSpending: (month: string, updates: Partial<SpendingRecord>) => void;

@@ -6,6 +6,22 @@ import { DEFAULT_ALLOCATION } from '../utils/constants';
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+const normalizePolicy = (p: any): InsurancePolicy => ({
+  id: p.id,
+  name: p.name,
+  type: p.type,
+  category: p.category as any,
+  subCategory: p.sub_category as any,
+  isTaxAdvantaged: p.is_tax_advantaged,
+  annualPremium: p.annual_premium,
+  cashValue: p.cash_value,
+  coverageAmount: p.coverage_amount,
+  startDate: p.start_date,
+  notes: p.notes,
+  benefits: p.benefits || {}
+});
+
 const groupAccounts = (rows: any[]): Accounts => {
   const accounts: Accounts = { growth: [], stability: [], special: [] };
   rows.forEach(row => {
@@ -62,13 +78,6 @@ export const fetchProfileData = async (userId: string): Promise<ProfileData | nu
       .select('*')
       .eq('user_id', userId);
 
-    // 5. Fetch History
-    const { data: historyData } = await supabase
-      .from('history_snapshots')
-      .select('*')
-      .eq('user_id', userId)
-      .order('date', { ascending: true });
-
     // Reconstruct ProfileData
     const userProfile: UserProfile = {
       ...profile.demographics,
@@ -84,29 +93,13 @@ export const fetchProfileData = async (userId: string): Promise<ProfileData | nu
       monthlyIncome: profile.monthly_income || 0,
       allocation: profile.allocation || DEFAULT_ALLOCATION,
       accounts: groupAccounts(accountsData || []),
-      history: (historyData || []).map((h: any) => ({
-        date: h.date,
-        type: h.type,
-        totalAmount: h.total_amount,
-        snapshot: h.snapshot_data
-      })),
       spending: (spendingData || []).map((s: any) => ({
         month: s.month,
         amount: s.amount,
         note: s.note
       })),
       userProfile,
-      policies: (policiesData || []).map((p: any) => ({
-        id: p.id,
-        name: p.name,
-        type: p.type,
-        annualPremium: p.annual_premium,
-        cashValue: p.cash_value,
-        coverageAmount: p.coverage_amount,
-        startDate: p.start_date,
-        notes: p.notes,
-        benefits: p.benefits
-      })),
+      policies: (policiesData || []).map(normalizePolicy),
       settings: profile.app_settings || null,
     };
   } catch (error) {
@@ -152,6 +145,40 @@ export const saveProfileData = async (userId: string, data: ProfileData) => {
 
     if (profileError) throw profileError;
 
+    // Sync Policies (Full Replace Strategy)
+    if (data.policies) {
+      // 1. Delete all policies for this user
+      await supabase.from('insurance_policies').delete().eq('user_id', userId);
+      
+      // 2. Insert all policies from state
+      if (data.policies.length > 0) {
+        const policiesToInsert = data.policies.map(p => ({
+            user_id: userId,
+            name: p.name,
+            type: p.type,
+            category: p.category,
+            sub_category: p.subCategory,
+            is_tax_advantaged: p.isTaxAdvantaged,
+            annual_premium: p.annualPremium,
+            cash_value: p.cashValue,
+            coverage_amount: p.coverageAmount,
+            start_date: p.startDate,
+            notes: p.notes,
+            benefits: p.benefits
+        }));
+        
+        const { error: insertError } = await supabase
+          .from('insurance_policies')
+          .insert(policiesToInsert);
+          
+        if (insertError) {
+           console.error('Error syncing policies:', insertError);
+           // Don't throw to avoid blocking profile save? Or throw?
+           // throwing might be better to alert user, but here we just log
+        }
+      }
+    }
+
     // Note: For arrays (accounts, spending, etc.), full sync is complex.
     // Ideally we should sync individual items on change.
     // For this prototype, we'll assume the store handles granular updates via specific API calls,
@@ -193,12 +220,43 @@ export const addSpending = async (userId: string, record: any) => {
 };
 
 export const addPolicy = async (userId: string, policy: InsurancePolicy) => {
+  // If ID is temporary (starts with pol_), let DB generate a UUID
+  const id = policy.id.startsWith('pol_') ? undefined : policy.id;
+  
   return supabase.from('insurance_policies').insert({
+    ...(id ? { id } : {}),
     user_id: userId,
-    ...policy, // map fields to snake_case if needed
+    name: policy.name,
+    type: policy.type,
+    category: policy.category,
+    sub_category: policy.subCategory,
+    is_tax_advantaged: policy.isTaxAdvantaged,
     annual_premium: policy.annualPremium,
     cash_value: policy.cashValue,
     coverage_amount: policy.coverageAmount,
-    start_date: policy.startDate
-  });
+    start_date: policy.startDate,
+    notes: policy.notes,
+    benefits: policy.benefits
+  }).select().single();
+};
+
+export const updatePolicy = async (policy: InsurancePolicy) => {
+  return supabase.from('insurance_policies').update({
+    name: policy.name,
+    type: policy.type,
+    category: policy.category,
+    sub_category: policy.subCategory,
+    is_tax_advantaged: policy.isTaxAdvantaged,
+    annual_premium: policy.annualPremium,
+    cash_value: policy.cashValue,
+    coverage_amount: policy.coverageAmount,
+    start_date: policy.startDate,
+    notes: policy.notes,
+    benefits: policy.benefits,
+    updated_at: new Date().toISOString()
+  }).eq('id', policy.id);
+};
+
+export const deletePolicy = async (id: string) => {
+  return supabase.from('insurance_policies').delete().eq('id', id);
 };

@@ -91,15 +91,11 @@ BEGIN
     (v_user_id, '2024-03', 3200, '餐饮美食');
 
   -- Insurance Policies (Minimal for young single)
-  INSERT INTO public.insurance_policies (user_id, name, type, annual_premium, cash_value, coverage_amount, benefits) VALUES
-    (v_user_id, '百万医疗险', 'medical', 360, 0, 3000000, '{"deductible": 10000}'::jsonb),
-    (v_user_id, '综合意外险', 'accident', 200, 0, 500000, '{"disability": 500000}'::jsonb);
+  INSERT INTO public.insurance_policies (user_id, name, type, category, sub_category, is_tax_advantaged, annual_premium, cash_value, coverage_amount, benefits) VALUES
+    (v_user_id, '百万医疗险', 'medical', 'protection', 'medical', false, 360, 0, 3000000, '{"deductible": 10000}'::jsonb),
+    (v_user_id, '综合意外险', 'accident', 'protection', 'accident', false, 200, 0, 500000, '{"disability": 500000}'::jsonb);
 
-  -- History Snapshots
-  INSERT INTO public.history_snapshots (user_id, date, type, total_amount, snapshot_data) VALUES
-    (v_user_id, NOW() - INTERVAL '90 days', 'initial', 50000, '{"accounts": {"growth": [{"name": "Fund", "amount": 40000}], "stability": [{"name": "Cash", "amount": 10000}]}}'::jsonb),
-    (v_user_id, NOW() - INTERVAL '60 days', 'income', 55000, '{"accounts": {"growth": [{"name": "Fund", "amount": 45000}], "stability": [{"name": "Cash", "amount": 10000}]}}'::jsonb),
-    (v_user_id, NOW() - INTERVAL '30 days', 'income', 70000, '{"accounts": {"growth": [{"name": "Fund", "amount": 55000}], "stability": [{"name": "Cash", "amount": 15000}]}}'::jsonb);
+  -- History Snapshots (Removed)
 END $$;
 
 -- ---------------------------------------------------------------------------
@@ -182,15 +178,12 @@ BEGIN
     (v_user_id, '2024-02', 3000, '子女教育培训');
 
   -- Insurance Policies (Standard family coverage)
-  INSERT INTO public.insurance_policies (user_id, name, type, annual_premium, cash_value, coverage_amount, benefits) VALUES
-    (v_user_id, '定期寿险 (夫)', 'life', 2000, 0, 2000000, '{"term": "20 years"}'::jsonb),
-    (v_user_id, '重疾险 (夫)', 'critical_illness', 6000, 20000, 500000, '{"term": "lifetime"}'::jsonb),
-    (v_user_id, '少儿医保+医疗', 'medical', 500, 0, 2000000, '{"insured": "child"}'::jsonb);
+  INSERT INTO public.insurance_policies (user_id, name, type, category, sub_category, is_tax_advantaged, annual_premium, cash_value, coverage_amount, benefits) VALUES
+    (v_user_id, '定期寿险 (夫)', 'life', 'protection', 'termLife', false, 2000, 0, 2000000, '{"term": "20 years"}'::jsonb),
+    (v_user_id, '重疾险 (夫)', 'critical_illness', 'protection', 'criticalIllness', false, 6000, 20000, 500000, '{"term": "lifetime"}'::jsonb),
+    (v_user_id, '少儿医保+医疗', 'medical', 'protection', 'medical', false, 500, 0, 2000000, '{"insured": "child"}'::jsonb);
 
-  -- History Snapshots
-  INSERT INTO public.history_snapshots (user_id, date, type, total_amount, snapshot_data) VALUES
-    (v_user_id, NOW() - INTERVAL '90 days', 'initial', 500000, '{"accounts": {"growth": [], "stability": []}}'::jsonb),
-    (v_user_id, NOW() - INTERVAL '30 days', 'income', 580000, '{"accounts": {"growth": [], "stability": []}}'::jsonb);
+  -- History Snapshots (Removed)
 END $$;
 
 -- ---------------------------------------------------------------------------
@@ -272,15 +265,12 @@ BEGIN
     (v_user_id, '2024-02', 25000, '高端生活方式');
 
   -- Insurance Policies (High value)
-  INSERT INTO public.insurance_policies (user_id, name, type, annual_premium, cash_value, coverage_amount, benefits) VALUES
-    (v_user_id, '终身寿险信托', 'life', 100000, 500000, 10000000, '{"beneficiary": "trust"}'::jsonb),
-    (v_user_id, '高端医疗险 (全球)', 'medical', 20000, 0, 50000000, '{"region": "global"}'::jsonb),
-    (v_user_id, '养老年金险', 'annuity', 50000, 200000, 0, '{"payout_start_age": 60}'::jsonb);
+  INSERT INTO public.insurance_policies (user_id, name, type, category, sub_category, is_tax_advantaged, annual_premium, cash_value, coverage_amount, benefits) VALUES
+    (v_user_id, '终身寿险信托', 'life', 'savings', 'wholeLife', false, 100000, 500000, 10000000, '{"beneficiary": "trust"}'::jsonb),
+    (v_user_id, '高端医疗险 (全球)', 'medical', 'protection', 'medical', false, 20000, 0, 50000000, '{"region": "global"}'::jsonb),
+    (v_user_id, '养老年金险', 'annuity', 'savings', 'pensionAnnuity', false, 50000, 200000, 0, '{"payout_start_age": 60}'::jsonb);
 
-  -- History Snapshots
-  INSERT INTO public.history_snapshots (user_id, date, type, total_amount, snapshot_data) VALUES
-    (v_user_id, NOW() - INTERVAL '90 days', 'initial', 7500000, '{"accounts": {"growth": [], "stability": []}}'::jsonb),
-    (v_user_id, NOW() - INTERVAL '30 days', 'income', 8000000, '{"accounts": {"growth": [], "stability": []}}'::jsonb);
+  -- History Snapshots (Removed)
 END $$;
 
 COMMIT;

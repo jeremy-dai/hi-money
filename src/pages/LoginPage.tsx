@@ -7,6 +7,7 @@ import { Button } from '../components/common/Button';
 import { Card } from '../components/common/Card';
 import { Input } from '../components/common/Input';
 import { useAppStore } from '../store/useAppStore';
+import { supabase } from '../lib/supabase';
 import { ROUTES } from '../utils/constants';
 
 export default function LoginPage() {
@@ -15,23 +16,33 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Simple validation
     if (!email || !password) {
       setError('请输入邮箱和密码');
       return;
     }
 
-    // TODO: Replace with actual authentication logic
-    // For now, accept any non-empty credentials as valid
-    if (email && password) {
-      setAuthenticated(true);
-      navigate(ROUTES.DASHBOARD);
+    setLoading(true);
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    setLoading(false);
+
+    if (authError) {
+      setError(authError.message === 'Invalid login credentials'
+        ? '邮箱或密码错误'
+        : authError.message);
+      return;
     }
+
+    setAuthenticated(true);
+    navigate(ROUTES.DASHBOARD);
   };
 
   return (
@@ -91,8 +102,8 @@ export default function LoginPage() {
               )}
 
               <div className="space-y-3">
-                <Button type="submit" size="lg" className="w-full">
-                  登录
+                <Button type="submit" size="lg" className="w-full" disabled={loading}>
+                  {loading ? '登录中...' : '登录'}
                 </Button>
 
                 <Button
@@ -100,6 +111,7 @@ export default function LoginPage() {
                   variant="ghost"
                   size="lg"
                   className="w-full"
+                  disabled={loading}
                   onClick={() => navigate(ROUTES.DASHBOARD)}
                 >
                   跳过，使用本地存储模式
@@ -109,7 +121,7 @@ export default function LoginPage() {
 
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-400">
-                暂未开放注册 | 演示账号：任意邮箱+密码
+                暂未开放注册
               </p>
             </div>
           </Card>

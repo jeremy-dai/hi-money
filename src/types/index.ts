@@ -5,7 +5,6 @@ export type {
   Account,
   Accounts,
   SpendingRecord,
-  HistoryRecord,
   ProfileData,
   AppState,
 } from './store.types';
