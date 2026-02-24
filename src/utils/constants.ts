@@ -5,18 +5,21 @@ export const INVESTMENT_CATEGORY_COLORS: Record<InvestmentCategoryType, string> 
   growth: '#10B981',   // emerald-500
   stability: '#3B82F6', // blue-500
   special: '#8B5CF6',  // violet-500
+  emergency: '#F59E0B', // amber-400
 };
 
 export const INVESTMENT_CATEGORY_NAMES: Record<InvestmentCategoryType, string> = {
   growth: '成长投资',
   stability: '稳健储蓄',
   special: '特殊用途',
+  emergency: '应急基金',
 };
 
 export const INVESTMENT_CATEGORY_DESCRIPTIONS: Record<InvestmentCategoryType, string> = {
   growth: '股票、ETF、指数基金等高增长投资',
-  stability: '债券、应急基金、定期存款',
+  stability: '债券、定期存款等稳健收益资产',
   special: '教育基金、机会投资、其他目标',
+  emergency: '现金、货币基金、活期存款等高流动性资产',
 };
 
 // 25-15-50-10 income allocation framework

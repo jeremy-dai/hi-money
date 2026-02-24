@@ -1,10 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Briefcase,
   Users,
-  Sliders,
   User,
   AlertTriangle,
   RefreshCw,
@@ -25,16 +24,6 @@ import { ROUTES, CITY_TIER_NAMES, MARITAL_STATUS_NAMES, RISK_TOLERANCE_NAMES } f
 import type { WorkspaceMode } from '../types';
 
 // ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-interface AllocationDraft {
-  growth: number;
-  stability: number;
-  essentials: number;
-  rewards: number;
-}
-
-// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 const fadeUp = {
@@ -45,43 +34,6 @@ const fadeUp = {
     transition: { delay: i * 0.08, duration: 0.35, ease: 'easeOut' as const },
   }),
 };
-
-const ALLOCATION_META: {
-  key: keyof AllocationDraft;
-  label: string;
-  color: string;
-  trackColor: string;
-  thumbColor: string;
-}[] = [
-  {
-    key: 'growth',
-    label: '增长投资',
-    color: 'text-emerald-400',
-    trackColor: 'bg-emerald-500',
-    thumbColor: '#10B981',
-  },
-  {
-    key: 'stability',
-    label: '稳健储蓄',
-    color: 'text-blue-400',
-    trackColor: 'bg-blue-500',
-    thumbColor: '#3B82F6',
-  },
-  {
-    key: 'essentials',
-    label: '基本开支',
-    color: 'text-amber-400',
-    trackColor: 'bg-amber-500',
-    thumbColor: '#F59E0B',
-  },
-  {
-    key: 'rewards',
-    label: '享乐奖励',
-    color: 'text-pink-400',
-    trackColor: 'bg-pink-500',
-    thumbColor: '#EC4899',
-  },
-];
 
 // ---------------------------------------------------------------------------
 // Sub-components
@@ -115,41 +67,6 @@ function SectionHeader({ icon, title, subtitle }: { icon: React.ReactNode; title
   );
 }
 
-/** Allocation slider row */
-function AllocationSlider({
-  meta,
-  value,
-  onChange,
-}: {
-  meta: (typeof ALLOCATION_META)[number];
-  value: number;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between">
-        <span className={`text-sm font-medium ${meta.color}`}>{meta.label}</span>
-        <span className="text-sm font-bold text-white tabular-nums">{value}%</span>
-      </div>
-      <div className="relative h-2 rounded-full bg-gray-800">
-        <div
-          className={`absolute inset-y-0 left-0 rounded-full ${meta.trackColor} transition-all duration-150`}
-          style={{ width: `${value}%` }}
-        />
-        <input
-          type="range"
-          min={0}
-          max={100}
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          style={{ accentColor: meta.thumbColor }}
-        />
-      </div>
-    </div>
-  );
-}
-
 // ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
@@ -162,7 +79,6 @@ export default function SettingsPage() {
     switchMode,
     createSandbox,
     clearSandbox,
-    updateSettings,
     resetAll,
     getCurrentData,
     sandboxData,
@@ -171,16 +87,7 @@ export default function SettingsPage() {
   } = useAppStore();
 
   const currentData = getCurrentData();
-  const { settings, userProfile } = currentData;
-
-  // Allocation draft state — initialized from store settings or defaults
-  const [draft, setDraft] = useState<AllocationDraft>({
-    growth:     settings?.targetAllocation?.growth     ?? 25,
-    stability:  settings?.targetAllocation?.stability  ?? 15,
-    essentials: settings?.targetAllocation?.essentials ?? 50,
-    rewards:    settings?.targetAllocation?.rewards    ?? 10,
-  });
-  const [allocationSaved, setAllocationSaved] = useState(false);
+  const { userProfile } = currentData;
 
   // Example picker state
   const [selectedExampleId, setSelectedExampleId] = useState<string>(
@@ -190,27 +97,6 @@ export default function SettingsPage() {
 
   // Reset confirmation state
   const [showResetConfirm, setShowResetConfirm] = useState(false);
-
-  // Allocation sum
-  const allocationSum = draft.growth + draft.stability + draft.essentials + draft.rewards;
-  const allocationValid = allocationSum === 100;
-
-  // Handle slider change — clamp to prevent going below 0
-  const handleSliderChange = useCallback(
-    (key: keyof AllocationDraft, value: number) => {
-      setDraft((prev) => ({ ...prev, [key]: value }));
-      setAllocationSaved(false);
-    },
-    []
-  );
-
-  // Save allocation
-  const handleSaveAllocation = () => {
-    if (!allocationValid) return;
-    updateSettings({ targetAllocation: { ...draft } });
-    setAllocationSaved(true);
-    setTimeout(() => setAllocationSaved(false), 2000);
-  };
 
   // Reset all data
   const handleResetAll = () => {
@@ -490,115 +376,9 @@ export default function SettingsPage() {
         </motion.div>
 
         {/* ------------------------------------------------------------------ */}
-        {/* Section 2: Target Allocation                                       */}
+        {/* Section 2: Profile Info                                            */}
         {/* ------------------------------------------------------------------ */}
         <motion.div custom={1} variants={fadeUp} initial="hidden" animate="visible">
-          <Card>
-            <SectionHeader
-              icon={<Sliders size={20} />}
-              title="目标配比调整"
-              subtitle="自定义收入分配比例（合计须为 100%）"
-            />
-
-            <div className="space-y-5">
-              {ALLOCATION_META.map((meta) => (
-                <AllocationSlider
-                  key={meta.key}
-                  meta={meta}
-                  value={draft[meta.key]}
-                  onChange={(v) => handleSliderChange(meta.key, v)}
-                />
-              ))}
-            </div>
-
-            {/* Live sum preview */}
-            <div className="mt-5 flex items-center justify-between rounded-xl bg-gray-900/60 border border-gray-700 px-4 py-3">
-              <span className="text-sm text-gray-400">当前合计</span>
-              <span
-                className={`text-sm font-bold tabular-nums ${
-                  allocationValid ? 'text-emerald-400' : 'text-red-400'
-                }`}
-              >
-                {allocationSum}%
-              </span>
-            </div>
-
-            {/* Pie preview bar */}
-            <div className="mt-3 flex h-2 rounded-full overflow-hidden gap-0.5">
-              {ALLOCATION_META.map((meta) => (
-                <div
-                  key={meta.key}
-                  className={`${meta.trackColor} transition-all duration-200`}
-                  style={{ width: `${(draft[meta.key] / Math.max(allocationSum, 1)) * 100}%` }}
-                />
-              ))}
-            </div>
-            <div className="mt-2 flex flex-wrap gap-3">
-              {ALLOCATION_META.map((meta) => (
-                <div key={meta.key} className="flex items-center gap-1.5">
-                  <div className={`w-2 h-2 rounded-full ${meta.trackColor}`} />
-                  <span className="text-xs text-gray-400">
-                    {meta.label} {draft[meta.key]}%
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {/* Validation warning */}
-            <AnimatePresence>
-              {!allocationValid && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="mt-4 flex items-start gap-2 rounded-xl bg-red-500/10 border border-red-500/30 px-4 py-3">
-                    <AlertTriangle size={15} className="text-red-400 mt-0.5 shrink-0" />
-                    <p className="text-xs text-red-300 leading-relaxed">
-                      四项合计为 {allocationSum}%，需调整至 100% 才能保存
-                    </p>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Save button */}
-            <div className="mt-5 flex items-center gap-3">
-              <button
-                onClick={handleSaveAllocation}
-                disabled={!allocationValid}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                  allocationValid
-                    ? 'bg-gold-primary text-black-primary hover:opacity-90 active:scale-95'
-                    : 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                {allocationSaved ? (
-                  <>
-                    <CheckCircle2 size={15} />
-                    已保存
-                  </>
-                ) : (
-                  '保存配比'
-                )}
-              </button>
-              <button
-                onClick={() =>
-                  setDraft({ growth: 25, stability: 15, essentials: 50, rewards: 10 })
-                }
-                className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
-              >
-                恢复默认 (25-15-50-10)
-              </button>
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* ------------------------------------------------------------------ */}
-        {/* Section 3: Profile Info                                            */}
-        {/* ------------------------------------------------------------------ */}
-        <motion.div custom={2} variants={fadeUp} initial="hidden" animate="visible">
           <Card>
             <SectionHeader
               icon={<User size={20} />}
@@ -665,9 +445,9 @@ export default function SettingsPage() {
         </motion.div>
 
         {/* ------------------------------------------------------------------ */}
-        {/* Section 4: Data Management                                         */}
+        {/* Section 3: Data Management                                         */}
         {/* ------------------------------------------------------------------ */}
-        <motion.div custom={3} variants={fadeUp} initial="hidden" animate="visible">
+        <motion.div custom={2} variants={fadeUp} initial="hidden" animate="visible">
           <Card>
             <SectionHeader
               icon={<AlertTriangle size={20} />}
@@ -731,10 +511,10 @@ export default function SettingsPage() {
         </motion.div>
 
         {/* ------------------------------------------------------------------ */}
-        {/* Section 5: Account / Logout                                       */}
+        {/* Section 4: Account / Logout                                       */}
         {/* ------------------------------------------------------------------ */}
         {isAuthenticated && (
-          <motion.div custom={4} variants={fadeUp} initial="hidden" animate="visible">
+          <motion.div custom={3} variants={fadeUp} initial="hidden" animate="visible">
             <Card>
               <SectionHeader
                 icon={<LogOut size={20} />}

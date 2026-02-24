@@ -4,7 +4,6 @@ export const INSURANCE_CATEGORY_LABELS: Record<InsuranceCategory, string> = {
   protection: '保障型',
   savings: '储蓄型',
   investment: '投资型',
-  group: '团体/企业',
 };
 
 export const INSURANCE_SUBCATEGORY_LABELS: Record<InsuranceSubCategory, string> = {
@@ -26,25 +25,18 @@ export const INSURANCE_SUBCATEGORY_LABELS: Record<InsuranceSubCategory, string> 
   participating: '分红险',
   universalLife: '万能险',
   unitLinked: '投连险',
-  
-  // Group
-  enterpriseAnnuity: '企业年金',
-  groupAccident: '团体意外',
-  supplementaryMedical: '补充医疗',
 };
 
 export const INSURANCE_CATEGORY_COLORS: Record<InsuranceCategory, string> = {
   protection: '#10B981', // emerald-500
   savings: '#3B82F6',    // blue-500
   investment: '#8B5CF6', // violet-500
-  group: '#F59E0B',      // amber-500
 };
 
 export const INSURANCE_CATEGORY_MAPPING: Record<InsuranceCategory, InsuranceSubCategory[]> = {
   protection: ['criticalIllness', 'medical', 'accident', 'termLife', 'cancer'],
   savings: ['increasingWholeLife', 'pensionAnnuity', 'educationAnnuity', 'endowment', 'wholeLife'],
   investment: ['participating', 'universalLife', 'unitLinked'],
-  group: ['enterpriseAnnuity', 'groupAccident', 'supplementaryMedical'],
 };
 
 // Helper to get subcategory label safely

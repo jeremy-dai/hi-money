@@ -1,5 +1,5 @@
 import type { UserProfile } from './profile.types';
-import type { AllocationRecommendation } from './allocation.types';
+import type { AllocationRecommendation, InvestmentPoolAllocation } from './allocation.types';
 import type { InsurancePolicy } from './insurance.types';
 import type { WorkspaceSettings } from './settings.types';
 
@@ -11,7 +11,7 @@ export type WorkspaceMode = 'PERSONAL' | 'EXAMPLE' | 'SANDBOX';
 // ---------------------------------------------------------------------------
 // Core data primitives
 // ---------------------------------------------------------------------------
-export type InvestmentCategoryType = 'growth' | 'stability' | 'special';
+export type InvestmentCategoryType = 'growth' | 'stability' | 'special' | 'emergency';
 
 /** Income allocation targets (the 25-15-50-10 framework) */
 export interface Allocation {
@@ -32,6 +32,7 @@ export interface Accounts {
   growth: Account[];
   stability: Account[];
   special: Account[];
+  emergency: Account[];
 }
 
 /** Monthly spending record */
@@ -100,7 +101,10 @@ export interface AppState {
   addPolicy: (policy: InsurancePolicy) => void;
   updatePolicy: (id: string, updates: Partial<InsurancePolicy>) => void;
   deletePolicy: (id: string) => void;
+  refreshPolicies: () => void;
   updateSettings: (settings: Partial<WorkspaceSettings>) => void;
+  setInvestmentTargets: (targets: InvestmentPoolAllocation | null) => void;
+  getInvestmentTargets: () => InvestmentPoolAllocation | null;
   resetAll: () => void;
   applyRecommendedAllocation: () => void;
 }

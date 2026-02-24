@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Plus, Pencil, Trash2, Check, X, FileText, List } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Pencil, Trash2, Check, X, FileText, List, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
 import { PageContainer } from '../components/layout/PageContainer';
 import { Card } from '../components/common/Card';
 import { useAppStore } from '../store/useAppStore';
 import { formatCNY } from '../lib/format';
 import { getMonthlySpendingChartData } from '../algorithms/spendingAnalytics';
 import { SpendingBarChart } from '../components/charts/SpendingBarChart';
+import { AllocationDonut } from '../components/charts/AllocationDonut';
+import { DEFAULT_ALLOCATION } from '../utils/constants';
 import type { SpendingRecord } from '../types';
 
 const currentMonth = (): string => {
@@ -34,6 +36,8 @@ export default function SpendingPage() {
   const [isBatchMode, setIsBatchMode] = useState(false);
   const [batchText, setBatchText] = useState('');
   const [parsedBatch, setParsedBatch] = useState<SpendingRecord[]>([]);
+
+  const [showFramework, setShowFramework] = useState(false);
 
   const sorted = [...spending].sort((a, b) => b.month.localeCompare(a.month));
   const chartData = getMonthlySpendingChartData(spending);
@@ -163,6 +167,62 @@ export default function SpendingPage() {
             </Card>
           ))}
         </div>
+
+        {/* 25-15-50-10 Educational Card */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+          <Card>
+            <button
+              onClick={() => setShowFramework(!showFramework)}
+              className="w-full flex items-center justify-between"
+            >
+              <div className="flex items-center gap-2">
+                <BookOpen size={16} className="text-indigo-400" />
+                <span className="text-sm font-semibold text-white">收入配置法则 25-15-50-10</span>
+              </div>
+              {showFramework ? (
+                <ChevronUp size={16} className="text-gray-500" />
+              ) : (
+                <ChevronDown size={16} className="text-gray-500" />
+              )}
+            </button>
+
+            <AnimatePresence>
+              {showFramework && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="mt-4 space-y-4">
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      将月收入按以下比例分配，帮助您在资产增长、生活保障与生活品质之间取得平衡。
+                    </p>
+                    <AllocationDonut
+                      allocation={DEFAULT_ALLOCATION}
+                      target={DEFAULT_ALLOCATION}
+                    />
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        { label: '增长投资', pct: '25%', desc: '股票、ETF、基金', color: 'text-emerald-400' },
+                        { label: '稳健储蓄', pct: '15%', desc: '债券、应急金', color: 'text-blue-400' },
+                        { label: '基本开支', pct: '50%', desc: '房租、餐饮、日常', color: 'text-amber-400' },
+                        { label: '享乐奖励', pct: '10%', desc: '旅行、娱乐', color: 'text-pink-400' },
+                      ].map((item) => (
+                        <div key={item.label} className="p-2.5 rounded-lg bg-white/3">
+                          <p className={`text-sm font-semibold ${item.color}`}>
+                            {item.label} <span className="text-white">{item.pct}</span>
+                          </p>
+                          <p className="text-xs text-gray-500 mt-0.5">{item.desc}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </Card>
+        </motion.div>
 
         {/* Chart */}
         {chartData.length > 0 && (
@@ -355,8 +415,9 @@ export default function SpendingPage() {
                                 className={`text-xs px-1.5 py-0.5 rounded ${
                                   pct > 55 ? 'bg-red-500/15 text-red-400' : 'bg-emerald-500/15 text-emerald-400'
                                 }`}
+                                title="支出占月收入百分比"
                               >
-                                {pct.toFixed(0)}%
+                                占收入 {pct.toFixed(0)}%
                               </span>
                             )}
                           </div>

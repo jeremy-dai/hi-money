@@ -8,7 +8,7 @@
 /**
  * Insurance Categories & Subcategories
  */
-export type InsuranceCategory = 'protection' | 'savings' | 'investment' | 'group';
+export type InsuranceCategory = 'protection' | 'savings' | 'investment';
 
 export type InsuranceSubCategory =
   // Protection (保障型)
@@ -16,9 +16,7 @@ export type InsuranceSubCategory =
   // Savings (储蓄型)
   | 'increasingWholeLife' | 'pensionAnnuity' | 'educationAnnuity' | 'endowment' | 'wholeLife'
   // Investment (投资型)
-  | 'participating' | 'universalLife' | 'unitLinked'
-  // Group (团体/企业)
-  | 'enterpriseAnnuity' | 'groupAccident' | 'supplementaryMedical';
+  | 'participating' | 'universalLife' | 'unitLinked';
 
 /**
  * Individual insurance policy with triple-dispatch values
@@ -34,6 +32,8 @@ export interface InsurancePolicy {
   cashValue: number;
   coverageAmount: number;
   startDate: string;
+  endDate?: string; // Policy maturity date
+  cashValueSchedule?: { year: number; amount: number }[];
   notes?: string;
   benefits: Record<string, string>;
 }

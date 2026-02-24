@@ -19,11 +19,9 @@ import { calculateRecommendedAllocation } from '../algorithms/recommendAllocatio
 import { saveProfileData } from '../services/supabaseService';
 import { supabase } from '../lib/supabase';
 import { EXAMPLE_PROFILES } from '../data/exampleProfiles';
-
-// Helper to get total cash value from policies
-const getTotalCashValue = (policies: InsurancePolicy[]) => {
-  return policies.reduce((sum, p) => sum + (p.cashValue || 0), 0);
-};
+import { calculateCurrentCashValue } from '../lib/utils';
+import { getCashValueByAssetCategory } from '../algorithms/insuranceDispatch';
+import type { InvestmentPoolAllocation } from '../types/allocation.types';
 
 // Helper to get total coverage from policies
 const getTotalCoverage = (policies: InsurancePolicy[]) => {
@@ -33,7 +31,7 @@ const getTotalCoverage = (policies: InsurancePolicy[]) => {
 const createEmptyProfile = (): ProfileData => ({
   monthlyIncome: 0,
   allocation: { ...DEFAULT_ALLOCATION },
-  accounts: { growth: [], stability: [], special: [] },
+  accounts: { growth: [], stability: [], special: [], emergency: [] },
   spending: [],
   userProfile: null,
   policies: [],
@@ -85,18 +83,19 @@ export const useAppStore = create<AppState>()(
       // Derived getters
       // -----------------------------------------------------------------------
       getCategoryTotal: (category: InvestmentCategoryType) => {
-        const accounts = get().getCurrentData().accounts;
-        return (accounts[category] || []).reduce((sum, a) => sum + (a.amount || 0), 0);
+        const { accounts, policies } = get().getCurrentData();
+        const accountTotal = (accounts[category] || []).reduce((sum, a) => sum + (a.amount || 0), 0);
+        const insuranceCashValue = getCashValueByAssetCategory(policies)[category];
+        return accountTotal + insuranceCashValue;
       },
 
       getTotalAssets: () => {
-        const { getCategoryTotal, getCurrentData } = get();
-        const policies = getCurrentData().policies;
+        const { getCategoryTotal } = get();
         return (
           getCategoryTotal('growth') +
           getCategoryTotal('stability') +
           getCategoryTotal('special') +
-          getTotalCashValue(policies)
+          getCategoryTotal('emergency')
         );
       },
 
@@ -108,15 +107,15 @@ export const useAppStore = create<AppState>()(
       },
 
       getCategoryDeviation: (category: InvestmentCategoryType) => {
-        const { getCategoryPercentage } = get();
+        // Emergency has no fixed % target; deviation is always 0
+        if (category === 'emergency') return 0;
+        const { getCategoryPercentage, getInvestmentTargets, getRecommendedAllocation } = get();
         const actual = getCategoryPercentage(category);
-        // Default investment distribution target: 60% growth / 30% stability / 10% special
-        const targets: Record<InvestmentCategoryType, number> = {
-          growth: 60,
-          stability: 30,
-          special: 10,
-        };
-        return parseFloat((actual - targets[category]).toFixed(1));
+        const userTargets = getInvestmentTargets();
+        const recommended = getRecommendedAllocation();
+        const targets = userTargets
+          ?? (recommended ? recommended.investmentAllocation : { growth: 60, stability: 30, special: 10 });
+        return parseFloat((actual - (targets[category] ?? 0)).toFixed(1));
       },
 
       getTargetAllocation: (): Allocation => {
@@ -153,6 +152,11 @@ export const useAppStore = create<AppState>()(
         const userProfile = get().getCurrentData().userProfile;
         if (!userProfile) return null;
         return calculateRecommendedAllocation(userProfile);
+      },
+
+      getInvestmentTargets: (): InvestmentPoolAllocation | null => {
+        const settings = get().getCurrentData().settings;
+        return settings?.investmentTargets ?? null;
       },
 
       // -----------------------------------------------------------------------
@@ -345,12 +349,41 @@ export const useAppStore = create<AppState>()(
         if (get().activeMode === 'PERSONAL') syncProfile(get().personalData);
       },
 
+      refreshPolicies: () => {
+        set((state) => {
+          const data = getMutableSlice(state, state.activeMode);
+          if (!data) return;
+
+          data.policies.forEach((policy) => {
+            if (policy.cashValueSchedule && policy.cashValueSchedule.length > 0 && policy.startDate) {
+              const newVal = calculateCurrentCashValue(policy.startDate, policy.cashValueSchedule);
+              if (policy.cashValue !== newVal) {
+                policy.cashValue = newVal;
+              }
+            }
+          });
+        });
+        if (get().activeMode === 'PERSONAL') syncProfile(get().personalData);
+      },
+
       updateSettings: (settings: Partial<WorkspaceSettings>) => {
         set((state) => {
           const data = getMutableSlice(state, state.activeMode);
           if (data) {
              data.settings = { ...(data.settings || { targetAllocation: DEFAULT_ALLOCATION, subCategories: [] }), ...settings };
           }
+        });
+        if (get().activeMode === 'PERSONAL') syncProfile(get().personalData);
+      },
+
+      setInvestmentTargets: (targets: InvestmentPoolAllocation | null) => {
+        set((state) => {
+          const data = getMutableSlice(state, state.activeMode);
+          if (!data) return;
+          if (!data.settings) {
+            data.settings = { targetAllocation: DEFAULT_ALLOCATION, subCategories: [] };
+          }
+          data.settings.investmentTargets = targets;
         });
         if (get().activeMode === 'PERSONAL') syncProfile(get().personalData);
       },

@@ -18,14 +18,15 @@ const normalizePolicy = (p: any): InsurancePolicy => ({
   cashValue: p.cash_value,
   coverageAmount: p.coverage_amount,
   startDate: p.start_date,
+  cashValueSchedule: p.cash_value_schedule,
   notes: p.notes,
   benefits: p.benefits || {}
 });
 
 const groupAccounts = (rows: any[]): Accounts => {
-  const accounts: Accounts = { growth: [], stability: [], special: [] };
+  const accounts: Accounts = { growth: [], stability: [], special: [], emergency: [] };
   rows.forEach(row => {
-    if (row.category === 'growth' || row.category === 'stability' || row.category === 'special') {
+    if (row.category === 'growth' || row.category === 'stability' || row.category === 'special' || row.category === 'emergency') {
       const category = row.category as keyof Accounts;
       accounts[category].push({ 
         name: row.name, 
@@ -163,6 +164,7 @@ export const saveProfileData = async (userId: string, data: ProfileData) => {
             cash_value: p.cashValue,
             coverage_amount: p.coverageAmount,
             start_date: p.startDate,
+            cash_value_schedule: p.cashValueSchedule,
             notes: p.notes,
             benefits: p.benefits
         }));

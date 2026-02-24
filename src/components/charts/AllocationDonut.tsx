@@ -59,6 +59,7 @@ export function AllocationDonut({ allocation, target }: Props) {
                 color: '#fff',
                 fontSize: 12,
               }}
+              itemStyle={{ color: '#fff' }}
               formatter={((value: number | undefined, _name: string, props: { payload?: { name: string; target: number; deviation: number } }) => [
                 `${value ?? 0}%（目标 ${props.payload?.target ?? 0}%）`,
                 props.payload?.name ?? '',

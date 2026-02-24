@@ -1,6 +1,7 @@
 import {
   TrendingUp,
   Shield,
+  ShieldAlert,
   Home,
   Gift,
   Target,
@@ -12,6 +13,7 @@ export const CATEGORY_ICON_COMPONENTS: Record<InvestmentCategoryType | 'essentia
   growth: TrendingUp,
   stability: Shield,
   special: Target,
+  emergency: ShieldAlert,
   essentials: Home,
   rewards: Gift,
 };

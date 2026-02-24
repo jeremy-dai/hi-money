@@ -2,23 +2,24 @@ import { motion } from 'framer-motion';
 import { PageContainer } from '../components/layout/PageContainer';
 import { Card } from '../components/common/Card';
 import { HeroMetrics } from '../components/dashboard/HeroMetrics';
-import { AllocationDonut } from '../components/charts/AllocationDonut';
+import { AssetAllocationDonut } from '../components/charts/AssetAllocationDonut';
 import { SpendingBarChart } from '../components/charts/SpendingBarChart';
 import { ActionCenter } from '../components/dashboard/ActionCenter';
 import { useAppStore } from '../store/useAppStore';
 import { getMonthlySpendingChartData, generateActionItems } from '../algorithms/spendingAnalytics';
-import { DEFAULT_ALLOCATION } from '../utils/constants';
 import { getTotalCashValue } from '../algorithms/insuranceDispatch';
+import type { InvestmentCategoryType } from '../types';
 
 export default function DashboardPage() {
   const store = useAppStore();
   const data = store.getCurrentData();
-  const { allocation, spending, policies, monthlyIncome } = data;
+  const { spending, policies, monthlyIncome } = data;
 
   const totalAssets =
     store.getCategoryTotal('growth') +
     store.getCategoryTotal('stability') +
-    store.getCategoryTotal('special');
+    store.getCategoryTotal('special') +
+    store.getCategoryTotal('emergency');
   const cashValue = getTotalCashValue(policies);
   const totalNetWorth = totalAssets + cashValue;
 
@@ -28,8 +29,24 @@ export default function DashboardPage() {
   const chartData = getMonthlySpendingChartData(spending);
   const targetMonthlySpending = monthlyIncome * 0.5;
 
-  const targetAllocation = data.settings?.targetAllocation ?? DEFAULT_ALLOCATION;
   const actionItems = generateActionItems(data);
+
+  const TARGET_CATEGORIES: Array<'growth' | 'stability' | 'special'> = ['growth', 'stability', 'special'];
+  const recommendedAllocation = store.getRecommendedAllocation();
+  const userTargets = store.getInvestmentTargets();
+  const activeTargets = userTargets ?? recommendedAllocation?.investmentAllocation;
+
+  const assetCategoryData: Array<{ key: InvestmentCategoryType; percentage: number; target?: number }> = [
+    ...TARGET_CATEGORIES.map((cat) => ({
+      key: cat as InvestmentCategoryType,
+      percentage: store.getCategoryPercentage(cat),
+      target: activeTargets ? parseFloat(activeTargets[cat].toFixed(1)) : undefined,
+    })),
+    {
+      key: 'emergency' as const,
+      percentage: store.getCategoryPercentage('emergency'),
+    },
+  ];
 
   return (
     <PageContainer>
@@ -61,18 +78,24 @@ export default function DashboardPage() {
           className="grid grid-cols-1 md:grid-cols-2 gap-4"
         >
           <Card>
-            <h2 className="text-base font-semibold text-white mb-4">收入配置分布</h2>
-            {allocation.growth + allocation.stability + allocation.essentials + allocation.rewards > 0 ? (
-              <AllocationDonut allocation={allocation} target={targetAllocation} />
+            <div className="mb-5">
+              <h2 className="text-base font-semibold text-white">资产配置分布</h2>
+              <p className="text-[11px] text-gray-500 mt-0.5">投资组合与目标偏差</p>
+            </div>
+            {totalAssets > 0 ? (
+              <AssetAllocationDonut categories={assetCategoryData} />
             ) : (
               <div className="h-48 flex items-center justify-center text-gray-600 text-sm">
-                尚未设置收入配置
+                尚未录入投资账户
               </div>
             )}
           </Card>
 
           <Card>
-            <h2 className="text-base font-semibold text-white mb-4">支出趋势</h2>
+            <div className="mb-4">
+              <h2 className="text-base font-semibold text-white">支出趋势</h2>
+              <p className="text-[11px] text-gray-500 mt-0.5">近期月度支出与移动平均</p>
+            </div>
             {chartData.length > 0 ? (
               <SpendingBarChart data={chartData} targetMonthly={targetMonthlySpending} />
             ) : (

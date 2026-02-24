@@ -29,15 +29,21 @@ function LoadingSpinner() {
 }
 
 function App() {
-  const { setAuthenticated, loadPersonalData } = useAppStore();
+  const { setAuthenticated, loadPersonalData, refreshPolicies } = useAppStore();
 
   useEffect(() => {
+    // Refresh policies on mount (for persisted data)
+    refreshPolicies();
+
     // Check active session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setAuthenticated(!!session);
       if (session?.user) {
         fetchProfileData(session.user.id).then((data) => {
-          if (data) loadPersonalData(data);
+          if (data) {
+            loadPersonalData(data);
+            refreshPolicies();
+          }
         });
       }
     });
@@ -47,13 +53,16 @@ function App() {
       setAuthenticated(!!session);
       if (session?.user) {
         fetchProfileData(session.user.id).then((data) => {
-          if (data) loadPersonalData(data);
+          if (data) {
+            loadPersonalData(data);
+            refreshPolicies();
+          }
         });
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [setAuthenticated, loadPersonalData]);
+  }, [setAuthenticated, loadPersonalData, refreshPolicies]);
 
   return (
     <BrowserRouter>

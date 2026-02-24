@@ -1,7 +1,7 @@
 export interface SubCategory {
   id: string;
   name: string;
-  parentCategory: 'growth' | 'stability' | 'special';
+  parentCategory: 'growth' | 'stability' | 'special' | 'emergency';
   color?: string;
 }
 
@@ -12,6 +12,12 @@ export interface WorkspaceSettings {
     essentials: number;
     rewards: number;
   };
+  /** User-overridden investment pool targets (growth/stability/special %). If null, uses algorithm recommendation. */
+  investmentTargets?: {
+    growth: number;
+    stability: number;
+    special: number;
+  } | null;
   subCategories: SubCategory[];
 }
 
