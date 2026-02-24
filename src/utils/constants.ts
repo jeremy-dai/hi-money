@@ -84,9 +84,3 @@ export const PRIMARY_GOAL_NAMES: Record<
   security: '财务安全',
 };
 
-// Example Profiles Mapping (ID to UUID)
-export const EXAMPLE_USER_IDS: Record<string, string> = {
-  'fresh-graduate': '00000000-0000-0000-0000-000000000001',
-  'mid-career-family': '00000000-0000-0000-0000-000000000002',
-  'high-net-worth': '00000000-0000-0000-0000-000000000003',
-};

@@ -14,10 +14,11 @@ import type {
 import type { UserProfile } from '../types/profile.types';
 import type { InsurancePolicy } from '../types/insurance.types';
 import type { WorkspaceSettings } from '../types/settings.types';
-import { DEFAULT_ALLOCATION, EXAMPLE_USER_IDS } from '../utils/constants';
+import { DEFAULT_ALLOCATION } from '../utils/constants';
 import { calculateRecommendedAllocation } from '../algorithms/recommendAllocation';
-import { saveProfileData, fetchProfileData } from '../services/supabaseService';
+import { saveProfileData } from '../services/supabaseService';
 import { supabase } from '../lib/supabase';
+import { EXAMPLE_PROFILES } from '../data/exampleProfiles';
 
 // Helper to get total cash value from policies
 const getTotalCashValue = (policies: InsurancePolicy[]) => {
@@ -63,18 +64,16 @@ export const useAppStore = create<AppState>()(
       activeExampleId: null as string | null,
       personalData: createEmptyProfile(),
       sandboxData: null as ProfileData | null,
-      exampleDataCache: {},
-      isLoadingExample: false,
       isAuthenticated: false,
 
       // -----------------------------------------------------------------------
       // Core getter — all reads go through this
       // -----------------------------------------------------------------------
       getCurrentData: (): ProfileData => {
-        const { activeMode, activeExampleId, personalData, sandboxData, exampleDataCache } = get();
+        const { activeMode, activeExampleId, personalData, sandboxData } = get();
 
         if (activeMode === 'EXAMPLE' && activeExampleId) {
-          return exampleDataCache[activeExampleId] ?? personalData;
+          return EXAMPLE_PROFILES[activeExampleId] ?? personalData;
         } else if (activeMode === 'SANDBOX' && sandboxData) {
           return sandboxData;
         }
@@ -160,41 +159,14 @@ export const useAppStore = create<AppState>()(
       // Workspace actions
       // -----------------------------------------------------------------------
       switchMode: (mode: WorkspaceMode, exampleId?: string) => {
-        if (mode === 'EXAMPLE' && exampleId) {
-          get().loadExampleProfile(exampleId);
-        }
         set((state) => {
           state.activeMode = mode;
           state.activeExampleId = exampleId ?? null;
         });
       },
 
-      loadExampleProfile: async (exampleId: string) => {
-        const { exampleDataCache } = get();
-        if (exampleDataCache[exampleId]) return;
-
-        const userId = EXAMPLE_USER_IDS[exampleId];
-        if (!userId) return;
-
-        set((state) => {
-          state.isLoadingExample = true;
-        });
-
-        try {
-          const data = await fetchProfileData(userId);
-          if (data) {
-            set((state) => {
-              state.exampleDataCache[exampleId] = data;
-            });
-          }
-        } catch (error) {
-          console.error('Failed to load example profile', error);
-        } finally {
-          set((state) => {
-            state.isLoadingExample = false;
-          });
-        }
-      },
+      // Example profiles are now bundled locally; this is a no-op kept for API compatibility.
+      loadExampleProfile: (_exampleId: string) => {},
 
       createSandbox: (base?: Partial<ProfileData>) =>
         set((state) => {

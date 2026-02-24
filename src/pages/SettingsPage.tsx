@@ -160,7 +160,6 @@ export default function SettingsPage() {
     activeMode,
     activeExampleId,
     switchMode,
-    isLoadingExample,
     createSandbox,
     clearSandbox,
     updateSettings,
@@ -409,12 +408,9 @@ export default function SettingsPage() {
 
                 <button
                   onClick={() => switchMode('EXAMPLE', selectedExampleId)}
-                  disabled={isLoadingExample}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors ${
-                    isLoadingExample ? 'opacity-50 cursor-wait' : ''
-                  }`}
+                  className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
                 >
-                  {isLoadingExample ? '加载中...' : '加载案例'}
+                  加载案例
                 </button>
               </div>
 

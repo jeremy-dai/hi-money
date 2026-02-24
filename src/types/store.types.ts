@@ -63,8 +63,6 @@ export interface AppState {
   activeExampleId: string | null;
   personalData: ProfileData;
   sandboxData: ProfileData | null;
-  exampleDataCache: Record<string, ProfileData>;
-  isLoadingExample: boolean;
   isAuthenticated: boolean;
 
   // Getters (read from getCurrentData())
@@ -81,7 +79,7 @@ export interface AppState {
 
   // Workspace actions
   switchMode: (mode: WorkspaceMode, exampleId?: string) => void;
-  loadExampleProfile: (exampleId: string) => Promise<void>;
+  loadExampleProfile: (exampleId: string) => void;
   createSandbox: (base?: Partial<ProfileData>) => void;
   clearSandbox: () => void;
   loadPersonalData: (data: ProfileData) => void;
