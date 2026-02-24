@@ -36,7 +36,7 @@ export function Button({
   if (variant === 'primary') {
     return (
       <ShimmerButton
-        className={cn("w-full md:w-auto", sizes[size], className)}
+        className={cn(sizes[size], className)}
         disabled={disabled}
         {...props}
       >
@@ -49,7 +49,7 @@ export function Button({
     return (
       <MovingBorderButton
         borderRadius="0.5rem"
-        containerClassName={cn("w-full md:w-auto h-auto", className)}
+        containerClassName={cn("w-full md:w-auto md:mx-auto h-auto", className)}
         className={cn("bg-black text-white border-neutral-200 dark:border-slate-800", sizes[size])}
         disabled={disabled}
         {...props}

@@ -37,14 +37,7 @@ export type {
   FamilyAllocation,
 } from './insurance.types';
 
-export type {
-  RetirementCalculatorInput,
-  RetirementGapResult,
-  PensionAnalysis,
-  CorpusAnalysis,
-  LifestyleScenarioResult,
-  LifestyleScenario,
-} from './retirement.types';
+
 
 export type {
   SubCategory,

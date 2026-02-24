@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus,
@@ -11,11 +11,13 @@ import {
   Landmark,
   ChevronDown,
   ChevronUp,
+  AlertTriangle,
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { PageContainer } from '../components/layout/PageContainer';
 import { Card } from '../components/common/Card';
 import { PolicyForm } from '../components/insurance/PolicyForm';
+import { InsuranceGapChart } from '../components/insurance/InsuranceGapChart';
 import { FreshnessIndicator } from '../components/common/FreshnessIndicator';
 import { formatCNY } from '../lib/format';
 import {
@@ -24,8 +26,10 @@ import {
   getTotalCoverage,
   getMonthlyPremiumCost,
 } from '../algorithms/insuranceDispatch';
+import { calculateInsuranceGap } from '../algorithms/insuranceCalculator';
 import type { InvestmentCategoryType } from '../types';
 import type { InsurancePolicy, InsuranceCategory } from '../types/insurance.types';
+import type { InsuranceProfile } from '../types/profile.types';
 import {
   INVESTMENT_CATEGORY_NAMES,
   INVESTMENT_CATEGORY_DESCRIPTIONS,
@@ -53,10 +57,11 @@ const CATEGORY_ICON: Record<InvestmentCategoryType, React.ReactNode> = {
 export default function AssetsPage() {
   const store = useAppStore();
   const data = store.getCurrentData();
-  const { accounts, policies } = data;
+  const { accounts, policies, userProfile } = data;
   const isReadOnly = store.activeMode === 'EXAMPLE';
 
   const [activeTab, setActiveTab] = useState<TabType>('investments');
+  const [showGapAnalysis, setShowGapAnalysis] = useState(false);
   const [expanded, setExpanded] = useState<Record<InvestmentCategoryType, boolean>>({
     growth: true,
     stability: true,
@@ -83,6 +88,54 @@ export default function AssetsPage() {
   const totalAnnualPremiums = getTotalAnnualPremiums(policies);
   const monthlyPremiumCost = getMonthlyPremiumCost(policies);
   const riskLeverageRatio = store.getRiskLeverageRatio();
+
+  // Insurance Gap Analysis
+  const insuranceProfile: InsuranceProfile = useMemo(() => {
+    const profile: InsuranceProfile = {
+      existingCoverage: {
+        medicalInsurance: 0,
+        lifeInsurance: 0,
+        criticalIllness: 0,
+        accidentInsurance: 0,
+      },
+      existingCoverageAmount: {
+        life: 0,
+        criticalIllness: 0,
+        medical: 0,
+      },
+      dependents: (userProfile?.childrenCount || 0) + (userProfile?.maritalStatus === 'married' ? 1 : 0),
+      parentsCare: userProfile?.parentsCare || false,
+    };
+
+    policies.forEach((p) => {
+      const amount = p.coverageAmount || 0;
+      const type = p.subCategory || p.type;
+      
+      if (type === 'medical' || type === 'supplementaryMedical') {
+        profile.existingCoverage.medicalInsurance += amount;
+        profile.existingCoverageAmount.medical += amount;
+      } else if (['termLife', 'wholeLife', 'increasingWholeLife', 'endowment', 'life'].includes(type)) {
+        profile.existingCoverage.lifeInsurance += amount;
+        profile.existingCoverageAmount.life += amount;
+      } else if (type === 'criticalIllness') {
+        profile.existingCoverage.criticalIllness += amount;
+        profile.existingCoverageAmount.criticalIllness += amount;
+      } else if (type === 'accident' || type === 'groupAccident') {
+        profile.existingCoverage.accidentInsurance += amount;
+      }
+    });
+
+    return profile;
+  }, [policies, userProfile]);
+
+  const gapResult = useMemo(() => {
+    if (!userProfile) return null;
+    return calculateInsuranceGap({
+      userProfile,
+      insuranceProfile,
+      mortgageBalance: userProfile.hasMortgage ? userProfile.existingDebts : 0,
+    });
+  }, [userProfile, insuranceProfile]);
 
   const groupedPolicies = policies.reduce((acc, policy) => {
     const cat = policy.category || 'other';
@@ -340,6 +393,51 @@ export default function AssetsPage() {
               transition={{ duration: 0.15 }}
               className="space-y-4"
             >
+              {/* Gap Analysis Toggle */}
+              {userProfile && (
+                <div className="flex justify-end mb-2">
+                  <button
+                    onClick={() => setShowGapAnalysis(!showGapAnalysis)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                      showGapAnalysis 
+                        ? 'bg-indigo-600 text-white' 
+                        : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    <Shield size={14} />
+                    {showGapAnalysis ? '隐藏保障缺口分析' : '显示保障缺口分析'}
+                  </button>
+                </div>
+              )}
+
+              {/* Gap Analysis Chart */}
+              <AnimatePresence>
+                {showGapAnalysis && gapResult && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden mb-4"
+                  >
+                    <InsuranceGapChart result={gapResult} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              
+              {!userProfile && showGapAnalysis && (
+                <Card className="mb-4 bg-amber-500/10 border-amber-500/30">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="text-amber-500" size={20} />
+                    <div>
+                      <h4 className="text-sm font-bold text-amber-500">需完善个人档案</h4>
+                      <p className="text-xs text-amber-500/80 mt-0.5">
+                        请前往设置页面完善个人信息，以便进行保险缺口分析。
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              )}
+
               {/* Triple-dispatch summary */}
               <Card>
                 <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">三重调度总览</p>
