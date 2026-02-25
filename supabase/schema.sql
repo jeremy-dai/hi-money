@@ -124,6 +124,9 @@ create table public.insurance_policies (
   cash_value numeric default 0,
   coverage_amount numeric default 0,
   start_date date,
+  cash_value_schedule jsonb,  -- Year-by-year cash value: [{year, amount}]
+  premium_schedule jsonb,     -- Year-by-year premium: [{year, amount}]
+  coverage_schedule jsonb,    -- Year-by-year coverage: [{year, amount}]
   benefits jsonb default '{}'::jsonb, -- Flexible key-value pairs for benefits
   notes text,
   
