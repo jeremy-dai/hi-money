@@ -28,7 +28,7 @@ const getTotalCoverage = (policies: InsurancePolicy[]) => {
   return policies.reduce((sum, p) => sum + (p.coverageAmount || 0), 0);
 };
 
-const createEmptyProfile = (): ProfileData => ({
+export const createEmptyProfile = (): ProfileData => ({
   monthlyIncome: 0,
   allocation: { ...DEFAULT_ALLOCATION },
   accounts: { growth: [], stability: [], special: [], emergency: [] },
@@ -49,20 +49,38 @@ function getMutableSlice(
 
 // Sync helpers
 const syncProfile = async (data: ProfileData) => {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session?.user) {
-    saveProfileData(session.user.id, data);
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      await saveProfileData(session.user.id, data);
+    }
+  } catch (e) {
+    console.error('Profile sync error:', e);
   }
 };
 
 const syncUpsertSpending = async (record: SpendingRecord) => {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session?.user) upsertSpendingRecord(session.user.id, record);
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      const { error } = await upsertSpendingRecord(session.user.id, record);
+      if (error) console.error('Failed to sync spending:', error);
+    }
+  } catch (e) {
+    console.error('Spending sync error:', e);
+  }
 };
 
 const syncDeleteSpending = async (month: string) => {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session?.user) deleteSpendingRecord(session.user.id, month);
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      const { error } = await deleteSpendingRecord(session.user.id, month);
+      if (error) console.error('Failed to delete spending:', error);
+    }
+  } catch (e) {
+    console.error('Spending delete sync error:', e);
+  }
 };
 
 export const useAppStore = create<AppState>()(

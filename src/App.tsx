@@ -5,8 +5,8 @@ import { ROUTES } from './utils/constants';
 import { TopNav } from './components/layout/TopNav';
 import { ModeBanner } from './components/workspace/ModeBanner';
 import { supabase } from './lib/supabase';
-import { useAppStore } from './store/useAppStore';
-import { fetchProfileData } from './services/supabaseService';
+import { useAppStore, createEmptyProfile } from './store/useAppStore';
+import { fetchProfileData, saveProfileData } from './services/supabaseService';
 
 // Pre-auth pages
 const WelcomePage = lazy(() => import('./pages/WelcomePage'));
@@ -35,30 +35,30 @@ function App() {
     // Refresh policies on mount (for persisted data)
     refreshPolicies();
 
+    // Helper: load or create profile for authenticated user
+    const initUserProfile = async (userId: string) => {
+      const data = await fetchProfileData(userId);
+      if (data) {
+        loadPersonalData(data);
+      } else {
+        // New user — create empty profile in Supabase so spending syncs work
+        const emptyProfile = createEmptyProfile();
+        await saveProfileData(userId, emptyProfile);
+        loadPersonalData(emptyProfile);
+      }
+      refreshPolicies();
+    };
+
     // Check active session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setAuthenticated(!!session);
-      if (session?.user) {
-        fetchProfileData(session.user.id).then((data) => {
-          if (data) {
-            loadPersonalData(data);
-            refreshPolicies();
-          }
-        });
-      }
+      if (session?.user) initUserProfile(session.user.id);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setAuthenticated(!!session);
-      if (session?.user) {
-        fetchProfileData(session.user.id).then((data) => {
-          if (data) {
-            loadPersonalData(data);
-            refreshPolicies();
-          }
-        });
-      }
+      if (session?.user) initUserProfile(session.user.id);
       if (event === 'SIGNED_OUT') {
         resetAll();
       }
