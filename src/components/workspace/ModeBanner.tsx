@@ -11,9 +11,9 @@ export const ModeBanner: React.FC = () => {
 
   const isSandbox = activeMode === 'SANDBOX';
   const bgColor = isSandbox ? 'bg-amber-600' : 'bg-blue-600';
-  const label = isSandbox 
-    ? '客户演示模式 (Sandbox) - 数据保存在本地' 
-    : `演示案例: ${activeExampleId}`;
+  const label = isSandbox
+    ? '本地模式 — 数据仅保存在此设备，不同步到云端'
+    : `只读案例: ${activeExampleId}`;
 
   const handleExit = () => {
     switchMode('PERSONAL');
