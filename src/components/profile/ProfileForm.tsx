@@ -8,7 +8,7 @@
  * Step 4: Goals (retirement age, risk tolerance)
  */
 
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { Card } from '../common/Card';
@@ -107,11 +107,11 @@ export function ProfileForm({ onComplete, initialProfile }: ProfileFormProps) {
     <div className="w-full max-w-4xl mx-auto">
       {/* Progress Indicator */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center mb-4">
           {[1, 2, 3, 4].map((s) => (
-            <div key={s} className="flex items-center flex-1">
+            <Fragment key={s}>
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all ${
+                className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-bold transition-all ${
                   step >= s
                     ? 'bg-gold-primary text-black-primary'
                     : 'bg-black-soft text-gray-600 border-2 border-black-border'
@@ -126,7 +126,7 @@ export function ProfileForm({ onComplete, initialProfile }: ProfileFormProps) {
                   }`}
                 />
               )}
-            </div>
+            </Fragment>
           ))}
         </div>
         <div className="text-center">
@@ -160,35 +160,49 @@ export function ProfileForm({ onComplete, initialProfile }: ProfileFormProps) {
 
             <div>
               <label className="block text-sm font-medium text-white-soft mb-2">城市等级</label>
-              <select
-                className="w-full px-4 py-3 rounded-lg border border-black-border bg-black-soft text-white focus:outline-none focus:ring-2 focus:ring-gold-primary"
-                value={profile.cityTier || 1}
-                onChange={(e) => updateProfile({ cityTier: parseInt(e.target.value) as CityTier })}
-              >
-                <option value={1}>一线城市（北京、上海、广州、深圳）</option>
-                <option value={2}>二线城市（省会城市、主要城市）</option>
-                <option value={3}>三线城市（地级市）</option>
-                <option value={4}>四线城市（县级市及以下）</option>
-              </select>
+              <div className="relative">
+                <select
+                  className="w-full px-4 py-3 pr-10 rounded-lg border border-black-border bg-black-soft text-white appearance-none focus:outline-none focus:ring-2 focus:ring-gold-primary cursor-pointer"
+                  value={profile.cityTier || 1}
+                  onChange={(e) => updateProfile({ cityTier: parseInt(e.target.value) as CityTier })}
+                >
+                  <option value={1}>一线城市（北京、上海、广州、深圳）</option>
+                  <option value={2}>二线城市（省会城市、主要城市）</option>
+                  <option value={3}>三线城市（地级市）</option>
+                  <option value={4}>四线城市（县级市及以下）</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-white-soft mb-2">婚姻状况</label>
-              <select
-                className="w-full px-4 py-3 rounded-lg border border-black-border bg-black-soft text-white focus:outline-none focus:ring-2 focus:ring-gold-primary"
-                value={profile.maritalStatus || 'single'}
-                onChange={(e) => {
-                  const status = e.target.value as MaritalStatus;
-                  updateProfile({
-                    maritalStatus: status,
-                    hasChildren: status === 'single' ? false : profile.hasChildren,
-                  });
-                }}
-              >
-                <option value="single">单身</option>
-                <option value="married">已婚</option>
-                <option value="divorced">离异</option>
-              </select>
+              <div className="relative">
+                <select
+                  className="w-full px-4 py-3 pr-10 rounded-lg border border-black-border bg-black-soft text-white appearance-none focus:outline-none focus:ring-2 focus:ring-gold-primary cursor-pointer"
+                  value={profile.maritalStatus || 'single'}
+                  onChange={(e) => {
+                    const status = e.target.value as MaritalStatus;
+                    updateProfile({
+                      maritalStatus: status,
+                      hasChildren: status === 'single' ? false : profile.hasChildren,
+                    });
+                  }}
+                >
+                  <option value="single">单身</option>
+                  <option value="married">已婚</option>
+                  <option value="divorced">离异</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
             {profile.maritalStatus === 'married' && (
@@ -352,30 +366,44 @@ export function ProfileForm({ onComplete, initialProfile }: ProfileFormProps) {
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-white-soft mb-2">风险偏好</label>
-              <select
-                className="w-full px-4 py-3 rounded-lg border border-black-border bg-black-soft text-white focus:outline-none focus:ring-2 focus:ring-gold-primary"
-                value={profile.riskTolerance || 'moderate'}
-                onChange={(e) => updateProfile({ riskTolerance: e.target.value as RiskTolerance })}
-              >
-                <option value="conservative">保守型 - 偏好低风险稳定收益</option>
-                <option value="moderate">稳健型 - 平衡风险与收益</option>
-                <option value="aggressive">进取型 - 偏好高风险高收益</option>
-              </select>
+              <div className="relative">
+                <select
+                  className="w-full px-4 py-3 pr-10 rounded-lg border border-black-border bg-black-soft text-white appearance-none focus:outline-none focus:ring-2 focus:ring-gold-primary cursor-pointer"
+                  value={profile.riskTolerance || 'moderate'}
+                  onChange={(e) => updateProfile({ riskTolerance: e.target.value as RiskTolerance })}
+                >
+                  <option value="conservative">保守型 - 偏好低风险稳定收益</option>
+                  <option value="moderate">稳健型 - 平衡风险与收益</option>
+                  <option value="aggressive">进取型 - 偏好高风险高收益</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-white-soft mb-2">主要目标</label>
-              <select
-                className="w-full px-4 py-3 rounded-lg border border-black-border bg-black-soft text-white focus:outline-none focus:ring-2 focus:ring-gold-primary"
-                value={profile.primaryGoal || 'wealth'}
-                onChange={(e) => updateProfile({ primaryGoal: e.target.value as PrimaryGoal })}
-              >
-                <option value="retirement">退休规划</option>
-                <option value="house">购房</option>
-                <option value="education">教育基金</option>
-                <option value="wealth">财富增长</option>
-                <option value="security">财务安全</option>
-              </select>
+              <div className="relative">
+                <select
+                  className="w-full px-4 py-3 pr-10 rounded-lg border border-black-border bg-black-soft text-white appearance-none focus:outline-none focus:ring-2 focus:ring-gold-primary cursor-pointer"
+                  value={profile.primaryGoal || 'wealth'}
+                  onChange={(e) => updateProfile({ primaryGoal: e.target.value as PrimaryGoal })}
+                >
+                  <option value="retirement">退休规划</option>
+                  <option value="house">购房</option>
+                  <option value="education">教育基金</option>
+                  <option value="wealth">财富增长</option>
+                  <option value="security">财务安全</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
             <Input
