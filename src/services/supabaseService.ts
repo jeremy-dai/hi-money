@@ -1,6 +1,6 @@
 
 import { supabase } from '../lib/supabase';
-import type { ProfileData, Accounts, UserProfile, InsurancePolicy } from '../types';
+import type { ProfileData, Accounts, UserProfile, InsurancePolicy, SpendingRecord } from '../types';
 import { DEFAULT_ALLOCATION } from '../utils/constants';
 
 // ---------------------------------------------------------------------------
@@ -181,13 +181,20 @@ export const saveProfileData = async (userId: string, data: ProfileData) => {
       }
     }
 
-    // Note: For arrays (accounts, spending, etc.), full sync is complex.
-    // Ideally we should sync individual items on change.
-    // For this prototype, we'll assume the store handles granular updates via specific API calls,
-    // or we implement a full replace strategy (delete all for user and re-insert) which is risky but simple.
-    // Or better: The store should call specific add/update/delete functions.
-    
-    // We will export granular functions for the store to use.
+    // Sync Accounts (Full Replace Strategy)
+    await supabase.from('asset_accounts').delete().eq('user_id', userId);
+    const accountRows = (Object.keys(data.accounts) as (keyof Accounts)[]).flatMap(category =>
+      data.accounts[category].map(account => ({
+        user_id: userId,
+        category,
+        name: account.name,
+        balance: account.amount,
+      }))
+    );
+    if (accountRows.length > 0) {
+      const { error: accountsError } = await supabase.from('asset_accounts').insert(accountRows);
+      if (accountsError) console.error('Error syncing accounts:', accountsError);
+    }
   } catch (error) {
     console.error('Error saving profile data:', error);
   }
@@ -212,13 +219,19 @@ export const updateAccount = async (_userId: string, _accountId: string, _update
     // For now, let's skip deep sync implementation and focus on Profile level.
 };
 
-export const addSpending = async (userId: string, record: any) => {
-  return supabase.from('spending_records').insert({
+export const upsertSpendingRecord = async (userId: string, record: SpendingRecord) => {
+  return supabase.from('spending_records').upsert({
     user_id: userId,
     month: record.month,
     amount: record.amount,
     note: record.note
-  });
+  }, { onConflict: 'user_id,month' });
+};
+
+export const deleteSpendingRecord = async (userId: string, month: string) => {
+  return supabase.from('spending_records').delete()
+    .eq('user_id', userId)
+    .eq('month', month);
 };
 
 export const addPolicy = async (userId: string, policy: InsurancePolicy) => {

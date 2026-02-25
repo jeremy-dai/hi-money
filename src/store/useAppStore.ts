@@ -16,7 +16,7 @@ import type { InsurancePolicy } from '../types/insurance.types';
 import type { WorkspaceSettings } from '../types/settings.types';
 import { DEFAULT_ALLOCATION } from '../utils/constants';
 import { calculateRecommendedAllocation } from '../algorithms/recommendAllocation';
-import { saveProfileData } from '../services/supabaseService';
+import { saveProfileData, upsertSpendingRecord, deleteSpendingRecord } from '../services/supabaseService';
 import { supabase } from '../lib/supabase';
 import { EXAMPLE_PROFILES } from '../data/exampleProfiles';
 import { calculateCurrentCashValue } from '../lib/utils';
@@ -47,12 +47,22 @@ function getMutableSlice(
   return mode === 'PERSONAL' ? state.personalData : state.sandboxData;
 }
 
-// Sync helper
+// Sync helpers
 const syncProfile = async (data: ProfileData) => {
   const { data: { session } } = await supabase.auth.getSession();
   if (session?.user) {
     saveProfileData(session.user.id, data);
   }
+};
+
+const syncUpsertSpending = async (record: SpendingRecord) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.user) upsertSpendingRecord(session.user.id, record);
+};
+
+const syncDeleteSpending = async (month: string) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.user) deleteSpendingRecord(session.user.id, month);
 };
 
 export const useAppStore = create<AppState>()(
@@ -258,7 +268,7 @@ export const useAppStore = create<AppState>()(
             data.spending.sort((a, b) => a.month.localeCompare(b.month));
           }
         });
-        if (get().activeMode === 'PERSONAL') syncProfile(get().personalData);
+        if (get().activeMode === 'PERSONAL') syncUpsertSpending(record);
       },
 
       addSpendingBatch: (records: SpendingRecord[]) => {
@@ -277,7 +287,7 @@ export const useAppStore = create<AppState>()(
 
           data.spending.sort((a, b) => a.month.localeCompare(b.month));
         });
-        if (get().activeMode === 'PERSONAL') syncProfile(get().personalData);
+        if (get().activeMode === 'PERSONAL') records.forEach(syncUpsertSpending);
       },
 
       updateSpending: (month: string, updates: Partial<SpendingRecord>) => {
@@ -287,7 +297,10 @@ export const useAppStore = create<AppState>()(
           const idx = data.spending.findIndex((s) => s.month === month);
           if (idx >= 0) data.spending[idx] = { ...data.spending[idx], ...updates };
         });
-        if (get().activeMode === 'PERSONAL') syncProfile(get().personalData);
+        if (get().activeMode === 'PERSONAL') {
+          const updated = get().personalData.spending.find((s) => s.month === month);
+          if (updated) syncUpsertSpending(updated);
+        }
       },
 
       deleteSpending: (month: string) => {
@@ -296,7 +309,7 @@ export const useAppStore = create<AppState>()(
           if (!data) return;
           data.spending = data.spending.filter((s) => s.month !== month);
         });
-        if (get().activeMode === 'PERSONAL') syncProfile(get().personalData);
+        if (get().activeMode === 'PERSONAL') syncDeleteSpending(month);
       },
 
       setUserProfile: (profile: UserProfile) => {
