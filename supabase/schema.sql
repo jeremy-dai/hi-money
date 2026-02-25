@@ -3,6 +3,14 @@
 create extension if not exists "uuid-ossp";
 
 --------------------------------------------------------------------------------
+-- Drop existing tables (safe to re-run; cascades remove dependent objects)
+--------------------------------------------------------------------------------
+drop table if exists public.insurance_policies cascade;
+drop table if exists public.spending_records cascade;
+drop table if exists public.asset_accounts cascade;
+drop table if exists public.profiles cascade;
+
+--------------------------------------------------------------------------------
 -- 1. Profiles Table (Merges UserProfile + Settings)
 --------------------------------------------------------------------------------
 create table public.profiles (
@@ -45,8 +53,8 @@ create policy "Users can insert own profile"
 create table public.asset_accounts (
   id uuid default uuid_generate_v4() primary key,
   user_id uuid references public.profiles(id) on delete cascade not null,
-  
-  category text not null check (category in ('growth', 'stability', 'special')),
+
+  category text not null check (category in ('growth', 'stability', 'special', 'emergency')),
   name text not null,
   balance numeric default 0,
   institution text,
@@ -67,9 +75,10 @@ create policy "Users can insert own accounts"
   on public.asset_accounts for insert 
   with check (auth.uid() = user_id);
 
-create policy "Users can update own accounts" 
-  on public.asset_accounts for update 
-  using (auth.uid() = user_id);
+create policy "Users can update own accounts"
+  on public.asset_accounts for update
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
 
 create policy "Users can delete own accounts" 
   on public.asset_accounts for delete 
@@ -85,8 +94,10 @@ create table public.spending_records (
   month text not null, -- Format: 'YYYY-MM'
   amount numeric not null default 0,
   note text,
-  
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+
+  unique (user_id, month)
 );
 
 -- RLS
@@ -100,9 +111,10 @@ create policy "Users can insert own spending"
   on public.spending_records for insert 
   with check (auth.uid() = user_id);
 
-create policy "Users can update own spending" 
-  on public.spending_records for update 
-  using (auth.uid() = user_id);
+create policy "Users can update own spending"
+  on public.spending_records for update
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
 
 create policy "Users can delete own spending" 
   on public.spending_records for delete 
@@ -145,9 +157,10 @@ create policy "Users can insert own policies"
   on public.insurance_policies for insert 
   with check (auth.uid() = user_id);
 
-create policy "Users can update own policies" 
-  on public.insurance_policies for update 
-  using (auth.uid() = user_id);
+create policy "Users can update own policies"
+  on public.insurance_policies for update
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
 
 create policy "Users can delete own policies" 
   on public.insurance_policies for delete 

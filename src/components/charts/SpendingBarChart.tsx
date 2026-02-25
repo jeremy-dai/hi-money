@@ -1,6 +1,7 @@
 import {
   ComposedChart,
   Bar,
+  LabelList,
   Line,
   XAxis,
   YAxis,
@@ -16,10 +17,24 @@ interface Props {
   targetMonthly: number;
 }
 
-const formatY = (v: number) =>
-  v >= 10000 ? `${(v / 10000).toFixed(1)}万` : `${(v / 1000).toFixed(0)}k`;
+const formatY = (v: number) => `${Math.round(v / 1000)}k`;
+const formatKLabel = (v: number) => {
+  const k = v / 1000;
+  const value = k >= 100 ? k.toFixed(0) : k.toFixed(1);
+  return `${value.replace(/\.0$/, '')}k`;
+};
 
 export function SpendingBarChart({ data, targetMonthly }: Props) {
+  const amounts = data.map((item) => item.amount);
+  const maxAmount = Math.max(...amounts, targetMonthly, 10000);
+  const minAmount = Math.min(...amounts);
+  const maxIndex = amounts.indexOf(maxAmount);
+  const minIndex = amounts.indexOf(minAmount);
+  const lastIndex = data.length - 1;
+  const tickStep = 10000;
+  const tickMax = Math.max(tickStep, Math.ceil(maxAmount / tickStep) * tickStep);
+  const ticks = Array.from({ length: Math.floor(tickMax / tickStep) + 1 }, (_, i) => i * tickStep);
+
   return (
     <div className="flex flex-col gap-3">
       {/* Custom legend */}
@@ -48,7 +63,7 @@ export function SpendingBarChart({ data, targetMonthly }: Props) {
               <stop offset="100%" stopColor="#4338ca" stopOpacity={0.7} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.12)" vertical={false} />
           <XAxis
             dataKey="label"
             tick={{ fill: '#6b7280', fontSize: 11 }}
@@ -61,6 +76,8 @@ export function SpendingBarChart({ data, targetMonthly }: Props) {
             axisLine={false}
             tickLine={false}
             width={44}
+            ticks={ticks}
+            domain={[0, tickMax]}
           />
           <Tooltip
             contentStyle={{
@@ -86,7 +103,29 @@ export function SpendingBarChart({ data, targetMonthly }: Props) {
               label={{ value: '目标', fill: '#f59e0b', fontSize: 10, position: 'insideTopRight' }}
             />
           )}
-          <Bar dataKey="amount" fill="url(#barGradient)" radius={[5, 5, 0, 0]} maxBarSize={36} />
+          <Bar dataKey="amount" fill="url(#barGradient)" radius={[5, 5, 0, 0]} maxBarSize={36}>
+            <LabelList
+              dataKey="amount"
+              content={({ x, y, width, value, index }) => {
+                if (typeof value !== 'number') return null;
+                if (index !== maxIndex && index !== minIndex && index !== lastIndex) return null;
+                const labelX = Number(x ?? 0) + Number(width ?? 0) / 2;
+                const labelY = Number(y ?? 0) - 6;
+                return (
+                  <text
+                    x={labelX}
+                    y={labelY}
+                    fill="#c7d2fe"
+                    fontSize={10}
+                    textAnchor="middle"
+                    fontFamily="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace"
+                  >
+                    {formatKLabel(value)}
+                  </text>
+                );
+              }}
+            />
+          </Bar>
           <Line
             dataKey="ma3"
             type="monotone"
