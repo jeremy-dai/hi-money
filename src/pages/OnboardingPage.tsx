@@ -15,7 +15,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black-primary flex items-center justify-center p-4">
+    <div className="min-h-screen bg-black-primary grid place-items-center p-4 py-12">
       <div className="w-full max-w-4xl">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-4">欢迎使用 Hi Money</h1>

@@ -115,7 +115,7 @@ export default function LoginPage() {
                   onClick={() => {
                     resetAll();
                     setAuthenticated(false);
-                    navigate(ROUTES.DASHBOARD);
+                    navigate(ROUTES.ONBOARDING);
                   }}
                 >
                   跳过，使用本地存储模式
