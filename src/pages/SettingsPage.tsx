@@ -524,6 +524,7 @@ export default function SettingsPage() {
               <button
                 onClick={async () => {
                   await supabase.auth.signOut();
+                  resetAll();
                   setAuthenticated(false);
                   navigate(ROUTES.WELCOME);
                 }}

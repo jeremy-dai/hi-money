@@ -29,7 +29,7 @@ function LoadingSpinner() {
 }
 
 function App() {
-  const { setAuthenticated, loadPersonalData, refreshPolicies } = useAppStore();
+  const { setAuthenticated, loadPersonalData, refreshPolicies, resetAll } = useAppStore();
 
   useEffect(() => {
     // Refresh policies on mount (for persisted data)
@@ -49,7 +49,7 @@ function App() {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setAuthenticated(!!session);
       if (session?.user) {
         fetchProfileData(session.user.id).then((data) => {
@@ -59,10 +59,13 @@ function App() {
           }
         });
       }
+      if (event === 'SIGNED_OUT') {
+        resetAll();
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, [setAuthenticated, loadPersonalData, refreshPolicies]);
+  }, [setAuthenticated, loadPersonalData, refreshPolicies, resetAll]);
 
   return (
     <BrowserRouter>

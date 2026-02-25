@@ -12,7 +12,7 @@ import { ROUTES } from '../utils/constants';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { setAuthenticated } = useAppStore();
+  const { setAuthenticated, resetAll } = useAppStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -112,7 +112,11 @@ export default function LoginPage() {
                   size="lg"
                   className="w-full"
                   disabled={loading}
-                  onClick={() => navigate(ROUTES.DASHBOARD)}
+                  onClick={() => {
+                    resetAll();
+                    setAuthenticated(false);
+                    navigate(ROUTES.DASHBOARD);
+                  }}
                 >
                   跳过，使用本地存储模式
                 </Button>
