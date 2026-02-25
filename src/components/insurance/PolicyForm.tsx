@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Check, X, Plus, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 import type { InsurancePolicy, InsuranceCategory, InsuranceSubCategory } from '../../types/insurance.types';
-import { 
-  INSURANCE_CATEGORY_LABELS, 
-  INSURANCE_SUBCATEGORY_LABELS, 
-  INSURANCE_CATEGORY_MAPPING 
+import {
+  INSURANCE_CATEGORY_LABELS,
+  INSURANCE_SUBCATEGORY_LABELS,
+  INSURANCE_CATEGORY_MAPPING
 } from '../../utils/insuranceConstants';
 import { calculateCurrentCashValue } from '../../lib/utils';
 
@@ -13,6 +13,8 @@ interface Props {
   onCancel: () => void;
   initial?: Partial<InsurancePolicy>;
 }
+
+type ScheduleRow = { year: number; amount: number };
 
 export function PolicyForm({ onSave, onCancel, initial }: Props) {
   const [form, setForm] = useState<Partial<InsurancePolicy>>({
@@ -30,9 +32,20 @@ export function PolicyForm({ onSave, onCancel, initial }: Props) {
   const [benefitKey, setBenefitKey] = useState('');
   const [benefitVal, setBenefitVal] = useState('');
 
-  const [showSchedule, setShowSchedule] = useState(false);
-  const [scheduleInput, setScheduleInput] = useState('');
-  const [showBatchInput, setShowBatchInput] = useState(false);
+  // Cash value schedule UI state
+  const [showCashSchedule, setShowCashSchedule] = useState(false);
+  const [cashScheduleInput, setCashScheduleInput] = useState('');
+  const [showCashBatchInput, setShowCashBatchInput] = useState(false);
+
+  // Premium schedule UI state
+  const [showPremiumSchedule, setShowPremiumSchedule] = useState(false);
+  const [premiumScheduleInput, setPremiumScheduleInput] = useState('');
+  const [showPremiumBatchInput, setShowPremiumBatchInput] = useState(false);
+
+  // Coverage schedule UI state
+  const [showCoverageSchedule, setShowCoverageSchedule] = useState(false);
+  const [coverageScheduleInput, setCoverageScheduleInput] = useState('');
+  const [showCoverageBatchInput, setShowCoverageBatchInput] = useState(false);
 
   const update = (k: keyof InsurancePolicy, v: unknown) =>
     setForm((f) => ({ ...f, [k]: v }));
@@ -47,59 +60,107 @@ export function PolicyForm({ onSave, onCancel, initial }: Props) {
     }
   }, [form.cashValueSchedule, form.startDate]);
 
-  const updateSchedule = (index: number, field: 'year' | 'amount', value: number) => {
-    const newSchedule = [...(form.cashValueSchedule || [])];
-    if (!newSchedule[index]) return;
-    newSchedule[index] = { ...newSchedule[index], [field]: value };
-    // Sort by year
-    newSchedule.sort((a, b) => a.year - b.year);
-    update('cashValueSchedule', newSchedule);
-  };
+  // Auto-calculate annual premium whenever premium schedule or startDate changes
+  useEffect(() => {
+    if (form.premiumSchedule && form.premiumSchedule.length > 0 && form.startDate) {
+      const newVal = calculateCurrentCashValue(form.startDate, form.premiumSchedule);
+      if (form.annualPremium !== newVal) {
+        update('annualPremium', newVal);
+      }
+    }
+  }, [form.premiumSchedule, form.startDate]);
 
-  const addScheduleRow = () => {
-    const newSchedule = [...(form.cashValueSchedule || [])];
+  // Auto-calculate coverage amount whenever coverage schedule or startDate changes
+  useEffect(() => {
+    if (form.coverageSchedule && form.coverageSchedule.length > 0 && form.startDate) {
+      const newVal = calculateCurrentCashValue(form.startDate, form.coverageSchedule);
+      if (form.coverageAmount !== newVal) {
+        update('coverageAmount', newVal);
+      }
+    }
+  }, [form.coverageSchedule, form.startDate]);
+
+  // ---- Generic schedule helpers ----
+  const makeUpdateSchedule = (key: 'cashValueSchedule' | 'premiumSchedule' | 'coverageSchedule') =>
+    (index: number, field: 'year' | 'amount', value: number) => {
+      const newSchedule = [...((form[key] as ScheduleRow[]) || [])];
+      if (!newSchedule[index]) return;
+      newSchedule[index] = { ...newSchedule[index], [field]: value };
+      newSchedule.sort((a, b) => a.year - b.year);
+      update(key, newSchedule);
+    };
+
+  const makeAddRow = (key: 'cashValueSchedule' | 'premiumSchedule' | 'coverageSchedule') => () => {
+    const newSchedule = [...((form[key] as ScheduleRow[]) || [])];
     const lastYear = newSchedule.length > 0 ? newSchedule[newSchedule.length - 1].year : 0;
     newSchedule.push({ year: lastYear + 1, amount: 0 });
-    update('cashValueSchedule', newSchedule);
+    update(key, newSchedule);
   };
 
-  const removeScheduleRow = (index: number) => {
-    const newSchedule = [...(form.cashValueSchedule || [])];
-    newSchedule.splice(index, 1);
-    update('cashValueSchedule', newSchedule);
-  };
-  
-  const handleBatchSchedule = () => {
-    if (!scheduleInput.trim()) return;
-    
-    // Parse lines like "1 500" or just "500" (auto-increment year)
-    const lines = scheduleInput.split('\n').filter(l => l.trim());
-    const newSchedule: { year: number; amount: number }[] = [];
-    
+  const makeRemoveRow = (key: 'cashValueSchedule' | 'premiumSchedule' | 'coverageSchedule') =>
+    (index: number) => {
+      const newSchedule = [...((form[key] as ScheduleRow[]) || [])];
+      newSchedule.splice(index, 1);
+      update(key, newSchedule);
+    };
+
+  const parseBatchInput = (raw: string): ScheduleRow[] => {
+    const lines = raw.split('\n').filter(l => l.trim());
+    const result: ScheduleRow[] = [];
     let currentYear = 1;
     lines.forEach(line => {
-       const parts = line.trim().split(/\s+/);
-       if (parts.length >= 2) {
-          const y = parseInt(parts[0]);
-          const v = parseFloat(parts[1]);
-          if (!isNaN(y) && !isNaN(v)) {
-             newSchedule.push({ year: y, amount: v });
-             currentYear = y + 1;
-          }
-       } else if (parts.length === 1) {
-          const v = parseFloat(parts[0]);
-          if (!isNaN(v)) {
-             newSchedule.push({ year: currentYear, amount: v });
-             currentYear++;
-          }
-       }
+      const parts = line.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        const y = parseInt(parts[0]);
+        const v = parseFloat(parts[1]);
+        if (!isNaN(y) && !isNaN(v)) {
+          result.push({ year: y, amount: v });
+          currentYear = y + 1;
+        }
+      } else if (parts.length === 1) {
+        const v = parseFloat(parts[0]);
+        if (!isNaN(v)) {
+          result.push({ year: currentYear, amount: v });
+          currentYear++;
+        }
+      }
     });
-    
-    if (newSchedule.length > 0) {
-       newSchedule.sort((a, b) => a.year - b.year);
-       update('cashValueSchedule', newSchedule);
-       setShowBatchInput(false);
-       setScheduleInput('');
+    return result.sort((a, b) => a.year - b.year);
+  };
+
+  const updateCashSchedule = makeUpdateSchedule('cashValueSchedule');
+  const addCashRow = makeAddRow('cashValueSchedule');
+  const removeCashRow = makeRemoveRow('cashValueSchedule');
+  const handleCashBatch = () => {
+    const rows = parseBatchInput(cashScheduleInput);
+    if (rows.length > 0) {
+      update('cashValueSchedule', rows);
+      setShowCashBatchInput(false);
+      setCashScheduleInput('');
+    }
+  };
+
+  const updatePremiumSchedule = makeUpdateSchedule('premiumSchedule');
+  const addPremiumRow = makeAddRow('premiumSchedule');
+  const removePremiumRow = makeRemoveRow('premiumSchedule');
+  const handlePremiumBatch = () => {
+    const rows = parseBatchInput(premiumScheduleInput);
+    if (rows.length > 0) {
+      update('premiumSchedule', rows);
+      setShowPremiumBatchInput(false);
+      setPremiumScheduleInput('');
+    }
+  };
+
+  const updateCoverageSchedule = makeUpdateSchedule('coverageSchedule');
+  const addCoverageRow = makeAddRow('coverageSchedule');
+  const removeCoverageRow = makeRemoveRow('coverageSchedule');
+  const handleCoverageBatch = () => {
+    const rows = parseBatchInput(coverageScheduleInput);
+    if (rows.length > 0) {
+      update('coverageSchedule', rows);
+      setShowCoverageBatchInput(false);
+      setCoverageScheduleInput('');
     }
   };
 
@@ -111,7 +172,6 @@ export function PolicyForm({ onSave, onCancel, initial }: Props) {
     const years = diffTime / (1000 * 60 * 60 * 24 * 365.25);
     return Math.max(0, Math.floor(years));
   };
-
 
   const addBenefit = () => {
     if (!benefitKey.trim()) return;
@@ -138,7 +198,9 @@ export function PolicyForm({ onSave, onCancel, initial }: Props) {
       annualPremium: form.annualPremium ?? 0,
       cashValue: form.cashValue ?? 0,
       cashValueSchedule: form.cashValueSchedule,
+      premiumSchedule: form.premiumSchedule,
       coverageAmount: form.coverageAmount ?? 0,
+      coverageSchedule: form.coverageSchedule,
       startDate: form.startDate || '',
       notes: form.notes,
       benefits: form.benefits ?? {},
@@ -147,6 +209,118 @@ export function PolicyForm({ onSave, onCancel, initial }: Props) {
 
   const inputCls =
     'w-full bg-black-soft border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500 placeholder:text-gray-600';
+
+  // Reusable schedule panel renderer
+  const renderSchedulePanel = (
+    schedule: ScheduleRow[] | undefined,
+    showBatch: boolean,
+    batchInput: string,
+    colorClass: string,
+    addBtnClass: string,
+    onUpdateRow: (idx: number, field: 'year' | 'amount', val: number) => void,
+    onAddRow: () => void,
+    onRemoveRow: (idx: number) => void,
+    onSetShowBatch: (v: boolean) => void,
+    onSetBatchInput: (v: string) => void,
+    onApplyBatch: () => void,
+  ) => (
+    <div className="mt-3 p-3 bg-black-soft/50 border border-white/5 rounded-lg space-y-3">
+      <div className="flex items-center justify-between text-xs text-gray-500 px-1 pb-2 border-b border-white/5">
+        <div className="flex gap-4">
+          <button
+            onClick={() => onSetShowBatch(false)}
+            className={!showBatch ? "text-white font-medium" : "hover:text-gray-300"}
+          >
+            列表模式
+          </button>
+          <button
+            onClick={() => onSetShowBatch(true)}
+            className={showBatch ? "text-white font-medium" : "hover:text-gray-300"}
+          >
+            批量粘贴
+          </button>
+        </div>
+      </div>
+
+      {!showBatch ? (
+        <>
+          <div className="flex items-center justify-between text-xs text-gray-500 px-1">
+            <span className="w-20">保单年度</span>
+            <span className="flex-1 text-right pr-8">金额</span>
+            <span className="w-6"></span>
+          </div>
+
+          <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+            {(schedule || []).map((row, idx) => (
+              <div key={idx} className="flex gap-2 items-center">
+                <div className="relative w-20">
+                  <span className="absolute left-2 top-1.5 text-xs text-gray-500">第</span>
+                  <input
+                    type="number"
+                    className="w-full bg-black-elevated border border-white/10 rounded px-2 pl-6 py-1 text-white text-xs text-center"
+                    value={row.year}
+                    onChange={e => onUpdateRow(idx, 'year', parseInt(e.target.value) || 0)}
+                  />
+                </div>
+                <div className="flex-1 relative">
+                  <span className="absolute left-2 top-1.5 text-xs text-gray-500">¥</span>
+                  <input
+                    type="number"
+                    className="w-full bg-black-elevated border border-white/10 rounded px-2 pl-6 py-1 text-white text-xs text-right font-mono"
+                    value={row.amount}
+                    onChange={e => onUpdateRow(idx, 'amount', parseFloat(e.target.value) || 0)}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onRemoveRow(idx)}
+                  className="text-gray-600 hover:text-red-400 p-1"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between pt-2 border-t border-white/5">
+            <button
+              type="button"
+              onClick={onAddRow}
+              className={`text-xs ${addBtnClass} flex items-center gap-1`}
+            >
+              <Plus size={12} /> 添加年度
+            </button>
+            {form.startDate && (
+              <span className="text-[10px] text-gray-500">
+                当前处于第 {getCompletedYears() + 1} 保单年度
+              </span>
+            )}
+          </div>
+        </>
+      ) : (
+        <div className="space-y-2">
+          <textarea
+            value={batchInput}
+            onChange={e => onSetBatchInput(e.target.value)}
+            placeholder={`粘贴格式示例：
+1 500
+2 1200
+3 2500
+(也可以只粘贴数值，年份自动递增)`}
+            className="w-full h-32 bg-black-elevated border border-white/10 rounded p-2 text-xs font-mono text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500"
+          />
+          <div className="flex justify-end">
+            <button
+              onClick={onApplyBatch}
+              className={`px-3 py-1 ${colorClass} text-white text-xs rounded`}
+            >
+              识别并填充
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="space-y-4">
@@ -161,7 +335,7 @@ export function PolicyForm({ onSave, onCancel, initial }: Props) {
             placeholder="例：平安福终身寿险"
           />
         </div>
-        
+
         <div>
           <label className="text-xs text-gray-400 block mb-1">险种大类</label>
           <select
@@ -171,7 +345,6 @@ export function PolicyForm({ onSave, onCancel, initial }: Props) {
               const cat = e.target.value as InsuranceCategory;
               update('category', cat);
               update('subCategory', undefined);
-              // Auto-fill legacy type for compatibility
               update('type', INSURANCE_CATEGORY_LABELS[cat] || '');
             }}
           >
@@ -202,16 +375,16 @@ export function PolicyForm({ onSave, onCancel, initial }: Props) {
         </div>
 
         <div className="col-span-2 flex items-center gap-2 py-1">
-           <input 
-             type="checkbox" 
-             id="taxAdvantaged"
-             checked={!!form.isTaxAdvantaged}
-             onChange={e => update('isTaxAdvantaged', e.target.checked)}
-             className="rounded border-gray-600 bg-black-soft text-indigo-500 focus:ring-offset-0"
-           />
-           <label htmlFor="taxAdvantaged" className="text-sm text-gray-300 cursor-pointer select-none">
-             税优产品 (Tax-Advantaged)
-           </label>
+          <input
+            type="checkbox"
+            id="taxAdvantaged"
+            checked={!!form.isTaxAdvantaged}
+            onChange={e => update('isTaxAdvantaged', e.target.checked)}
+            className="rounded border-gray-600 bg-black-soft text-indigo-500 focus:ring-offset-0"
+          />
+          <label htmlFor="taxAdvantaged" className="text-sm text-gray-300 cursor-pointer select-none">
+            税优产品 (Tax-Advantaged)
+          </label>
         </div>
 
         <div>
@@ -229,20 +402,53 @@ export function PolicyForm({ onSave, onCancel, initial }: Props) {
       <div className="rounded-xl border border-white/8 bg-black-elevated/40 p-4 space-y-3">
         <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">三重分发数值</p>
 
+        {/* Annual Premium */}
         <div>
           <label className="text-xs text-gray-400 block mb-1">
             年交保费 (元)
             <span className="ml-2 text-indigo-400">→ 计入支出预算</span>
           </label>
-          <input
-            type="number"
-            className={inputCls}
-            value={form.annualPremium || ''}
-            onChange={(e) => update('annualPremium', parseFloat(e.target.value) || 0)}
-            placeholder="12000"
-          />
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <input
+                type="number"
+                className={`${inputCls} ${form.premiumSchedule?.length ? 'bg-white/5 text-gray-400 cursor-not-allowed' : ''}`}
+                value={form.annualPremium || ''}
+                onChange={(e) => update('annualPremium', parseFloat(e.target.value) || 0)}
+                placeholder="12000"
+                disabled={!!form.premiumSchedule?.length}
+              />
+              {!!form.premiumSchedule?.length && (
+                <span className="absolute right-2 top-2 text-xs text-indigo-400 flex items-center gap-1">
+                  <RefreshCw size={12} className="animate-spin-slow" /> 自动计算
+                </span>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowPremiumSchedule(!showPremiumSchedule)}
+              className="px-3 py-2 bg-white/5 hover:bg-white/10 text-xs text-indigo-300 rounded-lg transition-colors border border-white/10 whitespace-nowrap"
+            >
+              {showPremiumSchedule ? '隐藏表' : '保费进度表'}
+            </button>
+          </div>
+
+          {showPremiumSchedule && renderSchedulePanel(
+            form.premiumSchedule,
+            showPremiumBatchInput,
+            premiumScheduleInput,
+            'bg-indigo-600 hover:bg-indigo-500',
+            'text-indigo-400 hover:text-indigo-300',
+            updatePremiumSchedule,
+            addPremiumRow,
+            removePremiumRow,
+            setShowPremiumBatchInput,
+            setPremiumScheduleInput,
+            handlePremiumBatch,
+          )}
         </div>
 
+        {/* Cash Value */}
         <div>
           <label className="text-xs text-gray-400 block mb-1">
             当前现金价值 (元)
@@ -259,134 +465,79 @@ export function PolicyForm({ onSave, onCancel, initial }: Props) {
                 disabled={!!form.cashValueSchedule?.length}
               />
               {!!form.cashValueSchedule?.length && (
-                 <span className="absolute right-2 top-2 text-xs text-blue-400 flex items-center gap-1">
-                   <RefreshCw size={12} className="animate-spin-slow" /> 自动计算
-                 </span>
+                <span className="absolute right-2 top-2 text-xs text-blue-400 flex items-center gap-1">
+                  <RefreshCw size={12} className="animate-spin-slow" /> 自动计算
+                </span>
               )}
             </div>
             <button
               type="button"
-              onClick={() => setShowSchedule(!showSchedule)}
+              onClick={() => setShowCashSchedule(!showCashSchedule)}
               className="px-3 py-2 bg-white/5 hover:bg-white/10 text-xs text-blue-300 rounded-lg transition-colors border border-white/10 whitespace-nowrap"
             >
-              {showSchedule ? '隐藏表' : '现金价值表'}
+              {showCashSchedule ? '隐藏表' : '现金价值表'}
             </button>
           </div>
-          
-          {showSchedule && (
-            <div className="mt-3 p-3 bg-black-soft/50 border border-white/5 rounded-lg space-y-3">
-               {/* Header / Mode Switch */}
-               <div className="flex items-center justify-between text-xs text-gray-500 px-1 pb-2 border-b border-white/5">
-                 <div className="flex gap-4">
-                   <button 
-                     onClick={() => setShowBatchInput(false)}
-                     className={!showBatchInput ? "text-white font-medium" : "hover:text-gray-300"}
-                   >
-                     列表模式
-                   </button>
-                   <button 
-                     onClick={() => setShowBatchInput(true)}
-                     className={showBatchInput ? "text-white font-medium" : "hover:text-gray-300"}
-                   >
-                     批量粘贴
-                   </button>
-                 </div>
-               </div>
-               
-               {!showBatchInput ? (
-                 <>
-                   <div className="flex items-center justify-between text-xs text-gray-500 px-1">
-                     <span className="w-20">保单年度</span>
-                     <span className="flex-1 text-right pr-8">末期现金价值</span>
-                     <span className="w-6"></span>
-                   </div>
-                   
-                   <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
-                     {(form.cashValueSchedule || []).map((row, idx) => (
-                        <div key={idx} className="flex gap-2 items-center">
-                          <div className="relative w-20">
-                            <span className="absolute left-2 top-1.5 text-xs text-gray-500">第</span>
-                            <input 
-                              type="number" 
-                              className="w-full bg-black-elevated border border-white/10 rounded px-2 pl-6 py-1 text-white text-xs text-center"
-                              value={row.year}
-                              onChange={e => updateSchedule(idx, 'year', parseInt(e.target.value) || 0)}
-                            />
-                          </div>
-                          <div className="flex-1 relative">
-                            <span className="absolute left-2 top-1.5 text-xs text-gray-500">¥</span>
-                            <input 
-                              type="number" 
-                              className="w-full bg-black-elevated border border-white/10 rounded px-2 pl-6 py-1 text-white text-xs text-right font-mono"
-                              value={row.amount}
-                              onChange={e => updateSchedule(idx, 'amount', parseFloat(e.target.value) || 0)}
-                            />
-                          </div>
-                          <button 
-                            type="button"
-                            onClick={() => removeScheduleRow(idx)}
-                            className="text-gray-600 hover:text-red-400 p-1"
-                          >
-                            <X size={14} />
-                          </button>
-                        </div>
-                     ))}
-                   </div>
-                   
-                   <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                     <button 
-                       type="button"
-                       onClick={addScheduleRow} 
-                       className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1"
-                     >
-                       <Plus size={12}/> 添加年度
-                     </button>
-                     
-                     {form.startDate && (
-                        <span className="text-[10px] text-gray-500">
-                          当前处于第 {getCompletedYears() + 1} 保单年度
-                        </span>
-                     )}
-                   </div>
-                 </>
-               ) : (
-                 <div className="space-y-2">
-                   <textarea
-                     value={scheduleInput}
-                     onChange={e => setScheduleInput(e.target.value)}
-                     placeholder={`粘贴格式示例：
-1 500
-2 1200
-3 2500
-(也可以只粘贴数值，年份自动递增)`}
-                     className="w-full h-32 bg-black-elevated border border-white/10 rounded p-2 text-xs font-mono text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500"
-                   />
-                   <div className="flex justify-end gap-2">
-                     <button
-                       onClick={handleBatchSchedule}
-                       className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs rounded"
-                     >
-                       识别并填充
-                     </button>
-                   </div>
-                 </div>
-               )}
-            </div>
+
+          {showCashSchedule && renderSchedulePanel(
+            form.cashValueSchedule,
+            showCashBatchInput,
+            cashScheduleInput,
+            'bg-indigo-600 hover:bg-indigo-500',
+            'text-blue-400 hover:text-blue-300',
+            updateCashSchedule,
+            addCashRow,
+            removeCashRow,
+            setShowCashBatchInput,
+            setCashScheduleInput,
+            handleCashBatch,
           )}
         </div>
 
+        {/* Coverage Amount */}
         <div>
           <label className="text-xs text-gray-400 block mb-1">
             核心保额 (元)
             <span className="ml-2 text-emerald-400">→ 计入抗风险杠杆率</span>
           </label>
-          <input
-            type="number"
-            className={inputCls}
-            value={form.coverageAmount || ''}
-            onChange={(e) => update('coverageAmount', parseFloat(e.target.value) || 0)}
-            placeholder="500000"
-          />
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <input
+                type="number"
+                className={`${inputCls} ${form.coverageSchedule?.length ? 'bg-white/5 text-gray-400 cursor-not-allowed' : ''}`}
+                value={form.coverageAmount || ''}
+                onChange={(e) => update('coverageAmount', parseFloat(e.target.value) || 0)}
+                placeholder="500000"
+                disabled={!!form.coverageSchedule?.length}
+              />
+              {!!form.coverageSchedule?.length && (
+                <span className="absolute right-2 top-2 text-xs text-emerald-400 flex items-center gap-1">
+                  <RefreshCw size={12} className="animate-spin-slow" /> 自动计算
+                </span>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowCoverageSchedule(!showCoverageSchedule)}
+              className="px-3 py-2 bg-white/5 hover:bg-white/10 text-xs text-emerald-300 rounded-lg transition-colors border border-white/10 whitespace-nowrap"
+            >
+              {showCoverageSchedule ? '隐藏表' : '保额进度表'}
+            </button>
+          </div>
+
+          {showCoverageSchedule && renderSchedulePanel(
+            form.coverageSchedule,
+            showCoverageBatchInput,
+            coverageScheduleInput,
+            'bg-emerald-700 hover:bg-emerald-600',
+            'text-emerald-400 hover:text-emerald-300',
+            updateCoverageSchedule,
+            addCoverageRow,
+            removeCoverageRow,
+            setShowCoverageBatchInput,
+            setCoverageScheduleInput,
+            handleCoverageBatch,
+          )}
         </div>
       </div>
 

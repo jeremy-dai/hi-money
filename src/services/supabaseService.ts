@@ -19,6 +19,8 @@ const normalizePolicy = (p: any): InsurancePolicy => ({
   coverageAmount: p.coverage_amount,
   startDate: p.start_date,
   cashValueSchedule: p.cash_value_schedule,
+  premiumSchedule: p.premium_schedule,
+  coverageSchedule: p.coverage_schedule,
   notes: p.notes,
   benefits: p.benefits || {}
 });
@@ -165,6 +167,8 @@ export const saveProfileData = async (userId: string, data: ProfileData) => {
             coverage_amount: p.coverageAmount,
             start_date: p.startDate,
             cash_value_schedule: p.cashValueSchedule,
+            premium_schedule: p.premiumSchedule,
+            coverage_schedule: p.coverageSchedule,
             notes: p.notes,
             benefits: p.benefits
         }));

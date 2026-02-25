@@ -374,6 +374,18 @@ export const useAppStore = create<AppState>()(
                 policy.cashValue = newVal;
               }
             }
+            if (policy.premiumSchedule && policy.premiumSchedule.length > 0 && policy.startDate) {
+              const newVal = calculateCurrentCashValue(policy.startDate, policy.premiumSchedule);
+              if (policy.annualPremium !== newVal) {
+                policy.annualPremium = newVal;
+              }
+            }
+            if (policy.coverageSchedule && policy.coverageSchedule.length > 0 && policy.startDate) {
+              const newVal = calculateCurrentCashValue(policy.startDate, policy.coverageSchedule);
+              if (policy.coverageAmount !== newVal) {
+                policy.coverageAmount = newVal;
+              }
+            }
           });
         });
         if (get().activeMode === 'PERSONAL') syncProfile(get().personalData);

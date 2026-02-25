@@ -34,6 +34,8 @@ export interface InsurancePolicy {
   startDate: string;
   endDate?: string; // Policy maturity date
   cashValueSchedule?: { year: number; amount: number }[];
+  premiumSchedule?: { year: number; amount: number }[];
+  coverageSchedule?: { year: number; amount: number }[];
   notes?: string;
   benefits: Record<string, string>;
 }
