@@ -7,6 +7,8 @@ import {
   INSURANCE_CATEGORY_MAPPING
 } from '../../utils/insuranceConstants';
 import { calculateCurrentCashValue } from '../../lib/utils';
+import { InfoTooltip } from '../common/InfoTooltip';
+import { TOOLTIP } from '../../utils/tooltipContent';
 
 interface Props {
   onSave: (policy: InsurancePolicy) => void;
@@ -337,7 +339,20 @@ export function PolicyForm({ onSave, onCancel, initial }: Props) {
         </div>
 
         <div>
-          <label className="text-xs text-gray-400 block mb-1">险种大类</label>
+          <div className="flex items-center gap-1.5 mb-1">
+            <label className="text-xs text-gray-400">险种大类</label>
+            <InfoTooltip
+              content={
+                form.category === 'protection' ? TOOLTIP.categoryProtection
+                : form.category === 'savings' ? TOOLTIP.categorySavings
+                : form.category === 'investment' ? TOOLTIP.categoryInvestment
+                : <span><span className="text-white font-semibold block mb-1">险种大类</span>保障型（消费型）、储蓄型（资产积累）、投资型（市场挂钩）三大类，决定保单的核心功能定位。</span>
+              }
+              position="top"
+              iconColor="text-gray-600 hover:text-gray-400"
+              iconSize={13}
+            />
+          </div>
           <select
             className={inputCls}
             value={form.category || ''}
@@ -385,6 +400,12 @@ export function PolicyForm({ onSave, onCancel, initial }: Props) {
           <label htmlFor="taxAdvantaged" className="text-sm text-gray-300 cursor-pointer select-none">
             税优产品 (Tax-Advantaged)
           </label>
+          <InfoTooltip
+            content={TOOLTIP.taxAdvantaged}
+            position="right"
+            iconColor="text-gray-600 hover:text-gray-400"
+            iconSize={13}
+          />
         </div>
 
         <div>
@@ -404,10 +425,13 @@ export function PolicyForm({ onSave, onCancel, initial }: Props) {
 
         {/* Annual Premium */}
         <div>
-          <label className="text-xs text-gray-400 block mb-1">
-            年交保费 (元)
-            <span className="ml-2 text-indigo-400">→ 计入支出预算</span>
-          </label>
+          <div className="flex items-center gap-1.5 mb-1">
+            <label className="text-xs text-gray-400">
+              年交保费 (元)
+              <span className="ml-2 text-indigo-400">→ 计入支出预算</span>
+            </label>
+            <InfoTooltip content={TOOLTIP.annualPremium} position="top" iconColor="text-indigo-500/60 hover:text-indigo-400" iconSize={13} />
+          </div>
           <div className="flex gap-2">
             <div className="relative flex-1">
               <input
@@ -424,13 +448,16 @@ export function PolicyForm({ onSave, onCancel, initial }: Props) {
                 </span>
               )}
             </div>
-            <button
-              type="button"
-              onClick={() => setShowPremiumSchedule(!showPremiumSchedule)}
-              className="px-3 py-2 bg-white/5 hover:bg-white/10 text-xs text-indigo-300 rounded-lg transition-colors border border-white/10 whitespace-nowrap"
-            >
-              {showPremiumSchedule ? '隐藏表' : '保费进度表'}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setShowPremiumSchedule(!showPremiumSchedule)}
+                className="px-3 py-2 bg-white/5 hover:bg-white/10 text-xs text-indigo-300 rounded-lg transition-colors border border-white/10 whitespace-nowrap"
+              >
+                {showPremiumSchedule ? '隐藏表' : '保费进度表'}
+              </button>
+              <InfoTooltip content={TOOLTIP.premiumSchedule} position="top" iconColor="text-gray-600 hover:text-gray-400" iconSize={13} />
+            </div>
           </div>
 
           {showPremiumSchedule && renderSchedulePanel(
@@ -450,10 +477,13 @@ export function PolicyForm({ onSave, onCancel, initial }: Props) {
 
         {/* Cash Value */}
         <div>
-          <label className="text-xs text-gray-400 block mb-1">
-            当前现金价值 (元)
-            <span className="ml-2 text-blue-400">→ 计入净资产（稳健类）</span>
-          </label>
+          <div className="flex items-center gap-1.5 mb-1">
+            <label className="text-xs text-gray-400">
+              当前现金价值 (元)
+              <span className="ml-2 text-blue-400">→ 计入净资产（稳健类）</span>
+            </label>
+            <InfoTooltip content={TOOLTIP.cashValue} position="top" iconColor="text-blue-500/60 hover:text-blue-400" iconSize={13} />
+          </div>
           <div className="flex gap-2">
             <div className="relative flex-1">
               <input
@@ -470,13 +500,16 @@ export function PolicyForm({ onSave, onCancel, initial }: Props) {
                 </span>
               )}
             </div>
-            <button
-              type="button"
-              onClick={() => setShowCashSchedule(!showCashSchedule)}
-              className="px-3 py-2 bg-white/5 hover:bg-white/10 text-xs text-blue-300 rounded-lg transition-colors border border-white/10 whitespace-nowrap"
-            >
-              {showCashSchedule ? '隐藏表' : '现金价值表'}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setShowCashSchedule(!showCashSchedule)}
+                className="px-3 py-2 bg-white/5 hover:bg-white/10 text-xs text-blue-300 rounded-lg transition-colors border border-white/10 whitespace-nowrap"
+              >
+                {showCashSchedule ? '隐藏表' : '现金价值表'}
+              </button>
+              <InfoTooltip content={TOOLTIP.cashValueSchedule} position="top" iconColor="text-gray-600 hover:text-gray-400" iconSize={13} />
+            </div>
           </div>
 
           {showCashSchedule && renderSchedulePanel(
@@ -496,10 +529,13 @@ export function PolicyForm({ onSave, onCancel, initial }: Props) {
 
         {/* Coverage Amount */}
         <div>
-          <label className="text-xs text-gray-400 block mb-1">
-            核心保额 (元)
-            <span className="ml-2 text-emerald-400">→ 计入抗风险杠杆率</span>
-          </label>
+          <div className="flex items-center gap-1.5 mb-1">
+            <label className="text-xs text-gray-400">
+              核心保额 (元)
+              <span className="ml-2 text-emerald-400">→ 计入抗风险杠杆率</span>
+            </label>
+            <InfoTooltip content={TOOLTIP.coverageAmount} position="top" iconColor="text-emerald-500/60 hover:text-emerald-400" iconSize={13} />
+          </div>
           <div className="flex gap-2">
             <div className="relative flex-1">
               <input
@@ -516,13 +552,16 @@ export function PolicyForm({ onSave, onCancel, initial }: Props) {
                 </span>
               )}
             </div>
-            <button
-              type="button"
-              onClick={() => setShowCoverageSchedule(!showCoverageSchedule)}
-              className="px-3 py-2 bg-white/5 hover:bg-white/10 text-xs text-emerald-300 rounded-lg transition-colors border border-white/10 whitespace-nowrap"
-            >
-              {showCoverageSchedule ? '隐藏表' : '保额进度表'}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setShowCoverageSchedule(!showCoverageSchedule)}
+                className="px-3 py-2 bg-white/5 hover:bg-white/10 text-xs text-emerald-300 rounded-lg transition-colors border border-white/10 whitespace-nowrap"
+              >
+                {showCoverageSchedule ? '隐藏表' : '保额进度表'}
+              </button>
+              <InfoTooltip content={TOOLTIP.coverageSchedule} position="top" iconColor="text-gray-600 hover:text-gray-400" iconSize={13} />
+            </div>
           </div>
 
           {showCoverageSchedule && renderSchedulePanel(

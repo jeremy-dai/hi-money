@@ -1,7 +1,26 @@
 import { Pencil, Trash2, Wallet, PiggyBank, Shield } from 'lucide-react';
 import { formatCNY } from '../../lib/format';
-import type { InsurancePolicy } from '../../types/insurance.types';
+import { InfoTooltip } from '../common/InfoTooltip';
+import type { InsurancePolicy, InsuranceSubCategory } from '../../types/insurance.types';
 import { INSURANCE_SUBCATEGORY_LABELS } from '../../utils/insuranceConstants';
+import { TOOLTIP } from '../../utils/tooltipContent';
+
+// Map subcategory to tooltip content
+const SUBCATEGORY_TOOLTIPS: Partial<Record<InsuranceSubCategory, React.ReactNode>> = {
+  criticalIllness: TOOLTIP.criticalIllness,
+  medical: TOOLTIP.medical,
+  accident: TOOLTIP.accident,
+  termLife: TOOLTIP.termLife,
+  cancer: TOOLTIP.cancer,
+  increasingWholeLife: TOOLTIP.increasingWholeLife,
+  pensionAnnuity: TOOLTIP.pensionAnnuity,
+  educationAnnuity: TOOLTIP.educationAnnuity,
+  endowment: TOOLTIP.endowment,
+  wholeLife: TOOLTIP.wholeLife,
+  participating: TOOLTIP.participating,
+  universalLife: TOOLTIP.universalLife,
+  unitLinked: TOOLTIP.unitLinked,
+};
 
 interface Props {
   policy: InsurancePolicy;
@@ -11,6 +30,10 @@ interface Props {
 }
 
 export function PolicyCard({ policy, isReadOnly, onEdit, onDelete }: Props) {
+  const subcategoryTooltip = policy.subCategory
+    ? SUBCATEGORY_TOOLTIPS[policy.subCategory]
+    : undefined;
+
   return (
     <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4 relative overflow-hidden group hover:border-white/20 transition-all">
       {policy.isTaxAdvantaged && (
@@ -18,7 +41,7 @@ export function PolicyCard({ policy, isReadOnly, onEdit, onDelete }: Props) {
           税优
         </div>
       )}
-      
+
       {/* Header */}
       <div className="flex items-start justify-between pr-8">
         <div>
@@ -31,9 +54,17 @@ export function PolicyCard({ policy, isReadOnly, onEdit, onDelete }: Props) {
                 ? INSURANCE_SUBCATEGORY_LABELS[policy.subCategory]
                 : policy.type}
             </span>
+            {subcategoryTooltip && (
+              <InfoTooltip
+                content={subcategoryTooltip}
+                position="bottom"
+                iconColor="text-indigo-400/60 hover:text-indigo-300"
+                iconSize={13}
+              />
+            )}
           </div>
         </div>
-        
+
         {!isReadOnly && (
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
@@ -56,47 +87,52 @@ export function PolicyCard({ policy, isReadOnly, onEdit, onDelete }: Props) {
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-3 gap-3">
-        <MetricItem 
+        <MetricItem
           icon={<Wallet size={14} />}
           label="年保费"
           value={policy.annualPremium}
           color="text-indigo-400"
           subtext="支出"
+          tooltip={TOOLTIP.annualPremium}
         />
-        <MetricItem 
+        <MetricItem
           icon={<PiggyBank size={14} />}
           label="现金价值"
           value={policy.cashValue}
           color="text-blue-400"
           subtext="资产"
+          tooltip={TOOLTIP.cashValue}
         />
-        <MetricItem 
+        <MetricItem
           icon={<Shield size={14} />}
           label="保障额度"
           value={policy.coverageAmount}
           color="text-emerald-400"
           subtext="杠杆"
+          tooltip={TOOLTIP.coverageAmount}
         />
       </div>
     </div>
   );
 }
 
-function MetricItem({ 
-  icon, 
-  label, 
-  value, 
+function MetricItem({
+  icon,
+  label,
+  value,
   color,
-  subtext
-}: { 
-  icon: React.ReactNode; 
-  label: string; 
-  value: number; 
+  subtext,
+  tooltip,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
   color: string;
   subtext: string;
+  tooltip: React.ReactNode;
 }) {
   const isZero = value === 0;
-  
+
   return (
     <div className={`rounded-lg p-2.5 text-center transition-colors ${isZero ? 'bg-white/2 opacity-60' : 'bg-black-soft'}`}>
       <div className={`flex items-center justify-center gap-1.5 text-xs ${isZero ? 'text-gray-500' : color} mb-1`}>
@@ -106,7 +142,15 @@ function MetricItem({
       <p className={`text-sm font-mono font-bold ${isZero ? 'text-gray-600' : 'text-white'}`}>
         {formatCNY(value)}
       </p>
-      <p className="text-[10px] text-gray-500 mt-0.5">{label}</p>
+      <div className="flex items-center justify-center gap-1 mt-0.5">
+        <p className="text-[10px] text-gray-500">{label}</p>
+        <InfoTooltip
+          content={tooltip}
+          position="top"
+          iconColor="text-gray-600 hover:text-gray-400"
+          iconSize={11}
+        />
+      </div>
     </div>
   );
 }

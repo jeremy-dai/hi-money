@@ -1,6 +1,8 @@
-import { Wallet, PiggyBank, Shield, Info } from 'lucide-react';
+import { Wallet, PiggyBank, Shield } from 'lucide-react';
 import { Card } from '../common/Card';
+import { InfoTooltip } from '../common/InfoTooltip';
 import { formatCNY } from '../../lib/format';
+import { TOOLTIP } from '../../utils/tooltipContent';
 
 interface Props {
   totalAnnualPremiums: number;
@@ -9,70 +11,65 @@ interface Props {
   monthlyPremiumCost: number;
 }
 
-export function InsuranceSummary({ 
-  totalAnnualPremiums, 
-  totalCashValue, 
-  totalCoverageAmount, 
-  monthlyPremiumCost 
+export function InsuranceSummary({
+  totalAnnualPremiums,
+  totalCashValue,
+  totalCoverageAmount,
+  monthlyPremiumCost
 }: Props) {
   return (
     <Card className="bg-gradient-to-br from-indigo-900/20 to-purple-900/20 border-indigo-500/20">
       <div className="flex items-center gap-2 mb-4">
         <h3 className="text-sm font-bold text-white uppercase tracking-wider">保险账户概览</h3>
-        <div className="group relative">
-          <Info size={14} className="text-indigo-400 cursor-help" />
-          <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-3 bg-gray-900 border border-gray-700 rounded-lg text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl">
-            <p className="font-bold text-white mb-1">三重调度机制：</p>
-            <ul className="list-disc pl-3 space-y-1">
-              <li><span className="text-indigo-400">支出预算</span>：保费计入年度支出</li>
-              <li><span className="text-blue-400">净资产</span>：现金价值计入家庭资产</li>
-              <li><span className="text-emerald-400">抗风险杠杆</span>：保额用于抵御风险</li>
-            </ul>
-          </div>
-        </div>
+        <InfoTooltip content={TOOLTIP.tripleDispatch} iconColor="text-indigo-400 hover:text-indigo-300" />
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <SummaryItem 
-          label="年度保费支出" 
-          value={totalAnnualPremiums} 
+        <SummaryItem
+          label="年度保费支出"
+          value={totalAnnualPremiums}
           icon={<Wallet className="text-indigo-400" size={18} />}
           color="text-indigo-400"
           desc="计入支出预算"
+          tooltip={TOOLTIP.annualPremium}
           subValue={monthlyPremiumCost > 0 ? `月均 ${formatCNY(monthlyPremiumCost)}` : undefined}
         />
-        <SummaryItem 
-          label="保单现金价值" 
-          value={totalCashValue} 
+        <SummaryItem
+          label="保单现金价值"
+          value={totalCashValue}
           icon={<PiggyBank className="text-blue-400" size={18} />}
           color="text-blue-400"
           desc="计入稳健资产"
+          tooltip={TOOLTIP.cashValue}
         />
-        <SummaryItem 
-          label="风险保障总额" 
-          value={totalCoverageAmount} 
+        <SummaryItem
+          label="风险保障总额"
+          value={totalCoverageAmount}
           icon={<Shield className="text-emerald-400" size={18} />}
           color="text-emerald-400"
           desc="家庭抗风险杠杆"
+          tooltip={TOOLTIP.coverageAmount}
         />
       </div>
     </Card>
   );
 }
 
-function SummaryItem({ 
-  label, 
-  value, 
-  icon, 
+function SummaryItem({
+  label,
+  value,
+  icon,
   color,
   desc,
+  tooltip,
   subValue
-}: { 
-  label: string; 
-  value: number; 
-  icon: React.ReactNode; 
+}: {
+  label: string;
+  value: number;
+  icon: React.ReactNode;
   color: string;
   desc: string;
+  tooltip: React.ReactNode;
   subValue?: string;
 }) {
   return (
@@ -80,7 +77,10 @@ function SummaryItem({
       <div className="mb-2 p-2 rounded-full bg-white/5">
         {icon}
       </div>
-      <p className="text-xs text-gray-400 mb-0.5">{label}</p>
+      <div className="flex items-center gap-1 mb-0.5">
+        <p className="text-xs text-gray-400">{label}</p>
+        <InfoTooltip content={tooltip} position="top" iconColor="text-gray-600 hover:text-gray-400" iconSize={12} />
+      </div>
       <p className={`text-lg font-bold font-mono text-white mb-1`}>
         {formatCNY(value)}
       </p>

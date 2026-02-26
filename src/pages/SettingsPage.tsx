@@ -6,7 +6,6 @@ import {
   Users,
   User,
   AlertTriangle,
-  RefreshCw,
   ChevronDown,
   CheckCircle2,
   FlaskConical,
@@ -14,14 +13,24 @@ import {
   Download,
   Upload,
   LogOut,
+  Edit2,
+  Save,
+  X,
 } from 'lucide-react';
 import { PageContainer } from '../components/layout/PageContainer';
 import { Card } from '../components/common/Card';
 import { useAppStore } from '../store/useAppStore';
 import { supabase } from '../lib/supabase';
 import { EXAMPLE_PROFILE_METADATA } from '../data/exampleProfiles';
-import { ROUTES, CITY_TIER_NAMES, MARITAL_STATUS_NAMES, RISK_TOLERANCE_NAMES } from '../utils/constants';
+import {
+  ROUTES,
+  CITY_TIER_NAMES,
+  MARITAL_STATUS_NAMES,
+  RISK_TOLERANCE_NAMES,
+  PRIMARY_GOAL_NAMES,
+} from '../utils/constants';
 import type { WorkspaceMode } from '../types';
+import type { CityTier, MaritalStatus, RiskTolerance, PrimaryGoal } from '../types/profile.types';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -67,6 +76,491 @@ function SectionHeader({ icon, title, subtitle }: { icon: React.ReactNode; title
   );
 }
 
+/** Read-only display field */
+function ViewField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl bg-gray-900/60 border border-gray-800 px-4 py-3">
+      <p className="text-xs text-gray-500 mb-1">{label}</p>
+      <p className="text-sm font-semibold text-white">{value}</p>
+    </div>
+  );
+}
+
+/** Toggle switch */
+function ToggleSwitch({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!value)}
+      className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+        value ? 'bg-gold-primary' : 'bg-gray-700'
+      }`}
+    >
+      <span
+        className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
+          value ? 'translate-x-5' : 'translate-x-0.5'
+        }`}
+      />
+    </button>
+  );
+}
+
+/** Button group for selecting from a list of options */
+function ButtonGroup({
+  value,
+  options,
+  onChange,
+}: {
+  value: string;
+  options: { value: string; label: string }[];
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex gap-1.5 flex-wrap">
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          onClick={() => onChange(o.value)}
+          className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
+            value === o.value
+              ? 'bg-gold-primary/20 border-gold-primary/50 text-gold-primary'
+              : 'bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700 hover:text-gray-300'
+          }`}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Form row: label on left, input on right */
+function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-3">
+      <span className="text-xs text-gray-400 w-20 shrink-0 pt-2 leading-tight">{label}</span>
+      <div className="flex-1">{children}</div>
+    </div>
+  );
+}
+
+/** Section divider with title */
+function FormDivider({ title, note }: { title: string; note?: string }) {
+  return (
+    <div className="flex items-center gap-2 pt-1">
+      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">
+        {title}
+      </span>
+      {note && <span className="text-xs text-gray-600 normal-case font-normal">{note}</span>}
+      <div className="flex-1 h-px bg-gray-800" />
+    </div>
+  );
+}
+
+/** Shared number input style */
+const numInput = (extra = '') =>
+  `bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white text-center focus:outline-none focus:border-gold-primary/60 transition-colors ${extra}`;
+
+// ---------------------------------------------------------------------------
+// Profile info section (view + inline edit)
+// ---------------------------------------------------------------------------
+function ProfileInfoSection() {
+  const { getCurrentData, updateUserProfile, setUserProfile, activeMode } = useAppStore();
+  const { userProfile } = getCurrentData();
+  const isReadOnly = activeMode === 'EXAMPLE';
+
+  const buildDraft = () => ({
+    age:                      userProfile?.age ?? 30,
+    cityTier:                 (userProfile?.cityTier ?? 1) as CityTier,
+    maritalStatus:            (userProfile?.maritalStatus ?? 'single') as MaritalStatus,
+    hasChildren:              userProfile?.hasChildren ?? false,
+    childrenCount:            userProfile?.childrenCount ?? 0,
+    monthlyIncome:            userProfile?.monthlyIncome ?? 0,
+    hasMortgage:              userProfile?.hasMortgage ?? false,
+    mortgageMonthly:          userProfile?.mortgageMonthly ?? 0,
+    existingDebts:            userProfile?.existingDebts ?? 0,
+    riskTolerance:            (userProfile?.riskTolerance ?? 'moderate') as RiskTolerance,
+    primaryGoal:              (userProfile?.primaryGoal ?? 'retirement') as PrimaryGoal,
+    retirementAge:            userProfile?.retirementAge ?? 60,
+    dependents:               userProfile?.dependents ?? 0,
+    parentsCare:              userProfile?.parentsCare ?? false,
+    currentPensionContribution: userProfile?.currentPensionContribution ?? 0,
+    expectedMonthlyExpense:   userProfile?.expectedMonthlyExpense ?? 0,
+    desiredLifestyle:         (userProfile?.desiredLifestyle ?? 'comfortable') as 'basic' | 'comfortable' | 'affluent',
+    retirementLocation:       (userProfile?.retirementLocation ?? 'tier2') as 'tier1' | 'tier2' | 'tier3' | 'tier4',
+  });
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState(buildDraft);
+
+  const upd = <K extends keyof ReturnType<typeof buildDraft>>(
+    key: K,
+    value: ReturnType<typeof buildDraft>[K]
+  ) => setDraft((d) => ({ ...d, [key]: value }));
+
+  const startEditing = () => {
+    setDraft(buildDraft());
+    setIsEditing(true);
+  };
+
+  const handleSave = () => {
+    if (userProfile) {
+      updateUserProfile(draft);
+    } else {
+      setUserProfile({
+        ...draft,
+        childrenAges: [],
+        profileCompleted: true,
+        lastUpdated: new Date().toISOString(),
+      });
+    }
+    setIsEditing(false);
+  };
+
+  // ---- View mode ----
+  if (!isEditing) {
+    return (
+      <div className="space-y-3">
+        {userProfile ? (
+          <>
+            <div className="grid grid-cols-2 gap-2.5">
+              <ViewField label="年龄" value={`${userProfile.age} 岁`} />
+              <ViewField
+                label="城市"
+                value={CITY_TIER_NAMES[userProfile.cityTier] ?? `${userProfile.cityTier}线城市`}
+              />
+              <ViewField label="婚姻状况" value={MARITAL_STATUS_NAMES[userProfile.maritalStatus]} />
+              <ViewField
+                label="子女"
+                value={userProfile.hasChildren ? `${userProfile.childrenCount} 位` : '无'}
+              />
+              <ViewField label="月收入" value={`¥${userProfile.monthlyIncome.toLocaleString()}`} />
+              <ViewField
+                label="月供"
+                value={userProfile.hasMortgage ? `¥${(userProfile.mortgageMonthly || 0).toLocaleString()}` : '无'}
+              />
+              {userProfile.existingDebts > 0 && (
+                <ViewField label="现有负债" value={`¥${userProfile.existingDebts.toLocaleString()}`} />
+              )}
+              <ViewField label="风险偏好" value={RISK_TOLERANCE_NAMES[userProfile.riskTolerance]} />
+              <ViewField label="主要目标" value={PRIMARY_GOAL_NAMES[userProfile.primaryGoal]} />
+              <ViewField label="退休年龄" value={`${userProfile.retirementAge} 岁`} />
+              {!!userProfile.dependents && userProfile.dependents > 0 && (
+                <ViewField label="被抚养人" value={`${userProfile.dependents} 人`} />
+              )}
+              {userProfile.parentsCare && <ViewField label="赡养父母" value="是" />}
+              {!!userProfile.expectedMonthlyExpense && userProfile.expectedMonthlyExpense > 0 && (
+                <ViewField
+                  label="退休月支出"
+                  value={`¥${userProfile.expectedMonthlyExpense.toLocaleString()}`}
+                />
+              )}
+            </div>
+            {!isReadOnly && (
+              <button
+                onClick={startEditing}
+                className="mt-1 flex items-center gap-1.5 text-sm text-gold-primary hover:opacity-80 transition-opacity"
+              >
+                <Edit2 size={13} />
+                编辑个人信息
+              </button>
+            )}
+          </>
+        ) : (
+          <div className="text-center py-5">
+            <p className="text-sm text-gray-500 mb-4">尚未设置个人信息</p>
+            {!isReadOnly && (
+              <button
+                onClick={startEditing}
+                className="px-4 py-2 rounded-xl bg-gold-primary text-black-primary text-sm font-semibold hover:opacity-90 active:scale-95 transition-all"
+              >
+                立即设置
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ---- Edit mode ----
+  return (
+    <div className="space-y-4">
+      {/* 基本信息 */}
+      <FormDivider title="基本信息" />
+
+      <FieldRow label="年龄">
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            min={18}
+            max={80}
+            value={draft.age}
+            onChange={(e) => upd('age', Math.max(18, Math.min(80, parseInt(e.target.value) || 18)))}
+            className={numInput('w-20')}
+          />
+          <span className="text-xs text-gray-500">岁</span>
+        </div>
+      </FieldRow>
+
+      <FieldRow label="城市级别">
+        <ButtonGroup
+          value={String(draft.cityTier)}
+          options={[
+            { value: '1', label: '一线城市' },
+            { value: '2', label: '二线城市' },
+            { value: '3', label: '三线城市' },
+            { value: '4', label: '四线城市' },
+          ]}
+          onChange={(v) => upd('cityTier', parseInt(v) as CityTier)}
+        />
+      </FieldRow>
+
+      <FieldRow label="婚姻状况">
+        <ButtonGroup
+          value={draft.maritalStatus}
+          options={[
+            { value: 'single', label: '单身' },
+            { value: 'married', label: '已婚' },
+            { value: 'divorced', label: '离异' },
+          ]}
+          onChange={(v) => upd('maritalStatus', v as MaritalStatus)}
+        />
+      </FieldRow>
+
+      <FieldRow label="有子女">
+        <div className="flex items-center gap-3">
+          <ToggleSwitch
+            value={draft.hasChildren}
+            onChange={(v) => {
+              upd('hasChildren', v);
+              if (!v) upd('childrenCount', 0);
+            }}
+          />
+          {draft.hasChildren && (
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min={1}
+                max={8}
+                value={draft.childrenCount || 1}
+                onChange={(e) =>
+                  upd('childrenCount', Math.max(1, Math.min(8, parseInt(e.target.value) || 1)))
+                }
+                className={numInput('w-16')}
+              />
+              <span className="text-xs text-gray-500">位</span>
+            </div>
+          )}
+        </div>
+      </FieldRow>
+
+      {/* 收入与负债 */}
+      <FormDivider title="收入与负债" />
+
+      <FieldRow label="月收入">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-500">¥</span>
+          <input
+            type="number"
+            min={0}
+            step={500}
+            value={draft.monthlyIncome}
+            onChange={(e) => upd('monthlyIncome', Math.max(0, parseInt(e.target.value) || 0))}
+            className={numInput('w-36')}
+          />
+        </div>
+      </FieldRow>
+
+      <FieldRow label="有房贷">
+        <div className="flex items-center gap-3">
+          <ToggleSwitch
+            value={draft.hasMortgage}
+            onChange={(v) => {
+              upd('hasMortgage', v);
+              if (!v) upd('mortgageMonthly', 0);
+            }}
+          />
+          {draft.hasMortgage && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500">月供 ¥</span>
+              <input
+                type="number"
+                min={0}
+                step={100}
+                value={draft.mortgageMonthly}
+                onChange={(e) => upd('mortgageMonthly', Math.max(0, parseInt(e.target.value) || 0))}
+                className={numInput('w-28')}
+              />
+            </div>
+          )}
+        </div>
+      </FieldRow>
+
+      <FieldRow label="现有负债">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-500">¥</span>
+          <input
+            type="number"
+            min={0}
+            step={1000}
+            value={draft.existingDebts}
+            onChange={(e) => upd('existingDebts', Math.max(0, parseInt(e.target.value) || 0))}
+            className={numInput('w-36')}
+          />
+        </div>
+      </FieldRow>
+
+      {/* 理财目标 */}
+      <FormDivider title="理财目标" />
+
+      <FieldRow label="风险偏好">
+        <ButtonGroup
+          value={draft.riskTolerance}
+          options={[
+            { value: 'conservative', label: '保守型' },
+            { value: 'moderate', label: '稳健型' },
+            { value: 'aggressive', label: '进取型' },
+          ]}
+          onChange={(v) => upd('riskTolerance', v as RiskTolerance)}
+        />
+      </FieldRow>
+
+      <FieldRow label="主要目标">
+        <ButtonGroup
+          value={draft.primaryGoal}
+          options={[
+            { value: 'retirement', label: '退休规划' },
+            { value: 'house', label: '购房' },
+            { value: 'education', label: '教育基金' },
+            { value: 'wealth', label: '财富增长' },
+            { value: 'security', label: '财务安全' },
+          ]}
+          onChange={(v) => upd('primaryGoal', v as PrimaryGoal)}
+        />
+      </FieldRow>
+
+      <FieldRow label="退休年龄">
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            min={50}
+            max={70}
+            value={draft.retirementAge}
+            onChange={(e) =>
+              upd('retirementAge', Math.max(50, Math.min(70, parseInt(e.target.value) || 60)))
+            }
+            className={numInput('w-20')}
+          />
+          <span className="text-xs text-gray-500">岁</span>
+        </div>
+      </FieldRow>
+
+      {/* 保险与养老（可选） */}
+      <FormDivider title="保险与养老" note="（可选）" />
+
+      <FieldRow label="被抚养人">
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            min={0}
+            max={10}
+            value={draft.dependents}
+            onChange={(e) =>
+              upd('dependents', Math.max(0, Math.min(10, parseInt(e.target.value) || 0)))
+            }
+            className={numInput('w-16')}
+          />
+          <span className="text-xs text-gray-500">人</span>
+        </div>
+      </FieldRow>
+
+      <FieldRow label="赡养父母">
+        <ToggleSwitch
+          value={draft.parentsCare}
+          onChange={(v) => upd('parentsCare', v)}
+        />
+      </FieldRow>
+
+      <FieldRow label="养老金月缴">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-500">¥</span>
+          <input
+            type="number"
+            min={0}
+            step={100}
+            value={draft.currentPensionContribution}
+            onChange={(e) =>
+              upd('currentPensionContribution', Math.max(0, parseInt(e.target.value) || 0))
+            }
+            className={numInput('w-32')}
+          />
+        </div>
+      </FieldRow>
+
+      <FieldRow label="退休月支出">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-500">¥</span>
+          <input
+            type="number"
+            min={0}
+            step={500}
+            value={draft.expectedMonthlyExpense}
+            onChange={(e) =>
+              upd('expectedMonthlyExpense', Math.max(0, parseInt(e.target.value) || 0))
+            }
+            className={numInput('w-32')}
+          />
+        </div>
+      </FieldRow>
+
+      <FieldRow label="生活标准">
+        <ButtonGroup
+          value={draft.desiredLifestyle}
+          options={[
+            { value: 'basic', label: '基本型' },
+            { value: 'comfortable', label: '舒适型' },
+            { value: 'affluent', label: '富裕型' },
+          ]}
+          onChange={(v) => upd('desiredLifestyle', v as 'basic' | 'comfortable' | 'affluent')}
+        />
+      </FieldRow>
+
+      <FieldRow label="退休城市">
+        <ButtonGroup
+          value={draft.retirementLocation}
+          options={[
+            { value: 'tier1', label: '一线' },
+            { value: 'tier2', label: '二线' },
+            { value: 'tier3', label: '三线' },
+            { value: 'tier4', label: '四线' },
+          ]}
+          onChange={(v) => upd('retirementLocation', v as 'tier1' | 'tier2' | 'tier3' | 'tier4')}
+        />
+      </FieldRow>
+
+      {/* Actions */}
+      <div className="flex items-center gap-3 pt-2 border-t border-gray-800">
+        <button
+          onClick={handleSave}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gold-primary text-black-primary text-sm font-semibold hover:opacity-90 active:scale-95 transition-all"
+        >
+          <Save size={14} />
+          保存
+        </button>
+        <button
+          onClick={() => setIsEditing(false)}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-800 text-gray-300 text-sm font-semibold hover:bg-gray-700 transition-colors"
+        >
+          <X size={14} />
+          取消
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
@@ -80,14 +574,10 @@ export default function SettingsPage() {
     createSandbox,
     clearSandbox,
     resetAll,
-    getCurrentData,
     sandboxData,
     isAuthenticated,
     setAuthenticated,
   } = useAppStore();
-
-  const currentData = getCurrentData();
-  const { userProfile } = currentData;
 
   // Example picker state
   const [selectedExampleId, setSelectedExampleId] = useState<string>(
@@ -128,17 +618,15 @@ export default function SettingsPage() {
     reader.onload = (event) => {
       try {
         const json = JSON.parse(event.target?.result as string);
-        // Simple validation
         if (typeof json === 'object' && json !== null) {
-            createSandbox(json);
+          createSandbox(json);
         } else {
-            alert('Invalid JSON file');
+          alert('Invalid JSON file');
         }
       } catch (err) {
         console.error('Failed to parse JSON', err);
         alert('Failed to parse JSON file');
       }
-      // Reset input
       e.target.value = '';
     };
     reader.readAsText(file);
@@ -337,26 +825,23 @@ export default function SettingsPage() {
                   >
                     新建沙盒
                   </button>
-                  
-                  {/* Download/Upload */}
+
                   {sandboxData && (
-                    <>
-                      <button
-                        onClick={handleDownloadSandbox}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-800 text-gray-300 hover:bg-white/10 transition-colors"
-                        title="导出沙盒数据"
-                      >
-                        <Download size={14} /> 导出
-                      </button>
-                    </>
+                    <button
+                      onClick={handleDownloadSandbox}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-800 text-gray-300 hover:bg-white/10 transition-colors"
+                      title="导出沙盒数据"
+                    >
+                      <Download size={14} /> 导出
+                    </button>
                   )}
-                  
+
                   <label className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-800 text-gray-300 hover:bg-white/10 transition-colors cursor-pointer">
                     <Upload size={14} /> 导入
-                    <input 
-                      type="file" 
-                      accept=".json" 
-                      className="hidden" 
+                    <input
+                      type="file"
+                      accept=".json"
+                      className="hidden"
                       onChange={handleUploadSandbox}
                     />
                   </label>
@@ -385,62 +870,7 @@ export default function SettingsPage() {
               title="个人信息"
               subtitle="您的基础画像，用于智能推荐"
             />
-
-            {userProfile ? (
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { label: '年龄', value: `${userProfile.age} 岁` },
-                    {
-                      label: '所在城市',
-                      value: CITY_TIER_NAMES[userProfile.cityTier] ?? `${userProfile.cityTier}线城市`,
-                    },
-                    {
-                      label: '婚姻状况',
-                      value: MARITAL_STATUS_NAMES[userProfile.maritalStatus] ?? userProfile.maritalStatus,
-                    },
-                    {
-                      label: '风险偏好',
-                      value: RISK_TOLERANCE_NAMES[userProfile.riskTolerance] ?? userProfile.riskTolerance,
-                    },
-                    {
-                      label: '月收入',
-                      value: `¥${userProfile.monthlyIncome.toLocaleString()}`,
-                    },
-                    {
-                      label: '退休目标',
-                      value: `${userProfile.retirementAge} 岁`,
-                    },
-                  ].map(({ label, value }) => (
-                    <div
-                      key={label}
-                      className="rounded-xl bg-gray-900/60 border border-gray-800 px-4 py-3"
-                    >
-                      <p className="text-xs text-gray-500 mb-1">{label}</p>
-                      <p className="text-sm font-semibold text-white">{value}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  onClick={() => navigate(ROUTES.ONBOARDING)}
-                  className="mt-1 flex items-center gap-2 text-sm text-gold-primary hover:opacity-80 transition-opacity"
-                >
-                  <RefreshCw size={14} />
-                  重新填写
-                </button>
-              </div>
-            ) : (
-              <div className="text-center py-6">
-                <p className="text-sm text-gray-500 mb-4">尚未完成个人画像</p>
-                <button
-                  onClick={() => navigate(ROUTES.ONBOARDING)}
-                  className="px-4 py-2 rounded-xl bg-gold-primary text-black-primary text-sm font-semibold hover:opacity-90 active:scale-95 transition-all"
-                >
-                  立即填写
-                </button>
-              </div>
-            )}
+            <ProfileInfoSection />
           </Card>
         </motion.div>
 

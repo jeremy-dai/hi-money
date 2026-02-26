@@ -8,7 +8,9 @@
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card } from '../common/Card';
+import { InfoTooltip } from '../common/InfoTooltip';
 import type { InsuranceGapResult } from '../../types/insurance.types';
+import { TOOLTIP } from '../../utils/tooltipContent';
 
 interface InsuranceGapChartProps {
   result: InsuranceGapResult;
@@ -60,7 +62,10 @@ export function InsuranceGapChart({ result }: InsuranceGapChartProps) {
     <div className="space-y-6">
       {/* Coverage Gap Chart */}
       <Card>
-        <h3 className="text-xl font-bold text-white mb-6">保障缺口分析</h3>
+        <div className="flex items-center gap-2 mb-6">
+          <h3 className="text-xl font-bold text-white">保障缺口分析</h3>
+          <InfoTooltip content={TOOLTIP.coverageGap} position="bottom" iconColor="text-gray-500 hover:text-gray-300" />
+        </div>
         <ResponsiveContainer width="100%" height={350}>
           <BarChart data={coverageData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#333" />
@@ -147,7 +152,10 @@ export function InsuranceGapChart({ result }: InsuranceGapChartProps) {
       {/* Family Allocation (if applicable) */}
       {result.familyAllocation && (
         <Card>
-          <h3 className="text-xl font-bold text-white mb-4">家庭保障分配 (6:3:1)</h3>
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="text-xl font-bold text-white">家庭保障分配 (6:3:1)</h3>
+            <InfoTooltip content={TOOLTIP.familyAllocation631} position="bottom" iconColor="text-gray-500 hover:text-gray-300" />
+          </div>
           <div className="space-y-4">
             <div className="bg-black-soft rounded-lg p-4 border border-black-border">
               <div className="flex items-center justify-between mb-3">
@@ -224,7 +232,10 @@ export function InsuranceGapChart({ result }: InsuranceGapChartProps) {
             </p>
           </div>
           <div className="bg-black-soft rounded-lg p-4">
-            <span className="text-sm text-gray-400">保障完整度</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm text-gray-400">保障完整度</span>
+              <InfoTooltip content={TOOLTIP.coverageCompleteness} position="top" iconColor="text-gray-600 hover:text-gray-400" iconSize={13} />
+            </div>
             <p className="text-2xl font-bold text-gold-primary font-mono mt-1">
               {result.coverageCompleteness.toFixed(1)}%
             </p>
