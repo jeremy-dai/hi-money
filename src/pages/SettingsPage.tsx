@@ -16,6 +16,8 @@ import {
   Edit2,
   Save,
   X,
+  PieChart,
+  BarChart2,
 } from 'lucide-react';
 import { PageContainer } from '../components/layout/PageContainer';
 import { Card } from '../components/common/Card';
@@ -28,8 +30,14 @@ import {
   MARITAL_STATUS_NAMES,
   RISK_TOLERANCE_NAMES,
   PRIMARY_GOAL_NAMES,
+  ALLOCATION_COLORS,
+  DEFAULT_ALLOCATION,
+  INVESTMENT_CATEGORY_COLORS,
+  INVESTMENT_CATEGORY_NAMES,
 } from '../utils/constants';
 import type { WorkspaceMode } from '../types';
+import type { Allocation } from '../types/store.types';
+import type { InvestmentPoolAllocation } from '../types/allocation.types';
 import type { CityTier, MaritalStatus, RiskTolerance, PrimaryGoal } from '../types/profile.types';
 
 // ---------------------------------------------------------------------------
@@ -562,6 +570,267 @@ function ProfileInfoSection() {
 }
 
 // ---------------------------------------------------------------------------
+// Shared: segmented preview bar + footer for allocation sections
+// ---------------------------------------------------------------------------
+interface SegmentedBarProps {
+  segments: { color: string; value: number }[];
+  sum: number;
+}
+
+function SegmentedBar({ segments, sum }: SegmentedBarProps) {
+  // When over 100, scale all segments down proportionally so they fit, then
+  // show a red overflow tab at the right edge.
+  const scale = sum > 100 ? 100 / sum : 1;
+  return (
+    <div className="relative h-3 rounded-full overflow-hidden flex bg-gray-800">
+      {segments.map((seg, i) => (
+        <div
+          key={i}
+          className="h-full transition-all duration-200"
+          style={{
+            width: `${seg.value * scale}%`,
+            backgroundColor: seg.color,
+            opacity: 0.85,
+          }}
+        />
+      ))}
+      {/* Red overflow stripe */}
+      {sum > 100 && (
+        <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-red-500" />
+      )}
+    </div>
+  );
+}
+
+interface AllocationFooterProps {
+  sum: number;
+  valid: boolean;
+  isReadOnly: boolean;
+  onBalance: () => void;
+  onReset: () => void;
+  onSave: () => void;
+  resetLabel: string;
+}
+
+function AllocationFooter({ sum, valid, isReadOnly, onBalance, onReset, onSave, resetLabel }: AllocationFooterProps) {
+  const delta = parseFloat((sum - 100).toFixed(1));
+  return (
+    <div className="flex items-center justify-between pt-3 border-t border-white/5">
+      <div className="flex items-center gap-2">
+        <span className={`text-xs font-mono tabular-nums ${valid ? 'text-gray-500' : delta > 0 ? 'text-red-400' : 'text-amber-400'}`}>
+          {sum.toFixed(1)}%
+          {!valid && (
+            <span className="ml-1 font-sans">
+              {delta > 0 ? `超出 ${delta}%` : `剩余 ${Math.abs(delta)}%`}
+            </span>
+          )}
+        </span>
+        {!valid && !isReadOnly && (
+          <button
+            onClick={onBalance}
+            className="px-2 py-0.5 text-xs rounded-md bg-gray-800 border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 transition-colors"
+          >
+            一键均衡
+          </button>
+        )}
+      </div>
+      {!isReadOnly && (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onReset}
+            className="px-2 py-1 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+          >
+            {resetLabel}
+          </button>
+          <button
+            onClick={onSave}
+            disabled={!valid}
+            className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+              valid
+                ? 'bg-gold-primary/20 text-gold-primary hover:bg-gold-primary/30'
+                : 'bg-gray-800 text-gray-600 cursor-not-allowed'
+            }`}
+          >
+            保存
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Income allocation section (25-15-50-10)
+// ---------------------------------------------------------------------------
+const INCOME_KEYS: (keyof Allocation)[] = ['growth', 'stability', 'essentials', 'rewards'];
+const INCOME_LABELS: Record<keyof Allocation, string> = {
+  growth: '增长投资', stability: '稳健储蓄', essentials: '基本开支', rewards: '享乐奖励',
+};
+
+function IncomeAllocationSection() {
+  const store = useAppStore();
+  const isReadOnly = store.activeMode === 'EXAMPLE';
+  const [draft, setDraft] = useState<Allocation>(() => ({ ...store.getTargetAllocation() }));
+
+  const sum = INCOME_KEYS.reduce((acc, k) => acc + draft[k], 0);
+  const valid = Math.abs(sum - 100) < 0.1;
+
+  const autoBalance = () => {
+    if (sum === 0) { setDraft({ ...DEFAULT_ALLOCATION }); return; }
+    const scale = 100 / sum;
+    let running = 0;
+    const balanced = {} as Allocation;
+    INCOME_KEYS.forEach((k, i) => {
+      if (i === INCOME_KEYS.length - 1) {
+        balanced[k] = Math.max(0, parseFloat((100 - running).toFixed(1)));
+      } else {
+        balanced[k] = Math.max(0, parseFloat((draft[k] * scale).toFixed(1)));
+        running += balanced[k];
+      }
+    });
+    setDraft(balanced);
+  };
+
+  const handleReset = () => {
+    const d = { ...DEFAULT_ALLOCATION };
+    setDraft(d);
+    store.updateSettings({ targetAllocation: d });
+  };
+
+  return (
+    <div className="space-y-4">
+      <SegmentedBar
+        segments={INCOME_KEYS.map((k) => ({ color: ALLOCATION_COLORS[k], value: draft[k] }))}
+        sum={sum}
+      />
+
+      <div className="space-y-4">
+        {INCOME_KEYS.map((k) => (
+          <div key={k} className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: ALLOCATION_COLORS[k] }} />
+                <span className="text-xs text-gray-300">{INCOME_LABELS[k]}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-gray-600">建议 {DEFAULT_ALLOCATION[k]}%</span>
+                <span className="font-mono text-white w-9 text-right tabular-nums">{draft[k]}%</span>
+              </div>
+            </div>
+            <input
+              type="range"
+              min={0} max={100} step={1}
+              value={draft[k]}
+              disabled={isReadOnly}
+              onChange={(e) => setDraft((d) => ({ ...d, [k]: parseInt(e.target.value) }))}
+              style={{ accentColor: ALLOCATION_COLORS[k] }}
+              className="w-full cursor-pointer disabled:opacity-40"
+            />
+          </div>
+        ))}
+      </div>
+
+      <AllocationFooter
+        sum={sum}
+        valid={valid}
+        isReadOnly={isReadOnly}
+        onBalance={autoBalance}
+        onReset={handleReset}
+        onSave={() => { if (valid) store.updateSettings({ targetAllocation: { ...draft } }); }}
+        resetLabel="重置为 25-15-50-10"
+      />
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Investment allocation section (growth / stability / special)
+// ---------------------------------------------------------------------------
+const INVEST_KEYS: (keyof InvestmentPoolAllocation)[] = ['growth', 'stability', 'special'];
+
+function InvestmentAllocationSection() {
+  const store = useAppStore();
+  const isReadOnly = store.activeMode === 'EXAMPLE';
+  const recommended = store.getRecommendedAllocation();
+  const userTargets = store.getInvestmentTargets();
+  const recAlloc = recommended?.investmentAllocation ?? { growth: 60, stability: 30, special: 10 };
+
+  const [draft, setDraft] = useState<InvestmentPoolAllocation>(() => ({ ...(userTargets ?? recAlloc) }));
+
+  const sum = INVEST_KEYS.reduce((acc, k) => acc + draft[k], 0);
+  const valid = Math.abs(sum - 100) < 0.1;
+
+  const autoBalance = () => {
+    if (sum === 0) { setDraft({ ...recAlloc }); return; }
+    let running = 0;
+    const balanced = {} as InvestmentPoolAllocation;
+    INVEST_KEYS.forEach((k, i) => {
+      if (i === INVEST_KEYS.length - 1) {
+        balanced[k] = Math.max(0, parseFloat((100 - running).toFixed(1)));
+      } else {
+        balanced[k] = Math.max(0, parseFloat((draft[k] / sum * 100).toFixed(1)));
+        running += balanced[k];
+      }
+    });
+    setDraft(balanced);
+  };
+
+  const handleReset = () => {
+    setDraft({ ...recAlloc });
+    store.setInvestmentTargets(null);
+  };
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-gray-500">
+        {userTargets ? '自定义目标' : '基于个人画像的智能推荐'}
+      </p>
+
+      <SegmentedBar
+        segments={INVEST_KEYS.map((k) => ({ color: INVESTMENT_CATEGORY_COLORS[k], value: draft[k] }))}
+        sum={sum}
+      />
+
+      <div className="space-y-4">
+        {INVEST_KEYS.map((k) => (
+          <div key={k} className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: INVESTMENT_CATEGORY_COLORS[k] }} />
+                <span className="text-xs text-gray-300">{INVESTMENT_CATEGORY_NAMES[k]}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-gray-600">建议 {recAlloc[k].toFixed(0)}%</span>
+                <span className="font-mono text-white w-9 text-right tabular-nums">{draft[k]}%</span>
+              </div>
+            </div>
+            <input
+              type="range"
+              min={0} max={100} step={1}
+              value={draft[k]}
+              disabled={isReadOnly}
+              onChange={(e) => setDraft((d) => ({ ...d, [k]: parseInt(e.target.value) }))}
+              style={{ accentColor: INVESTMENT_CATEGORY_COLORS[k] }}
+              className="w-full cursor-pointer disabled:opacity-40"
+            />
+          </div>
+        ))}
+      </div>
+
+      <AllocationFooter
+        sum={sum}
+        valid={valid}
+        isReadOnly={isReadOnly}
+        onBalance={autoBalance}
+        onReset={handleReset}
+        onSave={() => { if (valid) store.setInvestmentTargets({ ...draft }); }}
+        resetLabel="重置为建议值"
+      />
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
 export default function SettingsPage() {
@@ -875,9 +1144,37 @@ export default function SettingsPage() {
         </motion.div>
 
         {/* ------------------------------------------------------------------ */}
-        {/* Section 3: Data Management                                         */}
+        {/* Section 3: Income Allocation                                       */}
         {/* ------------------------------------------------------------------ */}
         <motion.div custom={2} variants={fadeUp} initial="hidden" animate="visible">
+          <Card>
+            <SectionHeader
+              icon={<PieChart size={20} />}
+              title="收入分配"
+              subtitle="规划月收入用途比例（25-15-50-10 法则）"
+            />
+            <IncomeAllocationSection />
+          </Card>
+        </motion.div>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* Section 4: Investment Allocation                                   */}
+        {/* ------------------------------------------------------------------ */}
+        <motion.div custom={3} variants={fadeUp} initial="hidden" animate="visible">
+          <Card>
+            <SectionHeader
+              icon={<BarChart2 size={20} />}
+              title="财产分配"
+              subtitle="投资池中各类资产的目标占比"
+            />
+            <InvestmentAllocationSection />
+          </Card>
+        </motion.div>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* Section 5: Data Management                                         */}
+        {/* ------------------------------------------------------------------ */}
+        <motion.div custom={4} variants={fadeUp} initial="hidden" animate="visible">
           <Card>
             <SectionHeader
               icon={<AlertTriangle size={20} />}
@@ -941,10 +1238,10 @@ export default function SettingsPage() {
         </motion.div>
 
         {/* ------------------------------------------------------------------ */}
-        {/* Section 4: Account / Logout                                       */}
+        {/* Section 6: Account / Logout                                       */}
         {/* ------------------------------------------------------------------ */}
         {isAuthenticated && (
-          <motion.div custom={3} variants={fadeUp} initial="hidden" animate="visible">
+          <motion.div custom={5} variants={fadeUp} initial="hidden" animate="visible">
             <Card>
               <SectionHeader
                 icon={<LogOut size={20} />}

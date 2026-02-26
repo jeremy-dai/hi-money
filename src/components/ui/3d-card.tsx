@@ -11,15 +11,18 @@ export const CardContainer = ({
   children,
   className,
   containerClassName,
+  enable3D = true,
 }: {
   children?: React.ReactNode;
   className?: string;
   containerClassName?: string;
+  enable3D?: boolean;
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMouseEntered, setIsMouseEntered] = useState(false);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!enable3D) return;
     if (!containerRef.current) return;
     const { left, top, width, height } =
       containerRef.current.getBoundingClientRect();
@@ -38,11 +41,18 @@ export const CardContainer = ({
     setIsMouseEntered(false);
     containerRef.current.style.transform = `rotateY(0deg) rotateX(0deg)`;
   };
+  
+  useEffect(() => {
+    if (!enable3D && containerRef.current) {
+        containerRef.current.style.transform = `rotateY(0deg) rotateX(0deg)`;
+    }
+  }, [enable3D]);
+
   return (
     <MouseEnterContext.Provider value={[isMouseEntered, setIsMouseEntered]}>
       <div
         className={cn(
-          "py-20 flex items-center justify-center",
+          "py-5 flex items-center justify-center",
           containerClassName
         )}
         style={{

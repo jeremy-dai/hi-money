@@ -19,6 +19,7 @@ import {
 import { useAppStore } from '../store/useAppStore';
 import { PageContainer } from '../components/layout/PageContainer';
 import { Card } from '../components/common/Card';
+import { WealthCard } from '../components/assets/WealthCard';
 import { PolicyForm } from '../components/insurance/PolicyForm';
 import { PolicyCard } from '../components/insurance/PolicyCard';
 import { InsuranceSummary } from '../components/insurance/InsuranceSummary';
@@ -445,7 +446,7 @@ export default function AssetsPage() {
                 const catTotal = catAccounts.reduce((sum, a) => sum + a.amount, 0);
                 const catInsurance = insuranceCashByCategory[cat];
                 return (
-                  <Card key={cat} className="overflow-hidden p-0">
+                  <WealthCard key={cat} className="overflow-hidden p-0" enable3D={!isOpen}>
                     <button
                       onClick={() => setExpanded((p) => ({ ...p, [cat]: !p[cat] }))}
                       className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/5 transition-colors"
@@ -631,7 +632,7 @@ export default function AssetsPage() {
                         </motion.div>
                       )}
                     </AnimatePresence>
-                  </Card>
+                  </WealthCard>
                 );
               })}
 

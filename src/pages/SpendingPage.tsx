@@ -38,6 +38,7 @@ export default function SpendingPage() {
   const [parsedBatch, setParsedBatch] = useState<SpendingRecord[]>([]);
 
   const [showFramework, setShowFramework] = useState(false);
+  const [hoveredMonth, setHoveredMonth] = useState<string | null>(null);
 
   const sorted = [...spending].sort((a, b) => b.month.localeCompare(a.month));
   const chartData = getMonthlySpendingChartData(spending);
@@ -372,9 +373,29 @@ export default function SpendingPage() {
                 return (
                   <div
                     key={record.month}
-                    className="flex items-center gap-3 p-3 rounded-lg bg-black-soft group"
+                    className="relative group rounded-lg bg-black-soft"
+                    onMouseEnter={() => setHoveredMonth(record.month)}
+                    onMouseLeave={() => setHoveredMonth(null)}
                   >
-                    {isEditing ? (
+                    <AnimatePresence>
+                      {hoveredMonth === record.month && (
+                        <motion.span
+                          className="absolute inset-0 h-full w-full bg-slate-700/[0.8] block rounded-lg"
+                          layoutId="hoverBackground"
+                          initial={{ opacity: 0 }}
+                          animate={{
+                            opacity: 1,
+                            transition: { duration: 0.15 },
+                          }}
+                          exit={{
+                            opacity: 0,
+                            transition: { duration: 0.15, delay: 0.2 },
+                          }}
+                        />
+                      )}
+                    </AnimatePresence>
+                    <div className="relative z-10 flex items-center gap-3 p-3">
+                      {isEditing ? (
                       <>
                         <div className="flex-1 grid grid-cols-2 gap-2">
                           <input
@@ -396,7 +417,13 @@ export default function SpendingPage() {
                         <button onClick={handleUpdate} className="text-emerald-400 hover:text-emerald-300 p-1">
                           <Check size={16} />
                         </button>
-                        <button onClick={() => setEditMonth(null)} className="text-gray-500 hover:text-gray-300 p-1">
+                        <button
+                          onClick={() => {
+                            setEditMonth(null);
+                            setForm({ month: currentMonth(), amount: 0, note: '' });
+                          }}
+                          className="text-gray-500 hover:text-gray-300 p-1"
+                        >
                           <X size={16} />
                         </button>
                       </>
@@ -443,6 +470,7 @@ export default function SpendingPage() {
                         )}
                       </>
                     )}
+                  </div>
                   </div>
                 );
               })}
