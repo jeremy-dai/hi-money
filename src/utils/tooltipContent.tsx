@@ -3,7 +3,6 @@
  * All content in Simplified Chinese for client education.
  */
 
-import React from 'react';
 
 export const TOOLTIP = {
   // ── Dashboard metrics ────────────────────────────────────────────────────

@@ -470,7 +470,7 @@ export default function SpendingPage() {
                         )}
                       </>
                     )}
-                  </div>
+                    </div>
                   </div>
                 );
               })}
