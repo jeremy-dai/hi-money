@@ -53,7 +53,19 @@ export function TopNav() {
           </div>
           <div className="hidden sm:flex items-center gap-1.5 text-xs text-gray-500">
             <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
-            <span>{modeLabel}</span>
+            {modeLabel === '未登录' ? (
+              <span
+                className="cursor-pointer hover:text-gray-700 hover:underline transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(ROUTES.LOGIN);
+                }}
+              >
+                {modeLabel}
+              </span>
+            ) : (
+              <span>{modeLabel}</span>
+            )}
           </div>
           {totalAssets > 0 && (
             <span className="hidden md:inline text-xs text-gray-600 font-mono">

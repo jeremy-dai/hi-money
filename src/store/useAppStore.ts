@@ -16,6 +16,7 @@ import type { InsurancePolicy } from '../types/insurance.types';
 import type { WorkspaceSettings } from '../types/settings.types';
 import { DEFAULT_ALLOCATION } from '../utils/constants';
 import { calculateRecommendedAllocation } from '../algorithms/recommendAllocation';
+import { calculateMA3Spending } from '../algorithms/spendingAnalytics';
 import { saveProfileData, upsertSpendingRecord, deleteSpendingRecord } from '../services/supabaseService';
 import { supabase } from '../lib/supabase';
 import { EXAMPLE_PROFILES } from '../data/exampleProfiles';
@@ -169,11 +170,8 @@ export const useAppStore = create<AppState>()(
       },
 
       getMA3Spending: () => {
-        // Simple MA3 implementation if algorithm not available
         const spending = get().getCurrentData().spending;
-        if (spending.length < 3) return 0;
-        const last3 = spending.slice(-3);
-        return last3.reduce((sum, s) => sum + s.amount, 0) / 3;
+        return calculateMA3Spending(spending);
       },
 
       getRecommendedAllocation: () => {
