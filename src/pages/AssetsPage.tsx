@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   Calculator,
   BookOpen,
+  FileText,
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { PageContainer } from '../components/layout/PageContainer';
@@ -89,6 +90,12 @@ export default function AssetsPage() {
     name: string;
     amount: string;
   } | null>(null);
+
+  const [showBatchAdd, setShowBatchAdd] = useState(false);
+  const [batchAccountText, setBatchAccountText] = useState('');
+  const [parsedBatchAccounts, setParsedBatchAccounts] = useState<
+    Array<{ category: InvestmentCategoryType; name: string; amount: number }>
+  >([]);
 
   const [showPolicyForm, setShowPolicyForm] = useState(false);
   const [editingPolicy, setEditingPolicy] = useState<InsurancePolicy | null>(null);
@@ -196,6 +203,45 @@ export default function AssetsPage() {
     setAddingTo(null);
   };
 
+  const CATEGORY_KEYWORDS: Record<string, InvestmentCategoryType> = {
+    '成长': 'growth', '成长投资': 'growth', 'growth': 'growth',
+    '稳健': 'stability', '稳健储蓄': 'stability', 'stability': 'stability',
+    '特殊': 'special', '特殊用途': 'special', 'special': 'special',
+    '应急': 'emergency', '应急基金': 'emergency', 'emergency': 'emergency',
+  };
+
+  const handleAccountBatchParse = (text: string) => {
+    setBatchAccountText(text);
+    const lines = text.split('\n').filter(l => l.trim());
+    const results: Array<{ category: InvestmentCategoryType; name: string; amount: number }> = [];
+
+    lines.forEach(line => {
+      const parts = line.split(/[\t,]+|\s{2,}/).map(p => p.trim()).filter(p => p);
+      if (parts.length >= 3) {
+        const category = CATEGORY_KEYWORDS[parts[0]];
+        if (!category) return;
+        const amountStr = parts[parts.length - 1].replace(/[,¥]/g, '');
+        const amount = parseFloat(amountStr);
+        const name = parts.slice(1, parts.length - 1).join(' ');
+        if (name && !isNaN(amount) && amount >= 0) {
+          results.push({ category, name, amount });
+        }
+      }
+    });
+
+    setParsedBatchAccounts(results);
+  };
+
+  const handleAccountBatchSave = () => {
+    if (parsedBatchAccounts.length === 0) return;
+    parsedBatchAccounts.forEach(({ category, name, amount }) => {
+      store.addAccount(category, { name, amount });
+    });
+    setShowBatchAdd(false);
+    setBatchAccountText('');
+    setParsedBatchAccounts([]);
+  };
+
   return (
     <PageContainer>
       <div className="max-w-4xl mx-auto pb-20 pt-10 space-y-6">
@@ -233,6 +279,103 @@ export default function AssetsPage() {
               transition={{ duration: 0.15 }}
               className="space-y-4"
             >
+              {/* Batch Add Button */}
+              {!isReadOnly && (
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => setShowBatchAdd(!showBatchAdd)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                      showBatchAdd
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-white/5 hover:bg-white/10 text-indigo-300'
+                    }`}
+                  >
+                    <FileText size={14} /> 批量录入
+                  </button>
+                </div>
+              )}
+
+              {/* Batch Add Card */}
+              <AnimatePresence>
+                {showBatchAdd && !isReadOnly && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <Card className="border-indigo-600/40">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-base font-semibold text-white">批量录入账户</h3>
+                        <button
+                          onClick={() => setShowBatchAdd(false)}
+                          className="text-gray-500 hover:text-gray-300 p-1"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                          <p className="text-xs text-blue-200">
+                            支持从 Excel 或文本粘贴。每行一条账户，格式：<br />
+                            <code className="bg-black/30 px-1 py-0.5 rounded text-blue-100">类别{'  '}账户名称{'  '}金额</code><br />
+                            类别支持：成长、稳健、特殊、应急（或全称）。分隔符支持制表符(Tab)、逗号或两个以上空格。
+                          </p>
+                        </div>
+
+                        <textarea
+                          value={batchAccountText}
+                          onChange={(e) => handleAccountBatchParse(e.target.value)}
+                          placeholder={"成长  招商银行股票  50000\n稳健  国债账户  30000\n应急  余额宝  20000"}
+                          className="w-full h-32 bg-black-soft border border-white/10 rounded-lg px-3 py-2 text-white text-sm font-mono focus:outline-none focus:border-indigo-500"
+                        />
+
+                        {parsedBatchAccounts.length > 0 && (
+                          <div className="bg-black-soft rounded-lg overflow-hidden border border-white/10">
+                            <div className="px-3 py-2 bg-white/5 border-b border-white/10 flex text-xs text-gray-400 font-medium">
+                              <div className="w-20">类别</div>
+                              <div className="flex-1">账户名称</div>
+                              <div className="w-28 text-right">金额</div>
+                            </div>
+                            <div className="max-h-40 overflow-y-auto">
+                              {parsedBatchAccounts.map((row, i) => (
+                                <div key={i} className="px-3 py-2 flex text-sm text-gray-300 border-b border-white/5 last:border-0">
+                                  <div className={`w-20 text-xs ${CATEGORY_TEXT[row.category]}`}>
+                                    {INVESTMENT_CATEGORY_NAMES[row.category]}
+                                  </div>
+                                  <div className="flex-1 truncate">{row.name}</div>
+                                  <div className="w-28 font-mono text-right">{formatCNY(row.amount)}</div>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="px-3 py-2 bg-white/5 border-t border-white/10 text-xs text-gray-400 text-right">
+                              共解析 {parsedBatchAccounts.length} 条账户
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex gap-2 pt-2">
+                          <button
+                            onClick={handleAccountBatchSave}
+                            disabled={parsedBatchAccounts.length === 0}
+                            className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
+                          >
+                            <Check size={15} /> 批量保存
+                          </button>
+                          <button
+                            onClick={() => setShowBatchAdd(false)}
+                            className="flex items-center gap-1.5 px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg text-sm transition-colors"
+                          >
+                            <X size={15} /> 取消
+                          </button>
+                        </div>
+                      </div>
+                    </Card>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {/* Target Asset Allocation Card */}
               {recommendedAllocation && (
                 <Card>
