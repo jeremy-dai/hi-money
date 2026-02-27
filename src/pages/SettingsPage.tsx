@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Briefcase,
@@ -74,11 +74,13 @@ function ModeBadge({ mode }: { mode: WorkspaceMode }) {
 /** Section header */
 function SectionHeader({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle?: string }) {
   return (
-    <div className="flex items-start gap-3 mb-5">
-      <div className="mt-0.5 text-gold-primary">{icon}</div>
+    <div className="flex items-center gap-4 mb-6">
+      <div className="w-10 h-10 rounded-xl bg-gold-primary/10 flex items-center justify-center text-gold-primary shrink-0">
+        {icon}
+      </div>
       <div>
-        <h2 className="text-lg font-semibold text-white">{title}</h2>
-        {subtitle && <p className="text-sm text-gray-400 mt-0.5">{subtitle}</p>}
+        <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+        {subtitle && <p className="text-sm text-gray-400 mt-0.5 leading-relaxed">{subtitle}</p>}
       </div>
     </div>
   );
@@ -582,21 +584,21 @@ function SegmentedBar({ segments, sum }: SegmentedBarProps) {
   // show a red overflow tab at the right edge.
   const scale = sum > 100 ? 100 / sum : 1;
   return (
-    <div className="relative h-3 rounded-full overflow-hidden flex bg-gray-800">
+    <div className="relative h-4 rounded-full overflow-hidden flex bg-gray-900 border border-white/5 shadow-inner">
       {segments.map((seg, i) => (
         <div
           key={i}
-          className="h-full transition-all duration-200"
+          className="h-full transition-all duration-300 ease-out"
           style={{
             width: `${seg.value * scale}%`,
             backgroundColor: seg.color,
-            opacity: 0.85,
+            opacity: 0.9,
           }}
         />
       ))}
       {/* Red overflow stripe */}
       {sum > 100 && (
-        <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-red-500" />
+        <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
       )}
     </div>
   );
@@ -614,44 +616,52 @@ interface AllocationFooterProps {
 
 function AllocationFooter({ sum, valid, isReadOnly, onBalance, onReset, onSave, resetLabel }: AllocationFooterProps) {
   const delta = parseFloat((sum - 100).toFixed(1));
+  const statusColor = valid ? 'text-emerald-400' : delta > 0 ? 'text-red-400' : 'text-amber-400';
+
   return (
-    <div className="flex items-center justify-between pt-3 border-t border-white/5">
-      <div className="flex items-center gap-2">
-        <span className={`text-xs font-mono tabular-nums ${valid ? 'text-gray-500' : delta > 0 ? 'text-red-400' : 'text-amber-400'}`}>
-          {sum.toFixed(1)}%
-          {!valid && (
-            <span className="ml-1 font-sans">
+    <div className="flex items-center justify-between pt-4 border-t border-white/5">
+      <div className="flex flex-col gap-0.5">
+        <div className="flex items-baseline gap-2">
+          <span className="text-xs text-gray-500">当前总计</span>
+          <span className={`text-lg font-mono font-bold tabular-nums ${statusColor}`}>
+            {sum.toFixed(1)}%
+          </span>
+        </div>
+        {!valid && (
+          <div className="flex items-center gap-2">
+            <span className={`text-xs ${statusColor}`}>
               {delta > 0 ? `超出 ${delta}%` : `剩余 ${Math.abs(delta)}%`}
             </span>
-          )}
-        </span>
-        {!valid && !isReadOnly && (
-          <button
-            onClick={onBalance}
-            className="px-2 py-0.5 text-xs rounded-md bg-gray-800 border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 transition-colors"
-          >
-            一键均衡
-          </button>
+            {!isReadOnly && (
+              <button
+                onClick={onBalance}
+                className="text-[10px] px-1.5 py-0.5 rounded bg-gray-800 border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 transition-colors"
+              >
+                一键均衡
+              </button>
+            )}
+          </div>
         )}
       </div>
+
       {!isReadOnly && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
             onClick={onReset}
-            className="px-2 py-1 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+            className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
           >
             {resetLabel}
           </button>
           <button
             onClick={onSave}
             disabled={!valid}
-            className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+            className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-lg ${
               valid
-                ? 'bg-gold-primary/20 text-gold-primary hover:bg-gold-primary/30'
-                : 'bg-gray-800 text-gray-600 cursor-not-allowed'
+                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-400 hover:to-amber-500 shadow-amber-500/20'
+                : 'bg-gray-800 text-gray-600 cursor-not-allowed shadow-none'
             }`}
           >
-            保存
+            保存配置
           </button>
         </div>
       )}
@@ -698,25 +708,23 @@ function IncomeAllocationSection() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <SegmentedBar
         segments={INCOME_KEYS.map((k) => ({ color: ALLOCATION_COLORS[k], value: draft[k] }))}
         sum={sum}
       />
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {INCOME_KEYS.map((k) => (
-          <div key={k} className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: ALLOCATION_COLORS[k] }} />
-                <span className="text-xs text-gray-300">{INCOME_LABELS[k]}</span>
+          <div key={k} className="group relative bg-white/[0.02] border border-white/[0.05] rounded-xl p-3 hover:bg-white/[0.04] transition-colors">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: ALLOCATION_COLORS[k] }} />
+                <span className="text-sm font-medium text-gray-200">{INCOME_LABELS[k]}</span>
               </div>
-              <div className="flex items-center gap-2 text-xs">
-                <span className="text-gray-600">建议 {DEFAULT_ALLOCATION[k]}%</span>
-                <span className="font-mono text-white w-9 text-right tabular-nums">{draft[k]}%</span>
-              </div>
+              <span className="text-lg font-mono font-bold text-white tabular-nums">{draft[k]}%</span>
             </div>
+            
             <input
               type="range"
               min={0} max={100} step={1}
@@ -724,8 +732,13 @@ function IncomeAllocationSection() {
               disabled={isReadOnly}
               onChange={(e) => setDraft((d) => ({ ...d, [k]: parseInt(e.target.value) }))}
               style={{ accentColor: ALLOCATION_COLORS[k] }}
-              className="w-full cursor-pointer disabled:opacity-40"
+              className="w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer disabled:opacity-40 hover:h-2 transition-all"
             />
+            
+            <div className="flex justify-between mt-2 px-0.5">
+               <span className="text-[10px] text-gray-500 uppercase tracking-wider">推荐值</span>
+               <span className="text-xs font-mono text-gray-400">{DEFAULT_ALLOCATION[k]}%</span>
+            </div>
           </div>
         ))}
       </div>
@@ -781,29 +794,34 @@ function InvestmentAllocationSection() {
   };
 
   return (
-    <div className="space-y-4">
-      <p className="text-xs text-gray-500">
-        {userTargets ? '自定义目标' : '基于个人画像的智能推荐'}
-      </p>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-gray-500">
+          {userTargets ? '自定义目标' : '基于个人画像的智能推荐'}
+        </p>
+        {!userTargets && (
+           <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+             智能推荐
+           </span>
+        )}
+      </div>
 
       <SegmentedBar
         segments={INVEST_KEYS.map((k) => ({ color: INVESTMENT_CATEGORY_COLORS[k], value: draft[k] }))}
         sum={sum}
       />
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {INVEST_KEYS.map((k) => (
-          <div key={k} className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: INVESTMENT_CATEGORY_COLORS[k] }} />
-                <span className="text-xs text-gray-300">{INVESTMENT_CATEGORY_NAMES[k]}</span>
+          <div key={k} className="group relative bg-white/[0.02] border border-white/[0.05] rounded-xl p-3 hover:bg-white/[0.04] transition-colors">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: INVESTMENT_CATEGORY_COLORS[k] }} />
+                <span className="text-sm font-medium text-gray-200">{INVESTMENT_CATEGORY_NAMES[k]}</span>
               </div>
-              <div className="flex items-center gap-2 text-xs">
-                <span className="text-gray-600">建议 {recAlloc[k].toFixed(0)}%</span>
-                <span className="font-mono text-white w-9 text-right tabular-nums">{draft[k]}%</span>
-              </div>
+              <span className="text-lg font-mono font-bold text-white tabular-nums">{draft[k]}%</span>
             </div>
+            
             <input
               type="range"
               min={0} max={100} step={1}
@@ -811,8 +829,13 @@ function InvestmentAllocationSection() {
               disabled={isReadOnly}
               onChange={(e) => setDraft((d) => ({ ...d, [k]: parseInt(e.target.value) }))}
               style={{ accentColor: INVESTMENT_CATEGORY_COLORS[k] }}
-              className="w-full cursor-pointer disabled:opacity-40"
+              className="w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer disabled:opacity-40 hover:h-2 transition-all"
             />
+            
+            <div className="flex justify-between mt-2 px-0.5">
+               <span className="text-[10px] text-gray-500 uppercase tracking-wider">推荐值</span>
+               <span className="text-xs font-mono text-gray-400">{recAlloc[k].toFixed(0)}%</span>
+            </div>
           </div>
         ))}
       </div>
@@ -835,6 +858,15 @@ function InvestmentAllocationSection() {
 // ---------------------------------------------------------------------------
 export default function SettingsPage() {
   const navigate = useNavigate();
+  const { hash } = useLocation();
+
+  useEffect(() => {
+    if (!hash) return;
+    const el = document.querySelector(hash);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [hash]);
 
   const {
     activeMode,
@@ -1146,7 +1178,7 @@ export default function SettingsPage() {
         {/* ------------------------------------------------------------------ */}
         {/* Section 3: Income Allocation                                       */}
         {/* ------------------------------------------------------------------ */}
-        <motion.div custom={2} variants={fadeUp} initial="hidden" animate="visible">
+        <motion.div id="income-allocation" custom={2} variants={fadeUp} initial="hidden" animate="visible">
           <Card>
             <SectionHeader
               icon={<PieChart size={20} />}

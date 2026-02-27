@@ -103,7 +103,13 @@ export const fetchProfileData = async (userId: string): Promise<ProfileData | nu
       })),
       userProfile,
       policies: (policiesData || []).map(normalizePolicy),
-      settings: profile.app_settings || null,
+      settings: (() => {
+        const appSettings = profile.app_settings || null;
+        if (appSettings?.targetAllocation) return appSettings;
+        // Migrate: promote legacy allocation column into settings.targetAllocation
+        const legacyAllocation = profile.allocation || DEFAULT_ALLOCATION;
+        return { targetAllocation: legacyAllocation, subCategories: appSettings?.subCategories ?? [] };
+      })(),
     };
   } catch (error) {
     console.error('Error fetching profile data:', error);
@@ -119,7 +125,6 @@ export const saveProfileData = async (userId: string, data: ProfileData) => {
       .upsert({
         id: userId,
         monthly_income: data.monthlyIncome,
-        allocation: data.allocation,
         demographics: {
           age: data.userProfile?.age,
           cityTier: data.userProfile?.cityTier,

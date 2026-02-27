@@ -23,10 +23,9 @@ create table public.profiles (
   monthly_income numeric default 0,
   
   -- JSONB for structured data to match plan flexibility
-  allocation jsonb default '{"growth": 50, "stability": 40, "special": 10}'::jsonb,
   demographics jsonb default '{}'::jsonb,      -- age, cityTier, maritalStatus, etc.
   financial_goals jsonb default '{}'::jsonb,   -- riskTolerance, retirementAge, primaryGoal, etc.
-  app_settings jsonb default '{}'::jsonb,      -- workspace settings, category customization
+  app_settings jsonb default '{"targetAllocation":{"growth":25,"stability":15,"essentials":50,"rewards":10},"subCategories":[]}'::jsonb,  -- workspace settings; targetAllocation is the 25-15-50-10 income split
   
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null

@@ -1,14 +1,16 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Pencil, Trash2, Check, X, FileText, List, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Pencil, Trash2, Check, X, FileText, List, BookOpen, ChevronDown, ChevronUp, Settings2 } from 'lucide-react';
 import { PageContainer } from '../components/layout/PageContainer';
 import { Card } from '../components/common/Card';
+import { InfoTooltip } from '../components/common/InfoTooltip';
+import { TOOLTIP } from '../utils/tooltipContent';
 import { useAppStore } from '../store/useAppStore';
 import { formatCNY } from '../lib/format';
 import { getMonthlySpendingChartData } from '../algorithms/spendingAnalytics';
 import { SpendingBarChart } from '../components/charts/SpendingBarChart';
-import { AllocationDonut } from '../components/charts/AllocationDonut';
-import { DEFAULT_ALLOCATION } from '../utils/constants';
+import { AllocationBreakdown } from '../components/charts/AllocationBreakdown';
 import type { SpendingRecord } from '../types';
 
 const currentMonth = (): string => {
@@ -22,9 +24,11 @@ const formatMonthLabel = (month: string): string => {
 };
 
 export default function SpendingPage() {
-  const { getCurrentData, getMA3Spending, addSpending, addSpendingBatch, updateSpending, deleteSpending, activeMode } =
+  const navigate = useNavigate();
+  const { getCurrentData, getTargetAllocation, getMA3Spending, addSpending, addSpendingBatch, updateSpending, deleteSpending, activeMode } =
     useAppStore();
   const { spending, monthlyIncome } = getCurrentData();
+  const targetAllocation = getTargetAllocation();
   const ma3 = getMA3Spending();
   const isReadOnly = activeMode === 'EXAMPLE';
 
@@ -42,7 +46,7 @@ export default function SpendingPage() {
 
   const sorted = [...spending].sort((a, b) => b.month.localeCompare(a.month));
   const chartData = getMonthlySpendingChartData(spending);
-  const targetMonthlySpending = monthlyIncome * 0.5; // 50% of income
+  const targetMonthlySpending = monthlyIncome * (targetAllocation.essentials + targetAllocation.rewards) / 100;
 
   const handleSave = () => {
     if (!form.month || form.amount <= 0) return;
@@ -147,22 +151,28 @@ export default function SpendingPage() {
               value: ma3 > 0 ? formatCNY(ma3) : '—',
               sub: '近3个月平均',
               color: 'text-white',
+              tooltip: TOOLTIP.ma3Spending,
             },
             {
               label: '目标月支出',
               value: monthlyIncome > 0 ? formatCNY(targetMonthlySpending) : '—',
-              sub: '收入的 50%',
+              sub: '基本开支 + 享乐奖励',
               color: 'text-amber-400',
+              tooltip: null,
             },
             {
               label: '上月支出率',
               value: spendingRate !== null ? `${spendingRate.toFixed(1)}%` : '—',
-              sub: spendingRate !== null && spendingRate > 55 ? '偏高' : '正常',
+              sub: spendingRate === null ? '暂无数据' : spendingRate > 55 ? '偏高' : '正常',
               color: spendingRate !== null && spendingRate > 55 ? 'text-red-400' : 'text-emerald-400',
+              tooltip: TOOLTIP.spendingRate,
             },
           ].map((stat) => (
             <Card key={stat.label} className="text-center">
-              <p className="text-xs text-gray-400 mb-1">{stat.label}</p>
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <p className="text-xs text-gray-400">{stat.label}</p>
+                {stat.tooltip && <InfoTooltip content={stat.tooltip} position="bottom" />}
+              </div>
               <p className={`text-xl font-bold font-mono ${stat.color}`}>{stat.value}</p>
               <p className="text-xs text-gray-500 mt-0.5">{stat.sub}</p>
             </Card>
@@ -199,25 +209,19 @@ export default function SpendingPage() {
                     <p className="text-xs text-gray-400 leading-relaxed">
                       将月收入按以下比例分配，帮助您在资产增长、生活保障与生活品质之间取得平衡。
                     </p>
-                    <AllocationDonut
-                      allocation={DEFAULT_ALLOCATION}
-                      target={DEFAULT_ALLOCATION}
+                    <AllocationBreakdown
+                      allocation={targetAllocation}
+                      monthlyIncome={monthlyIncome}
                     />
-                    <div className="grid grid-cols-2 gap-3">
-                      {[
-                        { label: '增长投资', pct: '25%', desc: '股票、ETF、基金', color: 'text-emerald-400' },
-                        { label: '稳健储蓄', pct: '15%', desc: '债券、应急金', color: 'text-blue-400' },
-                        { label: '基本开支', pct: '50%', desc: '房租、餐饮、日常', color: 'text-amber-400' },
-                        { label: '享乐奖励', pct: '10%', desc: '旅行、娱乐', color: 'text-pink-400' },
-                      ].map((item) => (
-                        <div key={item.label} className="p-2.5 rounded-lg bg-white/3">
-                          <p className={`text-sm font-semibold ${item.color}`}>
-                            {item.label} <span className="text-white">{item.pct}</span>
-                          </p>
-                          <p className="text-xs text-gray-500 mt-0.5">{item.desc}</p>
-                        </div>
-                      ))}
-                    </div>
+                    {!isReadOnly && (
+                      <button
+                        onClick={() => navigate('/settings#income-allocation')}
+                        className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                      >
+                        <Settings2 size={13} />
+                        在设置中调整配置比例
+                      </button>
+                    )}
                   </div>
                 </motion.div>
               )}

@@ -231,11 +231,7 @@ export const useAppStore = create<AppState>()(
       },
 
       setAllocation: (allocation: Allocation) => {
-        set((state) => {
-          const data = getMutableSlice(state, state.activeMode);
-          if (data) data.allocation = allocation;
-        });
-        if (get().activeMode === 'PERSONAL') syncProfile(get().personalData);
+        get().updateSettings({ targetAllocation: allocation });
       },
 
       setAuthenticated: (isAuthenticated: boolean) => set({ isAuthenticated }),
@@ -347,6 +343,9 @@ export const useAppStore = create<AppState>()(
             ...updates,
             lastUpdated: new Date().toISOString(),
           };
+          if (updates.monthlyIncome !== undefined) {
+            data.monthlyIncome = updates.monthlyIncome;
+          }
         });
         if (get().activeMode === 'PERSONAL') syncProfile(get().personalData);
       },
@@ -441,11 +440,7 @@ export const useAppStore = create<AppState>()(
       applyRecommendedAllocation: () => {
         const recommendation = get().getRecommendedAllocation();
         if (!recommendation) return;
-        set((state) => {
-          const data = getMutableSlice(state, state.activeMode);
-          if (data) data.allocation = recommendation.finalAllocation;
-        });
-        if (get().activeMode === 'PERSONAL') syncProfile(get().personalData);
+        get().updateSettings({ targetAllocation: recommendation.finalAllocation });
       },
     })),
     {

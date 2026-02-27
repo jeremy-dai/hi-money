@@ -16,7 +16,19 @@ export const TOOLTIP = {
   ma3Spending: (
     <span>
       <span className="text-white font-semibold block mb-1">MA-3 移动平均支出</span>
-      过去 3 个月支出的简单平均值。能平滑单月异常消费波动，更真实地反映日常支出水平，是制定预算的重要参考。
+      过去 3 个月支出的<span className="text-white">简单平均值</span>（Moving Average 3）。
+      <br />
+      能平滑单月异常消费波动（如年节大额支出），更真实地反映日常支出水平，是制定月度预算的重要参考。
+    </span>
+  ),
+
+  spendingRate: (
+    <span>
+      <span className="text-white font-semibold block mb-1">上月支出率</span>
+      计算公式：<span className="text-indigo-300">上月实际支出 ÷ 月收入 × 100%</span>
+      <br />
+      反映上个月消费占收入的比例。按照 25-15-50-10 法则，基本开支 + 享乐奖励合计应控制在收入的
+      <span className="text-amber-400"> 60% 以内</span>。超过 55% 视为偏高。
     </span>
   ),
 
