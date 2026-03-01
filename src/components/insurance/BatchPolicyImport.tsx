@@ -68,7 +68,7 @@ export function BatchPolicyImport({ isReadOnly, onSave, embedded = false }: Prop
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
           const content = await page.getTextContent();
-          pages.push(content.items.map((item: { str: string }) => item.str).join(' '));
+          pages.push(content.items.map((item: any) => item.str || '').join(' '));
         }
         const text = pages.join('\n');
         setDocuments(prev => [

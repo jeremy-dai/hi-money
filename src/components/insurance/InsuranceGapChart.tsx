@@ -19,7 +19,8 @@ interface InsuranceGapChartProps {
 /**
  * Format currency for display
  */
-function formatCurrency(amount: number): string {
+function formatCurrency(amount: number | undefined): string {
+  if (amount === undefined) return '';
   if (amount >= 1000000) {
     return `¥${(amount / 1000000).toFixed(1)}M`;
   } else if (amount >= 10000) {
@@ -80,7 +81,7 @@ export function InsuranceGapChart({ result }: InsuranceGapChartProps) {
               tickFormatter={(value) => formatCurrency(value)}
             />
             <Tooltip
-              formatter={(value: number) => formatCurrency(value)}
+              formatter={(value: number | undefined) => formatCurrency(value)}
               contentStyle={{
                 backgroundColor: '#1A1A1A',
                 border: '1px solid #D4AF37',
