@@ -23,6 +23,7 @@ import { PageContainer } from '../components/layout/PageContainer';
 import { Card } from '../components/common/Card';
 import { useAppStore } from '../store/useAppStore';
 import { supabase } from '../lib/supabase';
+import { saveProfileData } from '../services/supabaseService';
 import { EXAMPLE_PROFILE_METADATA } from '../data/exampleProfiles';
 import {
   ROUTES,
@@ -876,6 +877,8 @@ export default function SettingsPage() {
     clearSandbox,
     resetAll,
     sandboxData,
+    personalData,
+    loadPersonalData,
     isAuthenticated,
     setAuthenticated,
   } = useAppStore();
@@ -933,6 +936,48 @@ export default function SettingsPage() {
     reader.readAsText(file);
   };
 
+  // Download Personal Data
+  const handleDownloadPersonal = () => {
+    const blob = new Blob([JSON.stringify(personalData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `hi-money-personal-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  // Upload Personal Data
+  const handleUploadPersonal = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const json = JSON.parse(event.target?.result as string);
+        if (typeof json === 'object' && json !== null) {
+          loadPersonalData(json);
+          if (isAuthenticated) {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user) {
+              await saveProfileData(session.user.id, json);
+            }
+          }
+        } else {
+          alert('Invalid JSON file');
+        }
+      } catch (err) {
+        console.error('Failed to parse JSON', err);
+        alert('Failed to parse JSON file');
+      }
+      e.target.value = '';
+    };
+    reader.readAsText(file);
+  };
+
   // Selected example metadata
   const selectedExampleMeta =
     EXAMPLE_PROFILE_METADATA.find((m) => m.id === selectedExampleId) ??
@@ -968,31 +1013,51 @@ export default function SettingsPage() {
             <div className="space-y-3">
               {/* Personal mode */}
               <div
-                className={`flex items-center justify-between rounded-xl border p-4 transition-all duration-200 ${
+                className={`rounded-xl border p-4 transition-all duration-200 ${
                   activeMode === 'PERSONAL'
                     ? 'border-emerald-500/50 bg-emerald-500/5'
                     : 'border-gray-700 bg-gray-900/40'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                    <User size={16} className="text-emerald-400" />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                      <User size={16} className="text-emerald-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-white">个人模式</p>
+                      <p className="text-xs text-gray-400 mt-0.5">您的真实数据，安全保存</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-white">个人模式</p>
-                    <p className="text-xs text-gray-400 mt-0.5">您的真实数据，安全保存</p>
-                  </div>
+                  {activeMode === 'PERSONAL' ? (
+                    <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />
+                  ) : (
+                    <button
+                      onClick={() => switchMode('PERSONAL')}
+                      className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors"
+                    >
+                      切换
+                    </button>
+                  )}
                 </div>
-                {activeMode === 'PERSONAL' ? (
-                  <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />
-                ) : (
+                <div className="flex gap-2 mt-3 flex-wrap">
                   <button
-                    onClick={() => switchMode('PERSONAL')}
-                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors"
+                    onClick={handleDownloadPersonal}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-800 text-gray-300 hover:bg-white/10 transition-colors"
+                    title="导出个人数据"
                   >
-                    切换
+                    <Download size={14} /> 导出
                   </button>
-                )}
+                  <label className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-800 text-gray-300 hover:bg-white/10 transition-colors cursor-pointer">
+                    <Upload size={14} /> 导入
+                    <input
+                      type="file"
+                      accept=".json"
+                      className="hidden"
+                      onChange={handleUploadPersonal}
+                    />
+                  </label>
+                </div>
               </div>
 
               {/* Example mode */}

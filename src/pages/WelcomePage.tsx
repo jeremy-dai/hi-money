@@ -12,35 +12,37 @@ import { Button } from '../components/common/Button';
 import { ROUTES } from '../utils/constants';
 import { TextGenerateEffect } from '@/components/ui/text-generate';
 
-import { BentoGrid, BentoGridItem } from '@/components/ui/bento-grid';
-
 export default function WelcomePage() {
   const navigate = useNavigate();
 
-  const benefits = [
+  const features = [
     {
       title: '支出追踪',
       description: '按月记录生活支出，MA-3 移动平均平滑月度波动，自动识别支出异常并提醒。',
-      header: <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-900 to-neutral-800 border border-white/10" />,
-      icon: <BarChart3 className="h-4 w-4 text-neutral-500" />,
+      icon: BarChart3,
+      color: 'text-amber-400',
+      bg: 'bg-amber-400/10',
     },
     {
       title: '资产配置',
       description: '将投资账户按增长、稳健、特殊三类管理，根据年龄、家庭、城市等画像生成个性化配置建议。',
-      header: <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-900 to-neutral-800 border border-white/10" />,
-      icon: <PieChart className="h-4 w-4 text-neutral-500" />,
+      icon: PieChart,
+      color: 'text-blue-400',
+      bg: 'bg-blue-400/10',
     },
     {
       title: '保险管理',
       description: '录入保单后自动三维核算：保费计入支出预算，现金价值计入净资产，保额计算家庭抗风险杠杆率。',
-      header: <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-900 to-neutral-800 border border-white/10" />,
-      icon: <ShieldCheck className="h-4 w-4 text-neutral-500" />,
+      icon: ShieldCheck,
+      color: 'text-emerald-400',
+      bg: 'bg-emerald-400/10',
     },
     {
       title: '多场景模拟',
       description: '沙盒模式隔离演练 What-if 场景，案例模式参考不同人生阶段的配置策略，真实数据云端同步。',
-      header: <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-900 to-neutral-800 border border-white/10" />,
-      icon: <Layers className="h-4 w-4 text-neutral-500" />,
+      icon: Layers,
+      color: 'text-purple-400',
+      bg: 'bg-purple-400/10',
     },
   ];
 
@@ -84,18 +86,23 @@ export default function WelcomePage() {
             <p className="text-gray-400">把财务数据变成清晰的决策依据</p>
           </div>
 
-          <BentoGrid className="max-w-4xl mx-auto">
-            {benefits.map((item, i) => (
-              <BentoGridItem
-                key={i}
-                title={item.title}
-                description={item.description}
-                header={item.header}
-                icon={item.icon}
-                className={i === 3 || i === 6 ? "md:col-span-2" : ""}
-              />
-            ))}
-          </BentoGrid>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {features.map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={i}
+                  className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-6 hover:border-white/[0.15] hover:bg-white/[0.04] transition duration-200"
+                >
+                  <div className={`inline-flex rounded-lg p-2.5 ${item.bg} mb-4`}>
+                    <Icon className={`h-5 w-5 ${item.color}`} />
+                  </div>
+                  <h3 className="text-lg font-semibold text-neutral-200 mb-2">{item.title}</h3>
+                  <p className="text-sm text-neutral-400 leading-relaxed">{item.description}</p>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Footer CTA */}

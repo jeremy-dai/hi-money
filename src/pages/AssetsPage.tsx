@@ -764,12 +764,14 @@ export default function AssetsPage() {
                                   </button>
                                 </div>
                               ) : (
-                                <button
-                                  onClick={() => setAddingTo({ category: cat, name: '', amount: '' })}
-                                  className="w-full flex items-center gap-2 px-4 py-2.5 text-xs text-gray-600 hover:text-gray-300 hover:bg-white/5 transition-colors"
-                                >
-                                  <Plus size={12} /> 添加账户
-                                </button>
+                                <div className="px-4 py-2">
+                                  <button
+                                    onClick={() => setAddingTo({ category: cat, name: '', amount: '' })}
+                                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-colors"
+                                  >
+                                    <Plus size={14} /> 添加账户
+                                  </button>
+                                </div>
                               )
                             )}
                           </div>
@@ -1087,9 +1089,9 @@ export default function AssetsPage() {
                     setEditingPolicy(null);
                     setShowPolicyForm(true);
                   }}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-white/15 text-sm text-gray-500 hover:text-gray-300 hover:border-white/30 transition-all"
+                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-colors"
                 >
-                  <Plus size={15} /> 添加保险保单
+                  <Plus size={16} /> 添加保险保单
                 </button>
               )}
 
