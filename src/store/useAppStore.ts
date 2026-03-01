@@ -196,7 +196,7 @@ export const useAppStore = create<AppState>()(
       },
 
       // Example profiles are now bundled locally; this is a no-op kept for API compatibility.
-      loadExampleProfile: (_exampleId: string) => {},
+      loadExampleProfile: () => {},
 
       createSandbox: (base?: Partial<ProfileData>) =>
         set((state) => {

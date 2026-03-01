@@ -6,7 +6,7 @@
  * Mortgage (10%), Risk Tolerance (5%).
  */
 
-import type { UserProfile, InsuranceProfile } from '../types/profile.types';
+import type { UserProfile } from '../types/profile.types';
 import type { AllocationRecommendation, IncomeAllocation, InvestmentPoolAllocation } from '../types/allocation.types';
 import { calculateFinalAllocation } from '../types/allocation.types';
 
@@ -15,7 +15,6 @@ import { calculateFinalAllocation } from '../types/allocation.types';
  */
 export function calculateRecommendedAllocation(
   profile: UserProfile,
-  _insuranceProfile?: InsuranceProfile
 ): AllocationRecommendation {
   // Base allocation (neutral profile)
   let investmentPool = 45; // 45% of income

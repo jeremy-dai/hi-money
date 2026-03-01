@@ -19,6 +19,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
 interface Props {
   isReadOnly: boolean;
   onSave: (policies: InsurancePolicy[]) => void;
+  embedded?: boolean;
 }
 
 interface QueuedDocument {
@@ -37,7 +38,7 @@ function deriveCategoryFromSub(sub?: string): InsuranceCategory | undefined {
   return undefined;
 }
 
-export function BatchPolicyImport({ isReadOnly, onSave }: Props) {
+export function BatchPolicyImport({ isReadOnly, onSave, embedded = false }: Props) {
   const [open, setOpen] = useState(false);
   const [inputText, setInputText] = useState('');
   const [documents, setDocuments] = useState<QueuedDocument[]>([]);
@@ -67,7 +68,7 @@ export function BatchPolicyImport({ isReadOnly, onSave }: Props) {
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
           const content = await page.getTextContent();
-          pages.push(content.items.map((item: any) => item.str).join(' '));
+          pages.push(content.items.map((item: { str: string }) => item.str).join(' '));
         }
         const text = pages.join('\n');
         setDocuments(prev => [
@@ -157,43 +158,7 @@ export function BatchPolicyImport({ isReadOnly, onSave }: Props) {
 
   if (isReadOnly) return null;
 
-  return (
-    <>
-      {/* Toggle button */}
-      <div className="flex justify-end">
-        <button
-          onClick={() => setOpen(!open)}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-            open
-              ? 'bg-violet-600 text-white'
-              : 'bg-white/5 hover:bg-white/10 text-violet-300'
-          }`}
-        >
-          <Bot size={14} /> AI批量导入
-        </button>
-      </div>
-
-      {/* Panel */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.15 }}
-          >
-            <Card className="border-violet-600/40">
-              {/* Header */}
-              <div className="flex justify-between items-center mb-4">
-                <div className="flex items-center gap-2">
-                  <Bot size={16} className="text-violet-400" />
-                  <h3 className="text-base font-semibold text-white">AI 批量解析保单</h3>
-                </div>
-                <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-gray-300 p-1">
-                  <X size={16} />
-                </button>
-              </div>
-
+  const content = (
               <div className="space-y-4">
                 {/* Instructions */}
                 <div className="p-3 bg-violet-500/10 border border-violet-500/20 rounded-lg">
@@ -412,6 +377,47 @@ export function BatchPolicyImport({ isReadOnly, onSave }: Props) {
                   </div>
                 )}
               </div>
+  );
+
+  if (embedded) return content;
+
+  return (
+    <>
+      {/* Toggle button */}
+      <div className="flex justify-end">
+        <button
+          onClick={() => setOpen(!open)}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+            open
+              ? 'bg-violet-600 text-white'
+              : 'bg-white/5 hover:bg-white/10 text-violet-300'
+          }`}
+        >
+          <Bot size={14} /> AI批量导入
+        </button>
+      </div>
+
+      {/* Panel */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.15 }}
+          >
+            <Card className="border-violet-600/40">
+              {/* Header */}
+              <div className="flex justify-between items-center mb-4">
+                <div className="flex items-center gap-2">
+                  <Bot size={16} className="text-violet-400" />
+                  <h3 className="text-base font-semibold text-white">AI 批量解析保单</h3>
+                </div>
+                <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-gray-300 p-1">
+                  <X size={16} />
+                </button>
+              </div>
+              {content}
             </Card>
           </motion.div>
         )}

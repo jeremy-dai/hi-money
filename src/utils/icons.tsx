@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import type { InvestmentCategoryType } from '../types';
 
-export const CATEGORY_ICON_COMPONENTS: Record<InvestmentCategoryType | 'essentials' | 'rewards', LucideIcon> = {
+const CATEGORY_ICON_COMPONENTS: Record<InvestmentCategoryType | 'essentials' | 'rewards', LucideIcon> = {
   growth: TrendingUp,
   stability: Shield,
   special: Target,

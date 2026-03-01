@@ -18,6 +18,7 @@ import {
   X,
   PieChart,
   BarChart2,
+  Settings,
 } from 'lucide-react';
 import { PageContainer } from '../components/layout/PageContainer';
 import { Card } from '../components/common/Card';
@@ -861,14 +862,6 @@ export default function SettingsPage() {
   const navigate = useNavigate();
   const { hash } = useLocation();
 
-  useEffect(() => {
-    if (!hash) return;
-    const el = document.querySelector(hash);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, [hash]);
-
   const {
     activeMode,
     activeExampleId,
@@ -888,6 +881,26 @@ export default function SettingsPage() {
     activeExampleId ?? EXAMPLE_PROFILE_METADATA[0].id
   );
   const [exampleDropdownOpen, setExampleDropdownOpen] = useState(false);
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState<'general' | 'profile' | 'allocation'>(() => {
+    if (hash === '#income-allocation') return 'allocation';
+    return 'general';
+  });
+
+  useEffect(() => {
+    if (!hash) return;
+    // Switch tab and scroll after render
+    requestAnimationFrame(() => {
+      if (hash === '#income-allocation') setActiveTab('allocation');
+      requestAnimationFrame(() => {
+        const el = document.querySelector(hash);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  }, [hash]);
 
   // Reset confirmation state
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -998,6 +1011,33 @@ export default function SettingsPage() {
             <ModeBadge mode={activeMode} />
           </div>
         </motion.div>
+
+        {/* Tab bar */}
+        <div className="flex gap-1 p-1 rounded-xl bg-gray-900/60 border border-gray-800">
+          {([
+            { key: 'general' as const, label: '通用', icon: <Settings size={15} /> },
+            { key: 'profile' as const, label: '个人画像', icon: <User size={15} /> },
+            { key: 'allocation' as const, label: '分配方案', icon: <PieChart size={15} /> },
+          ]).map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                activeTab === tab.key
+                  ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/60 border border-transparent'
+              }`}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* Tab: General                                                       */}
+        {/* ------------------------------------------------------------------ */}
+        {activeTab === 'general' && (<>
 
         {/* ------------------------------------------------------------------ */}
         {/* Section 1: Workspace Mode                                          */}
@@ -1226,52 +1266,33 @@ export default function SettingsPage() {
           </Card>
         </motion.div>
 
-        {/* ------------------------------------------------------------------ */}
-        {/* Section 2: Profile Info                                            */}
-        {/* ------------------------------------------------------------------ */}
-        <motion.div custom={1} variants={fadeUp} initial="hidden" animate="visible">
-          <Card>
-            <SectionHeader
-              icon={<User size={20} />}
-              title="个人信息"
-              subtitle="您的基础画像，用于智能推荐"
-            />
-            <ProfileInfoSection />
-          </Card>
-        </motion.div>
+        {/* Account / Logout (in General tab) */}
+        {isAuthenticated && (
+          <motion.div custom={1} variants={fadeUp} initial="hidden" animate="visible">
+            <Card>
+              <SectionHeader
+                icon={<LogOut size={20} />}
+                title="账户"
+                subtitle="登录状态管理"
+              />
+              <button
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  resetAll();
+                  setAuthenticated(false);
+                  navigate(ROUTES.WELCOME);
+                }}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 text-sm font-semibold text-white hover:bg-gray-700 transition-colors active:scale-95"
+              >
+                <LogOut size={15} />
+                退出登录
+              </button>
+            </Card>
+          </motion.div>
+        )}
 
-        {/* ------------------------------------------------------------------ */}
-        {/* Section 3: Income Allocation                                       */}
-        {/* ------------------------------------------------------------------ */}
-        <motion.div id="income-allocation" custom={2} variants={fadeUp} initial="hidden" animate="visible">
-          <Card>
-            <SectionHeader
-              icon={<PieChart size={20} />}
-              title="收入分配"
-              subtitle="规划月收入用途比例（25-15-50-10 法则）"
-            />
-            <IncomeAllocationSection />
-          </Card>
-        </motion.div>
-
-        {/* ------------------------------------------------------------------ */}
-        {/* Section 4: Investment Allocation                                   */}
-        {/* ------------------------------------------------------------------ */}
-        <motion.div custom={3} variants={fadeUp} initial="hidden" animate="visible">
-          <Card>
-            <SectionHeader
-              icon={<BarChart2 size={20} />}
-              title="财产分配"
-              subtitle="投资池中各类资产的目标占比"
-            />
-            <InvestmentAllocationSection />
-          </Card>
-        </motion.div>
-
-        {/* ------------------------------------------------------------------ */}
-        {/* Section 5: Data Management                                         */}
-        {/* ------------------------------------------------------------------ */}
-        <motion.div custom={4} variants={fadeUp} initial="hidden" animate="visible">
+        {/* Data Management (in General tab) */}
+        <motion.div custom={2} variants={fadeUp} initial="hidden" animate="visible">
           <Card>
             <SectionHeader
               icon={<AlertTriangle size={20} />}
@@ -1334,32 +1355,62 @@ export default function SettingsPage() {
           </Card>
         </motion.div>
 
+        </>)}
+
         {/* ------------------------------------------------------------------ */}
-        {/* Section 6: Account / Logout                                       */}
+        {/* Tab: Profile                                                       */}
         {/* ------------------------------------------------------------------ */}
-        {isAuthenticated && (
-          <motion.div custom={5} variants={fadeUp} initial="hidden" animate="visible">
-            <Card>
+        {activeTab === 'profile' && (<>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* Section 2: Profile Info                                            */}
+        {/* ------------------------------------------------------------------ */}
+        <motion.div custom={0} variants={fadeUp} initial="hidden" animate="visible">
+          <Card>
+            <SectionHeader
+              icon={<User size={20} />}
+              title="个人信息"
+              subtitle="您的基础画像，用于智能推荐"
+            />
+            <ProfileInfoSection />
+          </Card>
+        </motion.div>
+
+        </>)}
+
+        {/* ------------------------------------------------------------------ */}
+        {/* Tab: Allocation                                                    */}
+        {/* ------------------------------------------------------------------ */}
+        {activeTab === 'allocation' && (<>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* Section 3 & 4: Income + Investment Allocation (two-column)         */}
+        {/* ------------------------------------------------------------------ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <motion.div id="income-allocation" custom={0} variants={fadeUp} initial="hidden" animate="visible">
+            <Card className="h-full">
               <SectionHeader
-                icon={<LogOut size={20} />}
-                title="账户"
-                subtitle="登录状态管理"
+                icon={<PieChart size={20} />}
+                title="收入分配"
+                subtitle="规划月收入用途比例（25-15-50-10 法则）"
               />
-              <button
-                onClick={async () => {
-                  await supabase.auth.signOut();
-                  resetAll();
-                  setAuthenticated(false);
-                  navigate(ROUTES.WELCOME);
-                }}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 text-sm font-semibold text-white hover:bg-gray-700 transition-colors active:scale-95"
-              >
-                <LogOut size={15} />
-                退出登录
-              </button>
+              <IncomeAllocationSection />
             </Card>
           </motion.div>
-        )}
+
+          <motion.div custom={1} variants={fadeUp} initial="hidden" animate="visible">
+            <Card className="h-full">
+              <SectionHeader
+                icon={<BarChart2 size={20} />}
+                title="财产分配"
+                subtitle="投资池中各类资产的目标占比"
+              />
+              <InvestmentAllocationSection />
+            </Card>
+          </motion.div>
+        </div>
+
+        </>)}
 
         {/* Bottom spacer for floating nav */}
         <div className="h-8" />

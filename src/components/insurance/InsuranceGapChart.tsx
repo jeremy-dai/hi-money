@@ -80,7 +80,7 @@ export function InsuranceGapChart({ result }: InsuranceGapChartProps) {
               tickFormatter={(value) => formatCurrency(value)}
             />
             <Tooltip
-              formatter={(value: any) => formatCurrency(Number(value))}
+              formatter={(value: number) => formatCurrency(value)}
               contentStyle={{
                 backgroundColor: '#1A1A1A',
                 border: '1px solid #D4AF37',

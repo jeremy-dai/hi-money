@@ -29,7 +29,7 @@ export const fetchProfileData = async (userId: string): Promise<ProfileData | nu
     return {
       ...createEmptyProfile(),
       ...(profile.profile_data ?? {}),
-      spending: (spendingData ?? []).map((s: any) => ({
+      spending: (spendingData ?? []).map((s: { month: string; amount: number; note?: string }) => ({
         month: s.month,
         amount: s.amount,
         note: s.note ?? undefined,

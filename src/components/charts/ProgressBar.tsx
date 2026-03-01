@@ -4,14 +4,12 @@ import clsx from 'clsx';
 interface ProgressBarProps {
   current: number;
   target: number;
-  color?: string;
   showPercentage?: boolean;
 }
 
 export function ProgressBar({
   current,
   target,
-  color: _color,
   showPercentage = true,
 }: ProgressBarProps) {
   const percentage = target > 0 ? Math.min((current / target) * 100, 100) : 0;

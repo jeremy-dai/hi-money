@@ -81,7 +81,6 @@ function calculateGaps(
 function getInsurancePriority(
   type: 'medical' | 'accident' | 'criticalIllness' | 'life',
   userProfile: UserProfile,
-  _gap: number
 ): { priority: InsuranceRecommendation['priority']; urgency: string } {
   const { maritalStatus, hasChildren } = userProfile;
 
@@ -217,7 +216,7 @@ export function calculateInsuranceGap(
       existingAmount: existing.medical,
       gap: gaps.medical,
       estimatedPremium: estimatePremium('medical', recommended.medical, userProfile.age),
-      ...getInsurancePriority('medical', userProfile, gaps.medical),
+      ...getInsurancePriority('medical', userProfile),
     },
     {
       type: 'accident' as const,
@@ -226,7 +225,7 @@ export function calculateInsuranceGap(
       existingAmount: existing.accident,
       gap: gaps.accident,
       estimatedPremium: estimatePremium('accident', recommended.accident, userProfile.age),
-      ...getInsurancePriority('accident', userProfile, gaps.accident),
+      ...getInsurancePriority('accident', userProfile),
     },
     {
       type: 'criticalIllness' as const,
@@ -235,7 +234,7 @@ export function calculateInsuranceGap(
       existingAmount: existing.criticalIllness,
       gap: gaps.criticalIllness,
       estimatedPremium: estimatePremium('criticalIllness', recommended.criticalIllness, userProfile.age),
-      ...getInsurancePriority('criticalIllness', userProfile, gaps.criticalIllness),
+      ...getInsurancePriority('criticalIllness', userProfile),
     },
     {
       type: 'life' as const,
@@ -244,7 +243,7 @@ export function calculateInsuranceGap(
       existingAmount: existing.life,
       gap: gaps.life,
       estimatedPremium: estimatePremium('life', gaps.life, userProfile.age),
-      ...getInsurancePriority('life', userProfile, gaps.life),
+      ...getInsurancePriority('life', userProfile),
     },
   ].sort((a, b) => {
     // Sort by priority: high > medium > low
