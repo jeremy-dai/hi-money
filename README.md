@@ -33,6 +33,113 @@
 
 ---
 
+## 知识库速查 (Knowledge Base)
+
+### 算法 (Algorithms)
+
+#### MA-3 支出平滑 (`spendingAnalytics.ts`)
+- 对最近3个月支出取移动平均，用于平滑月度波动
+- 告警：若最新月支出 > MA-3 × 1.15，触发"支出偏高"提示
+- 前2个月数据不足时 MA-3 显示 `null`
+
+#### 资产配置推荐 (`recommendAllocation.ts`)
+
+**输出**：两层配置比例（均归一化至 100%）
+- **收入分配**：每月收入如何切分 → 投资池 / 必需支出 / 奖励享乐
+- **投资池内分配**：投资池内部如何切分 → 增长 / 稳健 / 特殊
+
+**算法逻辑**：从基准值出发，依次叠加5个因子的调整量，最后归一化。
+
+基准值：
+
+| 层级 | 增长/投资池 | 稳健/必需 | 特殊/奖励 |
+|------|------------|----------|----------|
+| 收入分配 | 投资池 45% | 必需 45% | 奖励 10% |
+| 投资池内 | 增长 60% | 稳健 25% | 特殊 15% |
+
+各因子对基准值的调整（按重要性排序）：
+
+| 因子 | 重要性 | 触发条件 | 主要调整 |
+|------|--------|---------|---------|
+| 年龄 | 40% | <30岁 | 增长 +15%，稳健 -10%，特殊 -5%，投资池 +5% |
+| 年龄 | 40% | >50岁 | 增长 -20%，稳健 +15%，特殊 +5%，投资池 -5% |
+| 子女数 | 30% | 每个孩子 | 必需 +5%，特殊 +2%，增长 -1%，稳健 -1% |
+| 城市等级 | 15% | 一线城市 | 必需 +10%，投资池 -8%，奖励 -2% |
+| 城市等级 | 15% | 四线城市 | 必需 -5%，投资池 +5% |
+| 房贷 | 10% | 月供/收入 >30% | 增长 -5%，稳健 +3%，特殊 +2%，必需 +5% |
+| 风险偏好 | 5% | 进取型 | 增长 +10%，稳健 -7%，特殊 -3% |
+| 风险偏好 | 5% | 保守型 | 增长 -10%，稳健 +10% |
+
+#### 保险缺口计算 (`insuranceCalculator.ts`)
+基于中国市场标准推荐保额：
+
+| 险种 | 推荐标准 |
+|------|---------|
+| 寿险 | 房贷余额 + 10年收入 + 50万/孩教育金 + 20万养老备用 |
+| 重疾险 | <35岁 × 5年收入；≥35岁 × 3年收入 |
+| 医疗险 | 一线城市 300万；其他 200万 |
+| 意外险 | 7倍年收入 |
+
+- **预算上限**：年收入 × 7.5%
+- **家庭分配 6:3:1 原则**：主要收入者 60% / 配偶 30% / 子女 10%
+
+#### 保险三重调度 (`insuranceDispatch.ts`)
+每张保单同时作用于三个维度：
+
+```
+annualPremium  → 年度支出（预算视图）
+cashValue      → 净资产（稳健/增长资产桶）
+coverageAmount → 抗风险杠杆（风险覆盖率）
+```
+
+- **风险杠杆率** = 总保额 ÷ 年度支出，目标 ≥ 10×
+- 现金价值归类：储蓄型 → 稳健；投资型(万能/分红) → 稳健；投联险 → 增长；保障型 → 不计入资产
+
+---
+
+### 险种分类 (Insurance Taxonomy)
+
+```
+InsuranceCategory
+├── protection（保障型）
+│   ├── criticalIllness  重疾险
+│   ├── medical          医疗险（百万医疗）
+│   ├── accident         意外险
+│   ├── termLife         定期寿险
+│   └── cancer           癌症险
+├── savings（储蓄型）
+│   ├── increasingWholeLife  增额终身寿
+│   ├── pensionAnnuity       养老年金
+│   ├── educationAnnuity     教育金年金
+│   ├── endowment            两全险
+│   └── wholeLife            终身寿险
+└── investment（投资型）
+    ├── participating        分红险
+    ├── universalLife        万能险
+    └── unitLinked           投资连结险（投联险）
+```
+
+`isTaxAdvantaged` 标记税优险种（如税优养老险）。
+
+---
+
+### 关键数据类型 (Key Types)
+
+**`UserProfile`** — 用户画像（驱动所有算法）
+- 人口学：`age`, `cityTier`(1-4), `maritalStatus`, `hasChildren`, `childrenCount`
+- 财务：`monthlyIncome`, `hasMortgage`, `mortgageMonthly`, `existingDebts`
+- 目标：`riskTolerance`(conservative/moderate/aggressive), `primaryGoal`, `retirementAge`
+
+**`InsurancePolicy`** — 单张保单
+- 三重值：`annualPremium`, `cashValue`, `coverageAmount`
+- 分类：`category`, `subCategory`, `isTaxAdvantaged`
+- 时间表：`cashValueSchedule`, `premiumSchedule`, `coverageSchedule`（年份→金额数组）
+
+**资产四桶** (`InvestmentCategoryType`)
+- `growth` 增长 / `stability` 稳健 / `emergency` 应急 / `special` 特殊
+
+---
+
 ## 技术栈
 
 - **Frontend**: React 19, TypeScript, Vite

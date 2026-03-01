@@ -13,8 +13,9 @@ import { SpendingBarChart } from '../components/charts/SpendingBarChart';
 import { AllocationBreakdown } from '../components/charts/AllocationBreakdown';
 import type { SpendingRecord } from '../types';
 
-const currentMonth = (): string => {
+const previousMonth = (): string => {
   const d = new Date();
+  d.setMonth(d.getMonth() - 1);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 };
 
@@ -34,7 +35,7 @@ export default function SpendingPage() {
 
   const [showAdd, setShowAdd] = useState(false);
   const [editMonth, setEditMonth] = useState<string | null>(null);
-  const [form, setForm] = useState<SpendingRecord>({ month: currentMonth(), amount: 0, note: '' });
+  const [form, setForm] = useState<SpendingRecord>({ month: previousMonth(), amount: 0, note: '' });
 
   // Batch mode state
   const [isBatchMode, setIsBatchMode] = useState(false);
@@ -42,7 +43,6 @@ export default function SpendingPage() {
   const [parsedBatch, setParsedBatch] = useState<SpendingRecord[]>([]);
 
   const [showFramework, setShowFramework] = useState(false);
-  const [hoveredMonth, setHoveredMonth] = useState<string | null>(null);
 
   const sorted = [...spending].sort((a, b) => b.month.localeCompare(a.month));
   const chartData = getMonthlySpendingChartData(spending);
@@ -52,7 +52,7 @@ export default function SpendingPage() {
     if (!form.month || form.amount <= 0) return;
     addSpending(form);
     setShowAdd(false);
-    setForm({ month: currentMonth(), amount: 0, note: '' });
+    setForm({ month: previousMonth(), amount: 0, note: '' });
   };
 
   const handleBatchParse = (text: string) => {
@@ -310,8 +310,8 @@ export default function SpendingPage() {
                 </div>
               ) : (
                   <>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div>
+                      <div className="flex flex-col sm:flex-row sm:items-end gap-3">
+                        <div className="flex-1">
                           <label className="text-xs text-gray-400 block mb-1">月份</label>
                           <input
                             type="month"
@@ -320,7 +320,7 @@ export default function SpendingPage() {
                             className="w-full bg-black-soft border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
                           />
                         </div>
-                        <div>
+                        <div className="flex-1">
                           <label className="text-xs text-gray-400 block mb-1">总支出 (元)</label>
                           <input
                             type="number"
@@ -330,7 +330,7 @@ export default function SpendingPage() {
                             className="w-full bg-black-soft border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
                           />
                         </div>
-                        <div>
+                        <div className="flex-1">
                           <label className="text-xs text-gray-400 block mb-1">备注 (选填)</label>
                           <input
                             type="text"
@@ -340,20 +340,20 @@ export default function SpendingPage() {
                             className="w-full bg-black-soft border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
                           />
                         </div>
-                      </div>
-                      <div className="flex gap-2 mt-4">
-                        <button
-                          onClick={handleSave}
-                          className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-colors"
-                        >
-                          <Check size={15} /> 保存
-                        </button>
-                        <button
-                          onClick={() => setShowAdd(false)}
-                          className="flex items-center gap-1.5 px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg text-sm transition-colors"
-                        >
-                          <X size={15} /> 取消
-                        </button>
+                        <div className="flex gap-2 shrink-0">
+                          <button
+                            onClick={handleSave}
+                            className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-colors"
+                          >
+                            <Check size={15} /> 保存
+                          </button>
+                          <button
+                            onClick={() => setShowAdd(false)}
+                            className="flex items-center gap-1.5 px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg text-sm transition-colors"
+                          >
+                            <X size={15} /> 取消
+                          </button>
+                        </div>
                       </div>
                   </>
               )}
@@ -363,118 +363,69 @@ export default function SpendingPage() {
 
         {/* Spending table */}
         <Card>
-          <h2 className="text-base font-semibold text-white mb-4">历史记录</h2>
+          <h2 className="text-base font-semibold text-white mb-3">历史记录</h2>
           {sorted.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               <p className="text-sm">暂无支出记录</p>
               <p className="text-xs mt-1">点击「录入支出」开始追踪</p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="divide-y divide-white/5">
               {sorted.map((record) => {
                 const isEditing = editMonth === record.month;
                 const pct = monthlyIncome > 0 ? (record.amount / monthlyIncome) * 100 : 0;
                 return (
-                  <div
-                    key={record.month}
-                    className="relative group rounded-lg bg-black-soft"
-                    onMouseEnter={() => setHoveredMonth(record.month)}
-                    onMouseLeave={() => setHoveredMonth(null)}
-                  >
-                    <AnimatePresence>
-                      {hoveredMonth === record.month && (
-                        <motion.span
-                          className="absolute inset-0 h-full w-full bg-slate-700/[0.8] block rounded-lg"
-                          layoutId="hoverBackground"
-                          initial={{ opacity: 0 }}
-                          animate={{
-                            opacity: 1,
-                            transition: { duration: 0.15 },
-                          }}
-                          exit={{
-                            opacity: 0,
-                            transition: { duration: 0.15, delay: 0.2 },
-                          }}
-                        />
-                      )}
-                    </AnimatePresence>
-                    <div className="relative z-10 flex items-center gap-3 p-3">
-                      {isEditing ? (
+                  <div key={record.month} className="group flex items-center gap-2 py-1.5 hover:bg-white/[0.03] rounded px-1 -mx-1 transition-colors">
+                    {isEditing ? (
                       <>
-                        <div className="flex-1 grid grid-cols-2 gap-2">
-                          <input
-                            type="number"
-                            value={form.amount || ''}
-                            onChange={(e) =>
-                              setForm((f) => ({ ...f, amount: parseFloat(e.target.value) || 0 }))
-                            }
-                            className="bg-black-elevated border border-indigo-500/50 rounded px-2 py-1 text-white text-sm"
-                          />
-                          <input
-                            type="text"
-                            value={form.note || ''}
-                            onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
-                            placeholder="备注"
-                            className="bg-black-elevated border border-white/10 rounded px-2 py-1 text-white text-sm"
-                          />
-                        </div>
+                        <span className="text-xs text-gray-500 w-20 shrink-0">{formatMonthLabel(record.month)}</span>
+                        <input
+                          type="number"
+                          value={form.amount || ''}
+                          onChange={(e) => setForm((f) => ({ ...f, amount: parseFloat(e.target.value) || 0 }))}
+                          className="w-28 bg-black-elevated border border-indigo-500/50 rounded px-2 py-0.5 text-white text-sm"
+                        />
+                        <input
+                          type="text"
+                          value={form.note || ''}
+                          onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
+                          placeholder="备注"
+                          className="flex-1 bg-black-elevated border border-white/10 rounded px-2 py-0.5 text-white text-sm"
+                        />
                         <button onClick={handleUpdate} className="text-emerald-400 hover:text-emerald-300 p-1">
-                          <Check size={16} />
+                          <Check size={14} />
                         </button>
                         <button
-                          onClick={() => {
-                            setEditMonth(null);
-                            setForm({ month: currentMonth(), amount: 0, note: '' });
-                          }}
+                          onClick={() => { setEditMonth(null); setForm({ month: previousMonth(), amount: 0, note: '' }); }}
                           className="text-gray-500 hover:text-gray-300 p-1"
                         >
-                          <X size={16} />
+                          <X size={14} />
                         </button>
                       </>
                     ) : (
                       <>
-                        <div className="w-24 shrink-0">
-                          <p className="text-sm font-medium text-white">{formatMonthLabel(record.month)}</p>
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-base font-mono font-semibold text-white">
-                              {formatCNY(record.amount)}
-                            </span>
-                            {pct > 0 && (
-                              <span
-                                className={`text-xs px-1.5 py-0.5 rounded ${
-                                  pct > 55 ? 'bg-red-500/15 text-red-400' : 'bg-emerald-500/15 text-emerald-400'
-                                }`}
-                                title="支出占月收入百分比"
-                              >
-                                占收入 {pct.toFixed(0)}%
-                              </span>
-                            )}
-                          </div>
-                          {record.note && (
-                            <p className="text-xs text-gray-500 mt-0.5">{record.note}</p>
-                          )}
-                        </div>
+                        <span className="text-xs text-gray-400 w-20 shrink-0">{formatMonthLabel(record.month)}</span>
+                        <span className="text-sm font-mono font-semibold text-white tabular-nums">{formatCNY(record.amount)}</span>
+                        {pct > 0 && (
+                          <span className={`text-xs px-1.5 py-0.5 rounded shrink-0 ${pct > 55 ? 'bg-red-500/15 text-red-400' : 'bg-emerald-500/15 text-emerald-400'}`}>
+                            {pct.toFixed(0)}%
+                          </span>
+                        )}
+                        {record.note && (
+                          <span className="text-xs text-gray-500 truncate flex-1">{record.note}</span>
+                        )}
                         {!isReadOnly && (
-                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() => handleEdit(record)}
-                              className="text-gray-400 hover:text-white p-1.5 rounded hover:bg-white/5 transition-colors"
-                            >
-                              <Pencil size={14} />
+                          <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity ml-auto shrink-0">
+                            <button onClick={() => handleEdit(record)} className="text-gray-500 hover:text-white p-1 rounded hover:bg-white/5 transition-colors">
+                              <Pencil size={13} />
                             </button>
-                            <button
-                              onClick={() => deleteSpending(record.month)}
-                              className="text-gray-400 hover:text-red-400 p-1.5 rounded hover:bg-white/5 transition-colors"
-                            >
-                              <Trash2 size={14} />
+                            <button onClick={() => deleteSpending(record.month)} className="text-gray-500 hover:text-red-400 p-1 rounded hover:bg-white/5 transition-colors">
+                              <Trash2 size={13} />
                             </button>
                           </div>
                         )}
                       </>
                     )}
-                    </div>
                   </div>
                 );
               })}

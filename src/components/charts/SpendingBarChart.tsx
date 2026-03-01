@@ -10,7 +10,21 @@ import {
   ReferenceLine,
   ResponsiveContainer,
 } from 'recharts';
+import type { TooltipProps } from 'recharts';
 import type { MonthlySpendingDataPoint } from '../../algorithms/spendingAnalytics';
+
+function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
+  if (!active || !payload?.length) return null;
+  const d = payload[0]?.payload as MonthlySpendingDataPoint;
+  return (
+    <div style={{ background: 'rgba(15,15,30,0.95)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: '#fff', fontSize: 12, backdropFilter: 'blur(8px)', padding: '8px 12px', maxWidth: 200 }}>
+      <p style={{ color: '#9ca3af', marginBottom: 4 }}>{d.month}</p>
+      <p>实际支出：¥{d.amount.toLocaleString()}</p>
+      {d.ma3 != null && <p style={{ color: '#10b981' }}>MA-3：¥{d.ma3.toLocaleString()}</p>}
+      {d.note && <p style={{ color: '#9ca3af', marginTop: 4, fontStyle: 'italic' }}>{d.note}</p>}
+    </div>
+  );
+}
 
 interface Props {
   data: MonthlySpendingDataPoint[];
@@ -79,21 +93,7 @@ export function SpendingBarChart({ data, targetMonthly }: Props) {
             ticks={ticks}
             domain={[0, tickMax]}
           />
-          <Tooltip
-            contentStyle={{
-              background: 'rgba(15, 15, 30, 0.95)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: '10px',
-              color: '#fff',
-              fontSize: 12,
-              backdropFilter: 'blur(8px)',
-              padding: '8px 12px',
-            }}
-            formatter={((value: number | undefined, name: string) => [
-              `¥${(value ?? 0).toLocaleString()}`,
-              name === 'amount' ? '实际支出' : 'MA-3 均值',
-            ]) as never}
-          />
+          <Tooltip content={<CustomTooltip />} />
           {targetMonthly > 0 && (
             <ReferenceLine
               y={targetMonthly}

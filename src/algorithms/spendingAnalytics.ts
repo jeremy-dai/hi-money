@@ -13,6 +13,7 @@ export interface MonthlySpendingDataPoint {
   label: string;       // "1月"
   amount: number;
   ma3: number | null;  // null for first 2 months (insufficient data)
+  note?: string;
 }
 
 /** Returns chart-ready data with MA-3 for each month */
@@ -27,7 +28,7 @@ export function getMonthlySpendingChartData(
         ? Math.round(window.reduce((sum, x) => sum + x.amount, 0) / 3)
         : null;
     const [, mm] = s.month.split('-');
-    return { month: s.month, label: `${parseInt(mm)}月`, amount: s.amount, ma3 };
+    return { month: s.month, label: `${parseInt(mm)}月`, amount: s.amount, ma3, note: s.note || undefined };
   });
 }
 
