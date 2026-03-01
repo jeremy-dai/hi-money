@@ -1077,7 +1077,7 @@ export default function AssetsPage() {
 
               {/* AI Batch Import */}
               <BatchPolicyImport
-                isReadOnly={isReadOnly}
+                isReadOnly={store.activeMode !== 'PERSONAL'}
                 onSave={(policies) => policies.forEach(p => store.addPolicy(p))}
               />
 
