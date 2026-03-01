@@ -2,10 +2,10 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const DASHSCOPE_BASE = "https://dashscope.aliyuncs.com/compatible-mode/v1";
-const MODEL = "qwen-plus";
+const MODEL = "qwen3.5-plus";
 
 const DAILY_CALL_LIMIT = 10; // per user per day
-const MAX_TEXT_LENGTH = 30_000; // characters
+const MAX_TEXT_LENGTH = 100_000; // characters
 
 const SYSTEM_PROMPT = `你是一名专业的保险单证解析助手。从用户提供的保险文档文本中提取所有保险保单信息，以 JSON 数组格式返回，不要输出任何其他文字。
 

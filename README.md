@@ -166,10 +166,47 @@ cp .env.example .env
 npm run dev
 ```
 
+## Edge Functions (AI 解析)
+
+### `extract-policies` — 保险单证 AI 解析
+
+调用阿里云 DashScope 从用户粘贴的保险文档文本中提取保单结构化数据，返回符合 `InsurancePolicy` 类型的 JSON 数组。
+
+- 认证：需要有效的 Supabase JWT（用户必须已登录）
+- 限流：每用户每天最多 10 次（记录在 `llm_rate_limits` 表）
+- 文本上限：100,000 字符
+
+### 部署
+
+
+```bash
+# 1. 登录（首次，浏览器授权）
+npx supabase login
+
+# 2. 部署 Edge Function
+npx supabase functions deploy extract-policies
+```
+
+### Secrets 管理
+
+`DASHSCOPE_API_KEY` 存储为 Supabase Edge Function Secret，运行时通过 `Deno.env.get("DASHSCOPE_API_KEY")` 读取：
+
+```bash
+# 查看已配置的 secrets
+npx supabase secrets list
+
+# 新增 / 更新
+npx supabase secrets set DASHSCOPE_API_KEY=your-key-here
+```
+
+也可在 Supabase 控制台操作：**Project Settings → Edge Functions → Secrets**。
+
+---
+
 ## Roadmap
 
 - [ ] 更新保险缺口分析与投保建议
-- [ ] AI 助手：资产配置建议 + 保险文档解读
+- [ ] 更新AI 助手：资产配置建议 + 保险文档解读
 - [ ] 定投推荐指标
 - [ ] 汇率转换
 - [ ] 资产快照时间轴
