@@ -591,11 +591,11 @@ export default function AssetsPage() {
                 const catInsurance = insuranceCashByCategory[cat];
                 return (
                   <WealthCard key={cat} className="overflow-hidden p-0" enable3D={!isOpen}>
-                    <button
-                      onClick={() => setExpanded((p) => ({ ...p, [cat]: !p[cat] }))}
-                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/5 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
+                    <div className="w-full flex items-center justify-between px-4 py-3">
+                      <button
+                        onClick={() => setExpanded((p) => ({ ...p, [cat]: !p[cat] }))}
+                        className="flex items-center gap-3 flex-1 text-left hover:opacity-80 transition-opacity"
+                      >
                         <span className={CATEGORY_TEXT[cat]}>{CATEGORY_ICON[cat]}</span>
                         <div className="text-left">
                           <p className={`text-sm font-semibold ${CATEGORY_TEXT[cat]}`}>
@@ -603,18 +603,32 @@ export default function AssetsPage() {
                           </p>
                           <p className="text-xs text-gray-500">{INVESTMENT_CATEGORY_DESCRIPTIONS[cat]}</p>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="text-right">
-                          <span className="text-sm font-medium text-gray-300">{formatCNY(catTotal + catInsurance)}</span>
-                        </div>
-                        {isOpen ? (
-                          <ChevronUp size={14} className="text-gray-500" />
-                        ) : (
-                          <ChevronDown size={14} className="text-gray-500" />
+                      </button>
+                      <div className="flex items-center gap-2">
+                        {!isReadOnly && (
+                          <button
+                            onClick={() => {
+                              setAddingTo({ category: cat, name: '', amount: '' });
+                              setExpanded((p) => ({ ...p, [cat]: true }));
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition-colors"
+                          >
+                            <Plus size={12} /> 添加账户
+                          </button>
                         )}
+                        <button
+                          onClick={() => setExpanded((p) => ({ ...p, [cat]: !p[cat] }))}
+                          className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
+                        >
+                          <span className="text-sm font-medium">{formatCNY(catTotal + catInsurance)}</span>
+                          {isOpen ? (
+                            <ChevronUp size={14} className="text-gray-500" />
+                          ) : (
+                            <ChevronDown size={14} className="text-gray-500" />
+                          )}
+                        </button>
                       </div>
-                    </button>
+                    </div>
 
                     <AnimatePresence>
                       {isOpen && (
@@ -763,16 +777,7 @@ export default function AssetsPage() {
                                     <X size={14} />
                                   </button>
                                 </div>
-                              ) : (
-                                <div className="px-4 py-2">
-                                  <button
-                                    onClick={() => setAddingTo({ category: cat, name: '', amount: '' })}
-                                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-colors"
-                                  >
-                                    <Plus size={14} /> 添加账户
-                                  </button>
-                                </div>
-                              )
+                              ) : null
                             )}
                           </div>
                         </motion.div>
@@ -808,49 +813,19 @@ export default function AssetsPage() {
               transition={{ duration: 0.15 }}
               className="space-y-4"
             >
-              {/* Gap Analysis Toggle */}
-              {userProfile && (
-                <div className="flex justify-end mb-2">
+              {/* Add Policy Button */}
+              {!isReadOnly && (
+                <div className="flex items-center justify-end mb-2">
                   <button
-                    onClick={() => setShowGapAnalysis(!showGapAnalysis)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                      showGapAnalysis 
-                        ? 'bg-indigo-600 text-white' 
-                        : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
-                    }`}
+                    onClick={() => {
+                      setEditingPolicy(null);
+                      setShowPolicyForm(true);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-colors"
                   >
-                    <Shield size={14} />
-                    {showGapAnalysis ? '隐藏保障缺口分析' : '显示保障缺口分析'}
+                    <Plus size={16} /> 添加保险保单
                   </button>
                 </div>
-              )}
-
-              {/* Gap Analysis Chart */}
-              <AnimatePresence>
-                {showGapAnalysis && gapResult && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden mb-4"
-                  >
-                    <InsuranceGapChart result={gapResult} />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              
-              {!userProfile && showGapAnalysis && (
-                <Card className="mb-4 bg-amber-500/10 border-amber-500/30">
-                  <div className="flex items-center gap-3">
-                    <AlertTriangle className="text-amber-500" size={20} />
-                    <div>
-                      <h4 className="text-sm font-bold text-amber-500">需完善个人档案</h4>
-                      <p className="text-xs text-amber-500/80 mt-0.5">
-                        请前往设置页面完善个人信息，以便进行保险缺口分析。
-                      </p>
-                    </div>
-                  </div>
-                </Card>
               )}
 
               {/* Insurance Summary */}
@@ -859,7 +834,54 @@ export default function AssetsPage() {
                 totalCashValue={totalCashValue}
                 totalCoverageAmount={totalCoverageAmount}
                 monthlyPremiumCost={monthlyPremiumCost}
+                onOpenGapAnalysis={() => setShowGapAnalysis(true)}
+                hasUserProfile={!!userProfile}
               />
+
+              {/* Gap Analysis Modal */}
+              <AnimatePresence>
+                {showGapAnalysis && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                    onClick={() => setShowGapAnalysis(false)}
+                  >
+                    <motion.div
+                      initial={{ scale: 0.95, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.95, opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="w-full max-w-2xl max-h-[80vh] overflow-y-auto bg-black-elevated border border-white/10 rounded-2xl p-6 shadow-2xl"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-base font-semibold text-white">保障缺口分析</h3>
+                        <button
+                          onClick={() => setShowGapAnalysis(false)}
+                          className="text-gray-500 hover:text-gray-300 p-1"
+                        >
+                          <X size={18} />
+                        </button>
+                      </div>
+                      {gapResult ? (
+                        <InsuranceGapChart result={gapResult} />
+                      ) : (
+                        <div className="flex items-center gap-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                          <AlertTriangle className="text-amber-500 shrink-0" size={20} />
+                          <div>
+                            <h4 className="text-sm font-bold text-amber-500">需完善个人档案</h4>
+                            <p className="text-xs text-amber-500/80 mt-0.5">
+                              请前往设置页面完善个人信息，以便进行保险缺口分析。
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Insurance Educational Card */}
               <Card>
@@ -1082,18 +1104,6 @@ export default function AssetsPage() {
                 isReadOnly={store.activeMode !== 'PERSONAL'}
                 onSave={(policies) => policies.forEach(p => store.addPolicy(p))}
               />
-
-              {!isReadOnly && (
-                <button
-                  onClick={() => {
-                    setEditingPolicy(null);
-                    setShowPolicyForm(true);
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-colors"
-                >
-                  <Plus size={16} /> 添加保险保单
-                </button>
-              )}
 
               {/* Policy form modal */}
               {showPolicyForm && !isReadOnly && (

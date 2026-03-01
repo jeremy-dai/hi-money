@@ -9,19 +9,34 @@ interface Props {
   totalCashValue: number;
   totalCoverageAmount: number;
   monthlyPremiumCost: number;
+  onOpenGapAnalysis?: () => void;
+  hasUserProfile?: boolean;
 }
 
 export function InsuranceSummary({
   totalAnnualPremiums,
   totalCashValue,
   totalCoverageAmount,
-  monthlyPremiumCost
+  monthlyPremiumCost,
+  onOpenGapAnalysis,
+  hasUserProfile,
 }: Props) {
   return (
-    <Card className="bg-gradient-to-br from-indigo-900/20 to-purple-900/20 border-indigo-500/20">
-      <div className="flex items-center gap-2 mb-4">
-        <h3 className="text-sm font-bold text-white uppercase tracking-wider">保险账户概览</h3>
-        <InfoTooltip content={TOOLTIP.tripleDispatch} iconColor="text-indigo-400 hover:text-indigo-300" />
+    <Card>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider">保险账户概览</h3>
+          <InfoTooltip content={TOOLTIP.tripleDispatch} iconColor="text-indigo-400 hover:text-indigo-300" />
+        </div>
+        {hasUserProfile && onOpenGapAnalysis && (
+          <button
+            onClick={onOpenGapAnalysis}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors bg-white/5 text-gray-400 hover:text-white hover:bg-white/10"
+          >
+            <Shield size={14} />
+            保障缺口分析
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-3 gap-4">
