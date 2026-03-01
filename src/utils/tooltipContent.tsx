@@ -254,6 +254,18 @@ export const TOOLTIP = {
     </span>
   ),
 
+  historySpendingRate: (
+    <span>
+      <span className="text-white font-semibold block mb-1">月支出率</span>
+      计算公式：<span className="text-indigo-300">当月实际支出 ÷ 月收入 × 100%</span>
+      <br />
+      <span className="text-emerald-400">绿色</span>表示支出率 ≤ 55%（正常），
+      <span className="text-red-400">红色</span>表示支出率 &gt; 55%（偏高）。
+      <br />
+      按照 25-15-50-10 法则，基本开支 + 享乐奖励合计应控制在收入的 <span className="text-amber-400">60% 以内</span>。
+    </span>
+  ),
+
   premiumSchedule: (
     <span>
       <span className="text-white font-semibold block mb-1">保费进度表</span>

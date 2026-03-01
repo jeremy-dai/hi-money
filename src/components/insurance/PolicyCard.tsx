@@ -52,7 +52,7 @@ export function PolicyCard({ policy, isReadOnly, onEdit, onDelete }: Props) {
             <span className="text-xs font-medium text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20">
               {policy.subCategory
                 ? INSURANCE_SUBCATEGORY_LABELS[policy.subCategory]
-                : policy.type}
+                : '未分类'}
             </span>
             {subcategoryTooltip && (
               <InfoTooltip

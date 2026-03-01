@@ -31,7 +31,7 @@ export function InfoTooltip({
       <Info size={iconSize} className={cn('cursor-help transition-colors', iconColor)} />
       <div
         className={cn(
-          'absolute z-30 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150',
+          'absolute z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150',
           'bg-gray-900 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 shadow-xl leading-relaxed',
           positionClasses[position],
           width

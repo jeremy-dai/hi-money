@@ -25,6 +25,7 @@ import { PolicyForm } from '../components/insurance/PolicyForm';
 import { PolicyCard } from '../components/insurance/PolicyCard';
 import { InsuranceSummary } from '../components/insurance/InsuranceSummary';
 import { InsuranceGapChart } from '../components/insurance/InsuranceGapChart';
+import { BatchPolicyImport } from '../components/insurance/BatchPolicyImport';
 import { FreshnessIndicator } from '../components/common/FreshnessIndicator';
 import { formatCNY } from '../lib/format';
 import {
@@ -138,18 +139,18 @@ export default function AssetsPage() {
 
     policies.forEach((p) => {
       const amount = p.coverageAmount || 0;
-      const type = p.subCategory || p.type;
+      const type = p.subCategory || '';
       
-      if (type === 'medical' || type === 'supplementaryMedical') {
+      if (type === 'medical') {
         profile.existingCoverage.medicalInsurance += amount;
         profile.existingCoverageAmount.medical += amount;
-      } else if (['termLife', 'wholeLife', 'increasingWholeLife', 'endowment', 'life'].includes(type)) {
+      } else if (['termLife', 'wholeLife', 'increasingWholeLife', 'endowment'].includes(type)) {
         profile.existingCoverage.lifeInsurance += amount;
         profile.existingCoverageAmount.life += amount;
       } else if (type === 'criticalIllness') {
         profile.existingCoverage.criticalIllness += amount;
         profile.existingCoverageAmount.criticalIllness += amount;
-      } else if (type === 'accident' || type === 'groupAccident') {
+      } else if (type === 'accident') {
         profile.existingCoverage.accidentInsurance += amount;
       }
     });
@@ -1073,6 +1074,12 @@ export default function AssetsPage() {
                   )}
                 </div>
               )}
+
+              {/* AI Batch Import */}
+              <BatchPolicyImport
+                isReadOnly={isReadOnly}
+                onSave={(policies) => policies.forEach(p => store.addPolicy(p))}
+              />
 
               {!isReadOnly && (
                 <button

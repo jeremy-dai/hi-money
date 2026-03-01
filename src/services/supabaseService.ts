@@ -10,7 +10,6 @@ import { DEFAULT_ALLOCATION } from '../utils/constants';
 const normalizePolicy = (p: any): InsurancePolicy => ({
   id: p.id,
   name: p.name,
-  type: p.type,
   category: p.category as any,
   subCategory: p.sub_category as any,
   isTaxAdvantaged: p.is_tax_advantaged,
@@ -163,7 +162,6 @@ export const saveProfileData = async (userId: string, data: ProfileData) => {
         const policiesToInsert = data.policies.map(p => ({
             user_id: userId,
             name: p.name,
-            type: p.type,
             category: p.category,
             sub_category: p.subCategory,
             is_tax_advantaged: p.isTaxAdvantaged,
@@ -251,7 +249,6 @@ export const addPolicy = async (userId: string, policy: InsurancePolicy) => {
     ...(id ? { id } : {}),
     user_id: userId,
     name: policy.name,
-    type: policy.type,
     category: policy.category,
     sub_category: policy.subCategory,
     is_tax_advantaged: policy.isTaxAdvantaged,
@@ -267,7 +264,6 @@ export const addPolicy = async (userId: string, policy: InsurancePolicy) => {
 export const updatePolicy = async (policy: InsurancePolicy) => {
   return supabase.from('insurance_policies').update({
     name: policy.name,
-    type: policy.type,
     category: policy.category,
     sub_category: policy.subCategory,
     is_tax_advantaged: policy.isTaxAdvantaged,

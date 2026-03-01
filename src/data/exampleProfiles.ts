@@ -71,7 +71,6 @@ export const EXAMPLE_PROFILES: Record<string, ProfileData> = {
       {
         id: 'eg-fg-pol-1',
         name: '百万医疗险',
-        type: 'medical',
         category: 'protection',
         subCategory: 'medical',
         isTaxAdvantaged: false,
@@ -84,7 +83,6 @@ export const EXAMPLE_PROFILES: Record<string, ProfileData> = {
       {
         id: 'eg-fg-pol-2',
         name: '综合意外险',
-        type: 'accident',
         category: 'protection',
         subCategory: 'accident',
         isTaxAdvantaged: false,
@@ -97,7 +95,6 @@ export const EXAMPLE_PROFILES: Record<string, ProfileData> = {
       {
         id: 'eg-fg-pol-3',
         name: '定期寿险',
-        type: 'life',
         category: 'protection',
         subCategory: 'termLife',
         isTaxAdvantaged: false,
@@ -110,7 +107,6 @@ export const EXAMPLE_PROFILES: Record<string, ProfileData> = {
       {
         id: 'eg-fg-pol-4',
         name: '增额终身寿险',
-        type: 'life',
         category: 'savings',
         subCategory: 'increasingWholeLife',
         isTaxAdvantaged: false,
@@ -175,7 +171,6 @@ export const EXAMPLE_PROFILES: Record<string, ProfileData> = {
       {
         id: 'eg-mc-pol-1',
         name: '定期寿险 (夫)',
-        type: 'life',
         category: 'protection',
         subCategory: 'termLife',
         isTaxAdvantaged: false,
@@ -188,7 +183,6 @@ export const EXAMPLE_PROFILES: Record<string, ProfileData> = {
       {
         id: 'eg-mc-pol-2',
         name: '重疾险 (夫)',
-        type: 'critical_illness',
         category: 'protection',
         subCategory: 'criticalIllness',
         isTaxAdvantaged: false,
@@ -201,7 +195,6 @@ export const EXAMPLE_PROFILES: Record<string, ProfileData> = {
       {
         id: 'eg-mc-pol-3',
         name: '少儿医保+医疗',
-        type: 'medical',
         category: 'protection',
         subCategory: 'medical',
         isTaxAdvantaged: false,
@@ -214,7 +207,6 @@ export const EXAMPLE_PROFILES: Record<string, ProfileData> = {
       {
         id: 'eg-mc-pol-4',
         name: '百万医疗险 (夫)',
-        type: 'medical',
         category: 'protection',
         subCategory: 'medical',
         isTaxAdvantaged: false,
@@ -227,7 +219,6 @@ export const EXAMPLE_PROFILES: Record<string, ProfileData> = {
       {
         id: 'eg-mc-pol-5',
         name: '综合意外险 (夫)',
-        type: 'accident',
         category: 'protection',
         subCategory: 'accident',
         isTaxAdvantaged: false,
@@ -240,7 +231,6 @@ export const EXAMPLE_PROFILES: Record<string, ProfileData> = {
       {
         id: 'eg-mc-pol-6',
         name: '子女教育金年金',
-        type: 'annuity',
         category: 'savings',
         subCategory: 'educationAnnuity',
         isTaxAdvantaged: false,
@@ -269,7 +259,6 @@ export const EXAMPLE_PROFILES: Record<string, ProfileData> = {
       {
         id: 'eg-mc-pol-7',
         name: '企业补充医疗',
-        type: 'medical',
         category: 'protection',
         subCategory: 'medical',
         isTaxAdvantaged: false,
@@ -335,7 +324,6 @@ export const EXAMPLE_PROFILES: Record<string, ProfileData> = {
       {
         id: 'eg-hnw-pol-1',
         name: '终身寿险信托',
-        type: 'life',
         category: 'savings',
         subCategory: 'wholeLife',
         isTaxAdvantaged: false,
@@ -348,7 +336,6 @@ export const EXAMPLE_PROFILES: Record<string, ProfileData> = {
       {
         id: 'eg-hnw-pol-2',
         name: '高端医疗险 (全球)',
-        type: 'medical',
         category: 'protection',
         subCategory: 'medical',
         isTaxAdvantaged: false,
@@ -361,7 +348,6 @@ export const EXAMPLE_PROFILES: Record<string, ProfileData> = {
       {
         id: 'eg-hnw-pol-3',
         name: '养老年金险',
-        type: 'annuity',
         category: 'savings',
         subCategory: 'pensionAnnuity',
         isTaxAdvantaged: false,
@@ -374,7 +360,6 @@ export const EXAMPLE_PROFILES: Record<string, ProfileData> = {
       {
         id: 'eg-hnw-pol-4',
         name: '重疾险',
-        type: 'critical_illness',
         category: 'protection',
         subCategory: 'criticalIllness',
         isTaxAdvantaged: false,
@@ -387,7 +372,6 @@ export const EXAMPLE_PROFILES: Record<string, ProfileData> = {
       {
         id: 'eg-hnw-pol-5',
         name: '增额终身寿险',
-        type: 'life',
         category: 'savings',
         subCategory: 'increasingWholeLife',
         isTaxAdvantaged: false,
@@ -415,7 +399,6 @@ export const EXAMPLE_PROFILES: Record<string, ProfileData> = {
       {
         id: 'eg-hnw-pol-6',
         name: '万能险账户',
-        type: 'life',
         category: 'investment',
         subCategory: 'universalLife',
         isTaxAdvantaged: false,
@@ -428,7 +411,6 @@ export const EXAMPLE_PROFILES: Record<string, ProfileData> = {
       {
         id: 'eg-hnw-pol-7',
         name: '家庭综合意外险',
-        type: 'accident',
         category: 'protection',
         subCategory: 'accident',
         isTaxAdvantaged: false,

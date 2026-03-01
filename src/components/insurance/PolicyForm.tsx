@@ -21,7 +21,6 @@ type ScheduleRow = { year: number; amount: number };
 export function PolicyForm({ onSave, onCancel, initial }: Props) {
   const [form, setForm] = useState<Partial<InsurancePolicy>>({
     name: '',
-    type: '',
     annualPremium: 0,
     cashValue: 0,
     coverageAmount: 0,
@@ -193,7 +192,6 @@ export function PolicyForm({ onSave, onCancel, initial }: Props) {
     onSave({
       id: initial?.id ?? `pol_${Date.now()}`,
       name: form.name!,
-      type: form.type || '未分类',
       category: form.category,
       subCategory: form.subCategory,
       isTaxAdvantaged: form.isTaxAdvantaged,
@@ -360,7 +358,6 @@ export function PolicyForm({ onSave, onCancel, initial }: Props) {
               const cat = e.target.value as InsuranceCategory;
               update('category', cat);
               update('subCategory', undefined);
-              update('type', INSURANCE_CATEGORY_LABELS[cat] || '');
             }}
           >
             <option value="">请选择...</option>
@@ -379,7 +376,6 @@ export function PolicyForm({ onSave, onCancel, initial }: Props) {
             onChange={(e) => {
               const sub = e.target.value as InsuranceSubCategory;
               update('subCategory', sub);
-              update('type', INSURANCE_SUBCATEGORY_LABELS[sub] || sub);
             }}
           >
             <option value="">请选择...</option>

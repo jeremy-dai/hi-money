@@ -24,8 +24,8 @@ export function getMonthlySpendingChartData(
   return sorted.map((s, i) => {
     const window = sorted.slice(Math.max(0, i - 2), i + 1);
     const ma3 =
-      window.length === 3
-        ? Math.round(window.reduce((sum, x) => sum + x.amount, 0) / 3)
+      window.length >= 2
+        ? Math.round(window.reduce((sum, x) => sum + x.amount, 0) / window.length)
         : null;
     const [, mm] = s.month.split('-');
     return { month: s.month, label: `${parseInt(mm)}月`, amount: s.amount, ma3, note: s.note || undefined };

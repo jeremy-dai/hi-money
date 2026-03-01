@@ -166,13 +166,33 @@ create policy "Users can delete own policies"
   using (auth.uid() = user_id);
 
 --------------------------------------------------------------------------------
--- 5. [Removed] History Snapshots (Deprecated)
+-- 5. LLM Rate Limits (Edge Function abuse prevention)
+--------------------------------------------------------------------------------
+drop table if exists public.llm_rate_limits cascade;
+
+create table public.llm_rate_limits (
+  user_id    uuid references auth.users(id) on delete cascade not null,
+  date       date not null default current_date,
+  call_count integer not null default 0,
+  primary key (user_id, date)
+);
+
+-- RLS: service role key (used by Edge Function) bypasses this automatically
+alter table public.llm_rate_limits enable row level security;
+
+-- Users can read their own usage; writes are service-role only
+create policy "Users can view own llm usage"
+  on public.llm_rate_limits for select
+  using (auth.uid() = user_id);
+
+--------------------------------------------------------------------------------
+-- 6. [Removed] History Snapshots (Deprecated)
 --------------------------------------------------------------------------------
 -- Table removed as part of simplified architecture.
 -- Was: create table public.history_snapshots (...);
 
 --------------------------------------------------------------------------------
--- 6. Triggers for Automatic Profile Creation
+-- 7. Triggers for Automatic Profile Creation
 --------------------------------------------------------------------------------
 create or replace function public.handle_new_user()
 returns trigger as $$

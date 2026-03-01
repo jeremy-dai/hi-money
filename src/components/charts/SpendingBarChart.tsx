@@ -10,15 +10,14 @@ import {
   ReferenceLine,
   ResponsiveContainer,
 } from 'recharts';
-import type { TooltipProps } from 'recharts';
 import type { MonthlySpendingDataPoint } from '../../algorithms/spendingAnalytics';
 
-function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
+function CustomTooltip({ active, payload }: { active?: boolean; payload?: Array<{ payload: MonthlySpendingDataPoint }> }) {
   if (!active || !payload?.length) return null;
   const d = payload[0]?.payload as MonthlySpendingDataPoint;
   return (
     <div style={{ background: 'rgba(15,15,30,0.95)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: '#fff', fontSize: 12, backdropFilter: 'blur(8px)', padding: '8px 12px', maxWidth: 200 }}>
-      <p style={{ color: '#9ca3af', marginBottom: 4 }}>{d.month}</p>
+      <p style={{ color: '#9ca3af', marginBottom: 4 }}>{d.month.replace(/^(\d{4})-0?(\d+)$/, '$1年$2月')}</p>
       <p>实际支出：¥{d.amount.toLocaleString()}</p>
       {d.ma3 != null && <p style={{ color: '#10b981' }}>MA-3：¥{d.ma3.toLocaleString()}</p>}
       {d.note && <p style={{ color: '#9ca3af', marginTop: 4, fontStyle: 'italic' }}>{d.note}</p>}
@@ -79,7 +78,11 @@ export function SpendingBarChart({ data, targetMonthly }: Props) {
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.12)" vertical={false} />
           <XAxis
-            dataKey="label"
+            dataKey="month"
+            tickFormatter={(v: string) => {
+              const [, mm] = v.split('-');
+              return `${parseInt(mm)}月`;
+            }}
             tick={{ fill: '#6b7280', fontSize: 11 }}
             axisLine={false}
             tickLine={false}

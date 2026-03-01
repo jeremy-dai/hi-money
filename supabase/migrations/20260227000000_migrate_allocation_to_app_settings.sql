@@ -10,21 +10,36 @@
 -- redundant allocation column.
 --
 -- Safe to run on live data — no rows are deleted.
+-- Safe to run when the allocation column never existed (no-op for Step 1 & 3).
 
---------------------------------------------------------------------------------
--- Step 1: Promote legacy allocation into app_settings.targetAllocation
---         Only updates rows where app_settings does NOT already have targetAllocation
---         (i.e. users who haven't touched the Settings page yet).
---------------------------------------------------------------------------------
-update public.profiles
-set app_settings = jsonb_set(
-  coalesce(app_settings, '{}'::jsonb),
-  '{targetAllocation}',
-  allocation
-)
-where
-  allocation is not null
-  and (app_settings is null or app_settings->>'targetAllocation' is null);
+do $$
+begin
+  --------------------------------------------------------------------------------
+  -- Step 1: Promote legacy allocation into app_settings.targetAllocation
+  --         Only runs if the column actually exists (remote may never have had it).
+  --------------------------------------------------------------------------------
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name   = 'profiles'
+      and column_name  = 'allocation'
+  ) then
+    update public.profiles
+    set app_settings = jsonb_set(
+      coalesce(app_settings, '{}'::jsonb),
+      '{targetAllocation}',
+      allocation
+    )
+    where
+      allocation is not null
+      and (app_settings is null or app_settings->>'targetAllocation' is null);
+
+    --------------------------------------------------------------------------------
+    -- Step 3: Drop the now-redundant allocation column
+    --------------------------------------------------------------------------------
+    alter table public.profiles drop column if exists allocation;
+  end if;
+end $$;
 
 --------------------------------------------------------------------------------
 -- Step 2: Ensure every row has a valid targetAllocation (backfill default)
@@ -37,8 +52,3 @@ set app_settings = jsonb_set(
   '{"growth":25,"stability":15,"essentials":50,"rewards":10}'::jsonb
 )
 where app_settings->>'targetAllocation' is null;
-
---------------------------------------------------------------------------------
--- Step 3: Drop the now-redundant allocation column
---------------------------------------------------------------------------------
-alter table public.profiles drop column if exists allocation;

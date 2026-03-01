@@ -24,7 +24,6 @@ export type InsuranceSubCategory =
 export interface InsurancePolicy {
   id: string;
   name: string;
-  type: string; // Legacy field, kept for compatibility but will be derived/mapped
   category?: InsuranceCategory;
   subCategory?: InsuranceSubCategory;
   isTaxAdvantaged?: boolean;
