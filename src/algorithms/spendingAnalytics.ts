@@ -46,15 +46,16 @@ import type { ProfileData } from '../types/store.types';
 export function generateActionItems(data: ProfileData): ActionItem[] {
   const items: ActionItem[] = [];
   const now = new Date();
-  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastMonth = `${lastMonthDate.getFullYear()}-${String(lastMonthDate.getMonth() + 1).padStart(2, '0')}`;
 
-  // No spending recorded this month
-  const hasCurrentMonthSpending = data.spending.some(s => s.month === currentMonth);
-  if (!hasCurrentMonthSpending) {
+  // No spending recorded last month
+  const hasLastMonthSpending = data.spending.some(s => s.month === lastMonth);
+  if (!hasLastMonthSpending) {
     items.push({
       id: 'record-spending',
-      title: '记录本月支出',
-      description: `尚未记录 ${currentMonth.replace('-', '年')}月的支出数据`,
+      title: '记录上月支出',
+      description: `尚未记录 ${lastMonth.replace('-', '年')}月的支出数据`,
       priority: 'high',
       route: '/spending',
     });
